@@ -248,10 +248,10 @@ export default function Navigation() {
                         Travel Claim Generator
                       </Link>
                       <Link
-                        href="/tools/leave-chit"
+                        href="/tools/msc-tools/leave-chit-calculator"
                         className="block px-3 py-2 text-gray-700 hover:text-blue-600 hover:bg-blue-50 rounded-md transition-colors"
                       >
-                        Leave Chit Calculator
+                        MSC Tools → Leave Chit Calculator
                       </Link>
                     </div>
                   </div>
