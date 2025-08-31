@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   ChevronRight,
   MapPin,
@@ -31,27 +31,65 @@ interface Section {
 
 export default function SaseboPortPage() {
   const [activeSection, setActiveSection] = useState('overview');
+  const [weatherData, setWeatherData] = useState({ temp: '--', time: '--:--' });
+  useEffect(() => {
+    const fetchWeatherAndTime = async () => {
+      try {
+        // Fetch weather for Sasebo coordinates
+        const weatherResponse = await fetch(
+          `https://api.openweathermap.org/data/2.5/weather?lat=33.1594&lon=129.7233&appid=${process.env.NEXT_PUBLIC_OPENWEATHER_API_KEY}&units=imperial`
+        );
+        const weather = await weatherResponse.json();
 
+        // Fetch time for Japan
+        const timeResponse = await fetch(
+          'http://worldtimeapi.org/api/timezone/Asia/Tokyo'
+        );
+        const timeData = await timeResponse.json();
+        const localTime = new Date(timeData.datetime).toLocaleTimeString(
+          'en-US',
+          {
+            timeZone: 'Asia/Tokyo',
+            hour12: false,
+            hour: '2-digit',
+            minute: '2-digit',
+          }
+        );
+
+        setWeatherData({
+          temp: Math.round(weather.main.temp).toString(),
+          time: localTime,
+        });
+      } catch (error) {
+        console.error('Error fetching weather/time:', error);
+      }
+    };
+
+    fetchWeatherAndTime();
+    // Refresh every 10 minutes
+    const interval = setInterval(fetchWeatherAndTime, 600000);
+    return () => clearInterval(interval);
+  }, []);
   const quickStats: QuickStat[] = [
     {
-      icon: <Users className="w-5 h-5" />,
-      label: 'English Level',
-      value: 'Common in town',
+      icon: <Anchor className="w-5 h-5" />,
+      label: 'Port Type',
+      value: 'Military • Naval Base',
     },
     {
-      icon: <DollarSign className="w-5 h-5" />,
-      label: 'Currency',
-      value: 'Japanese Yen (~130¥/$1)',
+      icon: <Ship className="w-5 h-5" />,
+      label: 'Vessel Types',
+      value: 'T-AKE, T-AO, Navy Vessels',
+    },
+    {
+      icon: <Users className="w-5 h-5" />,
+      label: 'Typical Stay',
+      value: '2-5 days',
     },
     {
       icon: <Thermometer className="w-5 h-5" />,
-      label: 'Climate',
-      value: '30°F - 90°F seasonal',
-    },
-    {
-      icon: <Anchor className="w-5 h-5" />,
-      label: 'Common Stay',
-      value: '2-5 days',
+      label: 'Weather & Time',
+      value: `${weatherData.temp}°F • JST ${weatherData.time}`,
     },
   ];
 
@@ -71,11 +109,6 @@ export default function SaseboPortPage() {
       id: 'nightlife',
       title: 'Bars & Nightlife',
       icon: <Wine className="w-5 h-5" />,
-    },
-    {
-      id: 'amenities',
-      title: 'Base Amenities',
-      icon: <Wifi className="w-5 h-5" />,
     },
     {
       id: 'transportation',
@@ -127,9 +160,6 @@ export default function SaseboPortPage() {
               </div>
               <h1 className="text-5xl lg:text-6xl font-bold text-white mb-6">
                 Sasebo
-                <span className="block text-2xl lg:text-3xl font-normal text-blue-300 mt-2">
-                  &quot;Sas-Vegas&quot;
-                </span>
               </h1>
               <p className="text-xl text-white/80 leading-relaxed mb-8">
                 One of the most efficient loading ports in the world, located in
@@ -616,113 +646,6 @@ export default function SaseboPortPage() {
                     <li>• Local legend about 24-hour mating snakes</li>
                     <li>• Available at small liquor stores to buy</li>
                   </ul>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* Amenities Section */}
-          {activeSection === 'amenities' && (
-            <div className="space-y-8">
-              <div className="flex items-center mb-8">
-                <Wifi className="w-8 h-8 text-blue-400 mr-4" />
-                <h2 className="text-3xl font-bold text-white">
-                  Base Amenities
-                </h2>
-              </div>
-
-              <div className="grid md:grid-cols-2 gap-8">
-                <div className="space-y-6">
-                  <div className="bg-gradient-to-br from-blue-500/20 to-purple-500/20 rounded-xl p-6 border border-white/10">
-                    <h3 className="text-xl font-semibold text-white mb-4">
-                      🏪 Base Facilities
-                    </h3>
-                    <p className="text-white/80 mb-4">
-                      Sasebo is a large 7th fleet port with well-equipped
-                      facilities.
-                    </p>
-                    <ul className="space-y-2 text-white/70">
-                      <li>
-                        • <strong>Strong NEX</strong> - Full retail store
-                      </li>
-                      <li>
-                        • <strong>Good Commissary</strong> - Groceries &
-                        supplies
-                      </li>
-                      <li>
-                        • <strong>Galaxies Bar</strong> - Above Chili&apos;s
-                      </li>
-                      <li>
-                        • <strong>Chili&apos;s Restaurant</strong> - American
-                        dining
-                      </li>
-                      <li>
-                        • <strong>NEX Food Court</strong> - Multiple options
-                      </li>
-                    </ul>
-                    <p className="text-green-300 text-sm mt-4">
-                      All facilities are walking distance from liberty drop-off!
-                    </p>
-                  </div>
-                </div>
-
-                <div className="space-y-6">
-                  <div className="bg-gradient-to-br from-green-500/20 to-teal-500/20 rounded-xl p-6 border border-white/10">
-                    <h3 className="text-xl font-semibold text-white mb-4">
-                      📶 Wi-Fi Spots
-                    </h3>
-
-                    <div className="space-y-4">
-                      <div className="border-l-4 border-blue-400 pl-4">
-                        <h4 className="font-semibold text-white">On Base</h4>
-                        <p className="text-white/70 text-sm">
-                          NEX Food Court at Fleet Landing - popular and
-                          convenient
-                        </p>
-                      </div>
-
-                      <div className="border-l-4 border-green-400 pl-4">
-                        <h4 className="font-semibold text-white">In Town</h4>
-                        <p className="text-white/70 text-sm">
-                          Starbucks on the Ginza - frequented by sailors
-                        </p>
-                      </div>
-
-                      <div className="border-l-4 border-purple-400 pl-4">
-                        <h4 className="font-semibold text-white">
-                          Mobile Service
-                        </h4>
-                        <p className="text-white/70 text-sm">
-                          Japanese phone stores near base for SIM cards and data
-                          plans
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <div className="bg-gradient-to-br from-orange-500/20 to-red-500/20 rounded-xl p-6 border border-white/10">
-                <h3 className="text-xl font-semibold text-white mb-4">
-                  🏨 Lodging Options
-                </h3>
-                <div className="grid md:grid-cols-2 gap-4">
-                  <div>
-                    <h4 className="font-semibold text-white mb-2">On Base</h4>
-                    <ul className="space-y-1 text-white/70 text-sm">
-                      <li>• Navy Lodge (book in advance)</li>
-                      <li>• Transient quarters available</li>
-                      <li>• Gateway Inn & Suites</li>
-                    </ul>
-                  </div>
-                  <div>
-                    <h4 className="font-semibold text-white mb-2">In Town</h4>
-                    <ul className="space-y-1 text-white/70 text-sm">
-                      <li>• Limited hotel availability</li>
-                      <li>• Book early for peak times</li>
-                      <li>• Higher prices than other ports</li>
-                    </ul>
-                  </div>
                 </div>
               </div>
             </div>
