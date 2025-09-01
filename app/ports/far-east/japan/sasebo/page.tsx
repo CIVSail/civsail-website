@@ -39,6 +39,8 @@ export default function SaseboPortPage() {
   const [usdAmount, setUsdAmount] = useState('');
   const [yenAmount, setYenAmount] = useState('');
   const [exchangeRate, setExchangeRate] = useState(0);
+  const [localSpotsIndex, setLocalSpotsIndex] = useState(0);
+  const [tasteOfHomeIndex, setTasteOfHomeIndex] = useState(0);
   // Weather useEffect
   useEffect(() => {
     const fetchWeatherAndTime = async () => {
@@ -162,7 +164,101 @@ export default function SaseboPortPage() {
       value: `${weatherData.temp}°F • JST ${weatherData.time}`,
     },
   ];
+  const localSpots = [
+    {
+      id: 1,
+      name: 'DDD Ramen',
+      type: 'Ramen Shop',
+      description:
+        'Popular ramen spot with excellent gyoza. Great atmosphere and authentic Japanese flavors.',
+      highlights: ['Tonkotsu Ramen', 'Gyoza', 'Local Favorite'],
+      priceRange: '¥800-1,500',
+      location: 'Off Ginza Street',
+    },
+    {
+      id: 2,
+      name: 'Ra-Ra-ramen',
+      type: 'Ramen Shop',
+      description:
+        'Second popular ramen location with great wings and chuhai. Compete with DDD for best ramen.',
+      highlights: ['Miso Ramen', 'Chicken Wings', 'Chuhai'],
+      priceRange: '¥900-1,600',
+      location: 'Off Ginza Street',
+    },
+    {
+      id: 3,
+      name: 'Sushi Go-Round',
+      type: 'Sushi Restaurant',
+      description:
+        'Unique conveyor belt sushi experience. English menu available with beer selection.',
+      highlights: ['Conveyor Belt', 'English Menu', 'Beer Available'],
+      priceRange: '¥200-500 per plate',
+      location: '10-15 min walk from base',
+    },
+    {
+      id: 4,
+      name: 'Kunimatsu Coffee',
+      type: 'Coffee Shop',
+      description:
+        'Must-visit coffee shop owned by sharply dressed Hiro. Look for the sailor statue out front.',
+      highlights: ['Great Coffee', 'Friendly Owner', 'Sailor Statue'],
+      priceRange: '¥300-800',
+      location: 'Near Ginza',
+    },
+    {
+      id: 5,
+      name: 'Steak Salon',
+      type: 'Steakhouse',
+      description:
+        'Intimate mom-and-pop steakhouse with 4-course meals. Semi-circle seating around chef.',
+      highlights: ['4-Course Meals', 'Chef Performance', 'Premium Experience'],
+      priceRange: '¥3,000-5,000',
+      location: 'Downtown Area',
+    },
+  ];
 
+  const tasteOfHome = [
+    {
+      id: 1,
+      name: 'Galaxies Bar',
+      type: 'American Bar',
+      description:
+        "American-style bar above Chili's with familiar comfort food, cheap drinks, and Wi-Fi.",
+      highlights: ['Cheap Drinks', 'Good Wi-Fi', 'Slot Machines'],
+      priceRange: '$5-15',
+      location: "On Base - Above Chili's",
+    },
+    {
+      id: 2,
+      name: "Chili's",
+      type: 'American Restaurant',
+      description:
+        'Familiar American chain restaurant on base. Standard menu with American comfort food.',
+      highlights: ['American Menu', 'On Base', 'Familiar Food'],
+      priceRange: '$10-20',
+      location: 'On Base',
+    },
+    {
+      id: 3,
+      name: 'Starbucks',
+      type: 'Coffee Chain',
+      description:
+        'Located on Ginza street. Popular Wi-Fi spot frequently visited by sailors.',
+      highlights: ['Free Wi-Fi', 'Familiar Coffee', 'Central Location'],
+      priceRange: '¥400-800',
+      location: 'Ginza Street',
+    },
+    {
+      id: 4,
+      name: 'NEX Food Court',
+      type: 'Food Court',
+      description:
+        'Multiple American fast food options in one location. Convenient and familiar.',
+      highlights: ['Multiple Options', 'Fast Service', 'On Base'],
+      priceRange: '$8-15',
+      location: 'Fleet Landing - On Base',
+    },
+  ];
   // Rest of your component continues here...
 
   const sections: Section[] = [
@@ -511,72 +607,154 @@ export default function SaseboPortPage() {
                 </h2>
               </div>
 
-              <div className="grid lg:grid-cols-2 gap-8">
-                <div className="space-y-6">
-                  <div className="bg-gradient-to-br from-blue-500/20 to-indigo-500/20 rounded-xl p-6 border border-white/10">
-                    <h3 className="text-xl font-semibold text-white mb-4">
-                      Typical Operations
-                    </h3>
-                    <p className="text-white/80 mb-4">
-                      Sasebo is a major hub for routine port visits, loading,
-                      and fueling operations. May be the most efficient port in
-                      the world.
-                    </p>
+              {/* Typical Operations */}
+              <div className="bg-gradient-to-br from-blue-500/20 to-indigo-500/20 rounded-xl p-6 border border-white/10">
+                <h3 className="text-xl font-semibold text-white mb-4">
+                  Typical Operations
+                </h3>
+                <p className="text-white/80 mb-4">
+                  Sasebo serves as a major naval logistics hub for routine port
+                  visits, loading, and fueling operations. The port specializes
+                  in military vessel support with some of the most efficient
+                  loading operations globally.
+                </p>
+                <div className="grid md:grid-cols-2 gap-6">
+                  <div>
+                    <h4 className="font-semibold text-white mb-3">
+                      Primary Functions
+                    </h4>
                     <ul className="space-y-2 text-white/70">
                       <li>• Routine T-AKE and T-AO port visits</li>
-                      <li>• Loading and fueling operations</li>
+                      <li>• Fuel and supplies loading</li>
                       <li>• Occasional Voyage Repair (VR) periods</li>
-                      <li>• Workers and trucks always punctual</li>
+                      <li>• Navy vessel maintenance support</li>
                     </ul>
                   </div>
-
-                  <div className="bg-gradient-to-br from-orange-500/20 to-red-500/20 rounded-xl p-6 border border-white/10">
-                    <h3 className="text-xl font-semibold text-white mb-4">
-                      Anchoring Information
-                    </h3>
-                    <p className="text-white/80 mb-4">
-                      AKEs typically anchor in Sasebo harbor. Fuel pier
-                      available primarily for AOs.
-                    </p>
+                  <div>
+                    <h4 className="font-semibold text-white mb-3">
+                      Operation Notes
+                    </h4>
                     <ul className="space-y-2 text-white/70">
-                      <li>• 15-20 minute liberty launch transit</li>
-                      <li>• Launches operate 0600-0100 (ship dependent)</li>
-                      <li>• Punctual and well-maintained boats</li>
-                      <li>• Harbor rarely experiences bad weather</li>
+                      <li>• Workers and trucks always punctual</li>
+                      <li>• Professional, efficient cargo handling</li>
+                      <li>• 24/7 security and base operations</li>
+                      <li>• Harbor rarely experiences weather delays</li>
                     </ul>
                   </div>
                 </div>
+              </div>
 
-                <div className="bg-gradient-to-br from-purple-500/20 to-pink-500/20 rounded-xl p-6 border border-white/10">
-                  <h3 className="text-xl font-semibold text-white mb-4">
-                    Liberty Drop-off Points
-                  </h3>
-                  <div className="space-y-4">
-                    <div className="border-l-4 border-blue-400 pl-4">
-                      <h4 className="font-semibold text-white">
-                        Fleet Landing
-                      </h4>
-                      <p className="text-white/70 text-sm">
-                        Primary drop-off point near USO and NEX food court
-                      </p>
-                    </div>
-                    <div className="border-l-4 border-green-400 pl-4">
-                      <h4 className="font-semibold text-white">Flag Landing</h4>
-                      <p className="text-white/70 text-sm">
-                        Alternative drop-off by Navy Lodge
-                      </p>
+              {/* Pier Locations */}
+              <div className="bg-gradient-to-br from-purple-500/20 to-pink-500/20 rounded-xl p-6 border border-white/10">
+                <h3 className="text-xl font-semibold text-white mb-4">
+                  Pier Locations
+                </h3>
+
+                <div className="space-y-6">
+                  {/* Anchoring Information */}
+                  <div className="bg-white/10 rounded-lg p-4">
+                    <h4 className="font-semibold text-white mb-3">
+                      Anchoring Areas
+                    </h4>
+                    <p className="text-white/80 mb-3">
+                      Most T-AKEs anchor in Sasebo harbor rather than pier-side.
+                      Liberty launches provide reliable transportation to shore.
+                    </p>
+                    <div className="grid md:grid-cols-2 gap-4">
+                      <div>
+                        <h5 className="font-medium text-white mb-2">
+                          Anchor Details
+                        </h5>
+                        <ul className="space-y-1 text-white/70 text-sm">
+                          <li>• 15-20 minute liberty launch transit</li>
+                          <li>• Launches operate 0600-0100 (ship dependent)</li>
+                          <li>• Well-maintained harbor with good holding</li>
+                          <li>• Protected from most weather conditions</li>
+                        </ul>
+                      </div>
+                      <div>
+                        <h5 className="font-medium text-white mb-2">
+                          Launch Operations
+                        </h5>
+                        <ul className="space-y-1 text-white/70 text-sm">
+                          <li>• Multiple ships = multiple launch schedules</li>
+                          <li>• Punctual and reliable service</li>
+                          <li>• Two main drop-off points available</li>
+                          <li>• Weather rarely impacts operations</li>
+                        </ul>
+                      </div>
                     </div>
                   </div>
 
-                  <div className="mt-6 p-4 bg-yellow-500/20 rounded-lg border border-yellow-400/30">
-                    <h4 className="font-semibold text-yellow-300 mb-2">
-                      ⚠️ Important Reminder
+                  {/* Pier Information */}
+                  <div className="bg-white/10 rounded-lg p-4">
+                    <h4 className="font-semibold text-white mb-3">
+                      Pier Facilities
                     </h4>
-                    <p className="text-white/80 text-sm">
-                      Take a picture of your ship&apos;s schedule before
-                      departing. Multiple ships = multiple launches - get on the
-                      right one!
-                    </p>
+                    <div className="grid md:grid-cols-2 gap-4">
+                      <div className="border-l-4 border-blue-400 pl-4">
+                        <h5 className="font-semibold text-white mb-2">
+                          Fuel Pier
+                        </h5>
+                        <p className="text-white/70 text-sm mb-2">
+                          Primary fuel pier available for T-AO operations and
+                          fuel transfers.
+                        </p>
+                        <ul className="space-y-1 text-white/60 text-xs">
+                          <li>• Direct shore access when pier-side</li>
+                          <li>• Full fuel loading capabilities</li>
+                          <li>• Shore power and utilities available</li>
+                        </ul>
+                      </div>
+                      <div className="border-l-4 border-green-400 pl-4">
+                        <h5 className="font-semibold text-white mb-2">
+                          Cargo Areas
+                        </h5>
+                        <p className="text-white/70 text-sm mb-2">
+                          Multiple cargo handling areas for supplies and
+                          equipment loading.
+                        </p>
+                        <ul className="space-y-1 text-white/60 text-xs">
+                          <li>• Heavy-lift crane capabilities</li>
+                          <li>• Container and break-bulk handling</li>
+                          <li>• Secure storage areas available</li>
+                        </ul>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Liberty Drop-off Points */}
+                  <div className="bg-yellow-500/20 rounded-lg border border-yellow-400/30 p-4">
+                    <h4 className="font-semibold text-yellow-300 mb-3">
+                      Liberty Drop-off Points
+                    </h4>
+                    <div className="grid md:grid-cols-2 gap-4">
+                      <div className="border-l-4 border-blue-400 pl-4">
+                        <h5 className="font-semibold text-white mb-2">
+                          Fleet Landing
+                        </h5>
+                        <p className="text-white/70 text-sm">
+                          Primary drop-off point near USO and NEX food court.
+                          Most convenient for base facilities access.
+                        </p>
+                      </div>
+                      <div className="border-l-4 border-green-400 pl-4">
+                        <h5 className="font-semibold text-white mb-2">
+                          Flag Landing
+                        </h5>
+                        <p className="text-white/70 text-sm">
+                          Alternative drop-off point by Navy Lodge. Good access
+                          to lodging and alternate base facilities.
+                        </p>
+                      </div>
+                    </div>
+                    <div className="mt-4 p-3 bg-red-500/20 rounded-lg border border-red-400/30">
+                      <p className="text-red-300 text-sm font-medium">
+                        Important: Take a picture of your ship's launch schedule
+                        before departing. Multiple ships = multiple launches -
+                        get on the right one!
+                      </p>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -591,108 +769,259 @@ export default function SaseboPortPage() {
                 <h2 className="text-3xl font-bold text-white">Food & Dining</h2>
               </div>
 
-              <p className="text-lg text-white/80 mb-8">
-                Plain and simple, Sasebo has fantastic food. Sushi, Steak,
-                Burgers, Ramen and more - Sasebo has something for everyone.
-              </p>
+              {/* Local Food and Drink */}
+              <div className="bg-gradient-to-br from-orange-500/20 to-red-500/20 rounded-xl p-6 border border-white/10">
+                <h3 className="text-xl font-semibold text-white mb-4">
+                  Local Food & Drink
+                </h3>
+                <p className="text-lg text-white/80 leading-relaxed mb-6">
+                  Sasebo offers incredible Japanese cuisine with something for
+                  every palate. From authentic ramen shops to fresh sushi
+                  experiences, the food scene here is unforgettable.
+                </p>
 
-              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-                <div className="bg-gradient-to-br from-red-500/20 to-orange-500/20 rounded-xl p-6 border border-white/10">
-                  <h3 className="text-xl font-semibold text-white mb-4">
-                    🍜 Ramen
+                <div className="grid md:grid-cols-2 gap-6">
+                  <div className="bg-white/10 rounded-lg p-4">
+                    <h4 className="font-semibold text-white mb-3">
+                      Must-Try Local Specialties
+                    </h4>
+                    <ul className="space-y-2 text-white/80">
+                      <li className="flex items-start">
+                        <div className="w-2 h-2 bg-red-400 rounded-full mt-2 mr-3 flex-shrink-0"></div>
+                        <div>
+                          <strong>Ramen:</strong> Rich tonkotsu and miso broths
+                          with perfect noodles
+                        </div>
+                      </li>
+                      <li className="flex items-start">
+                        <div className="w-2 h-2 bg-red-400 rounded-full mt-2 mr-3 flex-shrink-0"></div>
+                        <div>
+                          <strong>Fresh Sushi:</strong> Daily catch from local
+                          waters, expertly prepared
+                        </div>
+                      </li>
+                      <li className="flex items-start">
+                        <div className="w-2 h-2 bg-red-400 rounded-full mt-2 mr-3 flex-shrink-0"></div>
+                        <div>
+                          <strong>Gyoza:</strong> Perfectly pan-fried dumplings,
+                          crispy and flavorful
+                        </div>
+                      </li>
+                    </ul>
+                  </div>
+
+                  <div className="bg-white/10 rounded-lg p-4">
+                    <h4 className="font-semibold text-white mb-3">
+                      Local Drinks to Try
+                    </h4>
+                    <ul className="space-y-2 text-white/80">
+                      <li className="flex items-start">
+                        <div className="w-2 h-2 bg-orange-400 rounded-full mt-2 mr-3 flex-shrink-0"></div>
+                        <div>
+                          <strong>Chuhai:</strong> 9% ABV mixed drink,
+                          deceptively strong
+                        </div>
+                      </li>
+                      <li className="flex items-start">
+                        <div className="w-2 h-2 bg-orange-400 rounded-full mt-2 mr-3 flex-shrink-0"></div>
+                        <div>
+                          <strong>Habusake:</strong> Snake-infused sake, unique
+                          local experience
+                        </div>
+                      </li>
+                      <li className="flex items-start">
+                        <div className="w-2 h-2 bg-orange-400 rounded-full mt-2 mr-3 flex-shrink-0"></div>
+                        <div>
+                          <strong>Local Beer:</strong> Asahi, Kirin, and Sapporo
+                          on tap
+                        </div>
+                      </li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+
+              {/* Local Spots Carousel */}
+              <div className="bg-gradient-to-br from-blue-500/20 to-purple-500/20 rounded-xl p-6 border border-white/10">
+                <div className="flex items-center justify-between mb-6">
+                  <h3 className="text-xl font-semibold text-white">
+                    Local Spots
                   </h3>
-                  <p className="text-white/80 mb-4">
-                    Two most popular spots both located off the Ginza with great
-                    gyoza.
-                  </p>
-                  <ul className="space-y-2 text-white/70">
-                    <li>
-                      • <strong>DDD Ramen</strong>
-                    </li>
-                    <li>
-                      • <strong>Ra-Ra-ramen</strong>
-                    </li>
-                    <li>Try both and pick your favorite!</li>
-                  </ul>
+                  <div className="flex space-x-2">
+                    <button
+                      onClick={() =>
+                        setLocalSpotsIndex(Math.max(0, localSpotsIndex - 4))
+                      }
+                      disabled={localSpotsIndex === 0}
+                      className="p-2 rounded-lg bg-white/10 text-white hover:bg-white/20 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                    >
+                      ←
+                    </button>
+                    <button
+                      onClick={() =>
+                        setLocalSpotsIndex(
+                          Math.min(localSpots.length - 4, localSpotsIndex + 4)
+                        )
+                      }
+                      disabled={localSpotsIndex >= localSpots.length - 4}
+                      className="p-2 rounded-lg bg-white/10 text-white hover:bg-white/20 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                    >
+                      →
+                    </button>
+                  </div>
                 </div>
 
-                <div className="bg-gradient-to-br from-green-500/20 to-teal-500/20 rounded-xl p-6 border border-white/10">
-                  <h3 className="text-xl font-semibold text-white mb-4">
-                    🍣 Sushi
-                  </h3>
-                  <p className="text-white/80 mb-4">
-                    Multiple spots on Ginza, plus the unique sushi go-round
-                    experience.
-                  </p>
-                  <ul className="space-y-2 text-white/70">
-                    <li>• Several Ginza locations</li>
-                    <li>
-                      • <strong>Sushi Go-Round</strong> (10-15 min walk)
-                    </li>
-                    <li>• Conveyor belt system</li>
-                    <li>• English menu & beer available</li>
-                  </ul>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                  {localSpots
+                    .slice(localSpotsIndex, localSpotsIndex + 4)
+                    .map((spot) => (
+                      <div
+                        key={spot.id}
+                        className="bg-white/10 rounded-lg p-4 hover:bg-white/15 transition-all cursor-pointer group"
+                      >
+                        <h4 className="font-semibold text-white mb-1 group-hover:text-blue-300 transition-colors">
+                          {spot.name}
+                        </h4>
+                        <p className="text-blue-300 text-sm mb-2">
+                          {spot.type}
+                        </p>
+                        <p className="text-white/70 text-sm mb-3 line-clamp-2">
+                          {spot.description}
+                        </p>
+
+                        <div className="space-y-2">
+                          <div className="flex flex-wrap gap-1">
+                            {spot.highlights
+                              .slice(0, 2)
+                              .map((highlight, idx) => (
+                                <span
+                                  key={idx}
+                                  className="text-xs bg-blue-500/30 text-blue-200 px-2 py-1 rounded"
+                                >
+                                  {highlight}
+                                </span>
+                              ))}
+                          </div>
+                          <div className="flex justify-between items-center text-xs">
+                            <span className="text-green-300">
+                              {spot.priceRange}
+                            </span>
+                            <span className="text-white/50">
+                              {spot.location}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
                 </div>
 
-                <div className="bg-gradient-to-br from-blue-500/20 to-purple-500/20 rounded-xl p-6 border border-white/10">
-                  <h3 className="text-xl font-semibold text-white mb-4">
-                    ☕ Kunimatsu
+                <div className="flex justify-center mt-4">
+                  <div className="flex space-x-2">
+                    {Array.from({
+                      length: Math.ceil(localSpots.length / 4),
+                    }).map((_, idx) => (
+                      <div
+                        key={idx}
+                        className={`w-2 h-2 rounded-full transition-all ${
+                          Math.floor(localSpotsIndex / 4) === idx
+                            ? 'bg-blue-400'
+                            : 'bg-white/30'
+                        }`}
+                      />
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              {/* A Taste of Home Carousel */}
+              <div className="bg-gradient-to-br from-green-500/20 to-teal-500/20 rounded-xl p-6 border border-white/10">
+                <div className="flex items-center justify-between mb-6">
+                  <h3 className="text-xl font-semibold text-white">
+                    A Taste of Home
                   </h3>
-                  <p className="text-white/80 mb-4">
-                    Must-visit coffee shop owned by sharply dressed Hiro.
-                  </p>
-                  <ul className="space-y-2 text-white/70">
-                    <li>• Great coffee</li>
-                    <li>• Friendly owner Hiro</li>
-                    <li>• Family-owned legacy shop</li>
-                    <li>• Look for sailor statue out front</li>
-                  </ul>
+                  <div className="flex space-x-2">
+                    <button
+                      onClick={() =>
+                        setTasteOfHomeIndex(Math.max(0, tasteOfHomeIndex - 4))
+                      }
+                      disabled={tasteOfHomeIndex === 0}
+                      className="p-2 rounded-lg bg-white/10 text-white hover:bg-white/20 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                    >
+                      ←
+                    </button>
+                    <button
+                      onClick={() =>
+                        setTasteOfHomeIndex(
+                          Math.min(tasteOfHome.length - 4, tasteOfHomeIndex + 4)
+                        )
+                      }
+                      disabled={tasteOfHomeIndex >= tasteOfHome.length - 4}
+                      className="p-2 rounded-lg bg-white/10 text-white hover:bg-white/20 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                    >
+                      →
+                    </button>
+                  </div>
                 </div>
 
-                <div className="bg-gradient-to-br from-purple-500/20 to-pink-500/20 rounded-xl p-6 border border-white/10">
-                  <h3 className="text-xl font-semibold text-white mb-4">
-                    🥩 Steak Salon
-                  </h3>
-                  <p className="text-white/80 mb-4">
-                    Mom-and-pop steakhouse with 4-course meals.
-                  </p>
-                  <ul className="space-y-2 text-white/70">
-                    <li>• Small, intimate setting</li>
-                    <li>• Semi-circle seating</li>
-                    <li>• Chef in center</li>
-                    <li>• More expensive but worth it</li>
-                  </ul>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                  {tasteOfHome
+                    .slice(tasteOfHomeIndex, tasteOfHomeIndex + 4)
+                    .map((spot) => (
+                      <div
+                        key={spot.id}
+                        className="bg-white/10 rounded-lg p-4 hover:bg-white/15 transition-all cursor-pointer group"
+                      >
+                        <h4 className="font-semibold text-white mb-1 group-hover:text-green-300 transition-colors">
+                          {spot.name}
+                        </h4>
+                        <p className="text-green-300 text-sm mb-2">
+                          {spot.type}
+                        </p>
+                        <p className="text-white/70 text-sm mb-3 line-clamp-2">
+                          {spot.description}
+                        </p>
+
+                        <div className="space-y-2">
+                          <div className="flex flex-wrap gap-1">
+                            {spot.highlights
+                              .slice(0, 2)
+                              .map((highlight, idx) => (
+                                <span
+                                  key={idx}
+                                  className="text-xs bg-green-500/30 text-green-200 px-2 py-1 rounded"
+                                >
+                                  {highlight}
+                                </span>
+                              ))}
+                          </div>
+                          <div className="flex justify-between items-center text-xs">
+                            <span className="text-green-300">
+                              {spot.priceRange}
+                            </span>
+                            <span className="text-white/50">
+                              {spot.location}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
                 </div>
 
-                <div className="bg-gradient-to-br from-indigo-500/20 to-blue-500/20 rounded-xl p-6 border border-white/10">
-                  <h3 className="text-xl font-semibold text-white mb-4">
-                    🏪 Local Spots
-                  </h3>
-                  <p className="text-white/80 mb-4">
-                    Small restaurants and window-only kitchens with amazing
-                    food.
-                  </p>
-                  <ul className="space-y-2 text-white/70">
-                    <li>• Literal window kitchens</li>
-                    <li>• Some of the best food in town</li>
-                    <li>• Affordable prices</li>
-                    <li>• Authentic local experience</li>
-                  </ul>
-                </div>
-
-                <div className="bg-gradient-to-br from-gray-600/20 to-slate-600/20 rounded-xl p-6 border border-white/10">
-                  <h3 className="text-xl font-semibold text-white mb-4">
-                    🇺🇸 Galaxies (On Base)
-                  </h3>
-                  <p className="text-white/80 mb-4">
-                    American-style bar above Chili&apos;s with familiar comfort.
-                  </p>
-                  <ul className="space-y-2 text-white/70">
-                    <li>• Cheap drinks</li>
-                    <li>• Good Wi-Fi</li>
-                    <li>• Slot machines</li>
-                    <li>• Decent food</li>
-                  </ul>
+                <div className="flex justify-center mt-4">
+                  <div className="flex space-x-2">
+                    {Array.from({
+                      length: Math.ceil(tasteOfHome.length / 4),
+                    }).map((_, idx) => (
+                      <div
+                        key={idx}
+                        className={`w-2 h-2 rounded-full transition-all ${
+                          Math.floor(tasteOfHomeIndex / 4) === idx
+                            ? 'bg-green-400'
+                            : 'bg-white/30'
+                        }`}
+                      />
+                    ))}
+                  </div>
                 </div>
               </div>
             </div>
