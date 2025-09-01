@@ -1,7 +1,9 @@
 'use client';
 
 import Link from 'next/link';
-import { useState, useEffect } from 'react';
+import mapboxgl from 'mapbox-gl';
+import 'mapbox-gl/dist/mapbox-gl.css';
+import { useState, useEffect, useRef } from 'react';
 import {
   ChevronRight,
   MapPin,
@@ -32,6 +34,12 @@ interface Section {
 export default function SaseboPortPage() {
   const [activeSection, setActiveSection] = useState('overview');
   const [weatherData, setWeatherData] = useState({ temp: '--', time: '--:--' });
+  const mapContainer = useRef<HTMLDivElement>(null);
+  const map = useRef<mapboxgl.Map | null>(null);
+  const [usdAmount, setUsdAmount] = useState('');
+  const [yenAmount, setYenAmount] = useState('');
+  const [exchangeRate, setExchangeRate] = useState(0);
+  // Weather useEffect
   useEffect(() => {
     const fetchWeatherAndTime = async () => {
       try {
@@ -70,6 +78,68 @@ export default function SaseboPortPage() {
     const interval = setInterval(fetchWeatherAndTime, 600000);
     return () => clearInterval(interval);
   }, []);
+
+  // Map useEffect - separate from weather
+  useEffect(() => {
+    if (map.current) return;
+    if (!mapContainer.current) return;
+
+    mapboxgl.accessToken = process.env.NEXT_PUBLIC_MAPBOX_TOKEN || '';
+
+    map.current = new mapboxgl.Map({
+      container: mapContainer.current,
+      style: 'mapbox://styles/mapbox/satellite-streets-v12',
+      center: [129.7233, 33.1594],
+      zoom: 12,
+    });
+
+    // Add marker
+    new mapboxgl.Marker({ color: '#3b82f6' })
+      .setLngLat([129.7233, 33.1594])
+      .setPopup(
+        new mapboxgl.Popup().setHTML(
+          '<h3>Sasebo Naval Base</h3><p>Primary port facility</p>'
+        )
+      )
+      .addTo(map.current);
+  }, []);
+
+  // Currency exchange rate useEffect - separate from map
+  useEffect(() => {
+    const fetchExchangeRate = async () => {
+      try {
+        const response = await fetch(
+          'https://api.exchangerate-api.com/v4/latest/USD'
+        );
+        const data = await response.json();
+        setExchangeRate(data.rates.JPY);
+      } catch (error) {
+        console.error('Error fetching exchange rate:', error);
+        setExchangeRate(130);
+      }
+    };
+
+    fetchExchangeRate();
+    const interval = setInterval(fetchExchangeRate, 3600000);
+    return () => clearInterval(interval);
+  }, []);
+
+  // Move conversion functions here, outside all useEffects
+  const convertUsdToYen = (usd: string) => {
+    if (!usd || !exchangeRate) return '';
+    const usdValue = parseFloat(usd);
+    if (isNaN(usdValue)) return '';
+    return (usdValue * exchangeRate).toLocaleString('en-US', {
+      maximumFractionDigits: 0,
+    });
+  };
+
+  const convertYenToUsd = (yen: string) => {
+    if (!yen || !exchangeRate) return '';
+    const yenValue = parseFloat(yen.replace(/,/g, ''));
+    if (isNaN(yenValue)) return '';
+    return (yenValue / exchangeRate).toFixed(2);
+  };
   const quickStats: QuickStat[] = [
     {
       icon: <Anchor className="w-5 h-5" />,
@@ -92,6 +162,8 @@ export default function SaseboPortPage() {
       value: `${weatherData.temp}°F • JST ${weatherData.time}`,
     },
   ];
+
+  // Rest of your component continues here...
 
   const sections: Section[] = [
     { id: 'overview', title: 'Overview', icon: <MapPin className="w-5 h-5" /> },
@@ -226,18 +298,32 @@ export default function SaseboPortPage() {
                 <h2 className="text-3xl font-bold text-white">Port Overview</h2>
               </div>
 
+              {/* Map Container */}
+              <div className="bg-gradient-to-br from-blue-500/20 to-purple-500/20 rounded-xl p-6 border border-white/10">
+                <h3 className="text-xl font-semibold text-white mb-4">
+                  Port Map
+                </h3>
+                <div
+                  ref={mapContainer}
+                  className="w-full h-64 rounded-lg"
+                  style={{ minHeight: '300px' }}
+                />
+              </div>
+
+              {/* Port Description */}
               <div className="prose prose-invert max-w-none">
                 <p className="text-lg text-white/80 leading-relaxed">
-                  Sasebo, Japan, affectionately known as &quot;Sas-Vegas&quot;,
-                  is in southern Japan on the outskirts of Nagasaki. Hosting a
-                  large, overseas US Navy base, Sasebo is a common loading port
-                  for T-AKEs and T-AOs in the 7th fleet AOR.
+                  Sasebo, Japan, affectionately known as "Sas-Vegas", is in
+                  southern Japan on the outskirts of Nagasaki. Hosting a large,
+                  overseas US Navy base, Sasebo is a common loading port for
+                  T-AKEs and T-AOs in the 7th fleet AOR.
                 </p>
 
+                {/* Updated Cards: Port Highlights and Quick Facts */}
                 <div className="grid md:grid-cols-2 gap-8 mt-8">
                   <div className="bg-gradient-to-br from-blue-500/20 to-purple-500/20 rounded-xl p-6 border border-white/10">
                     <h3 className="text-xl font-semibold text-white mb-4">
-                      Why CIVMARs Love Sasebo
+                      Port Highlights
                     </h3>
                     <ul className="space-y-3 text-white/80">
                       <li className="flex items-start">
@@ -246,41 +332,169 @@ export default function SaseboPortPage() {
                       </li>
                       <li className="flex items-start">
                         <div className="w-2 h-2 bg-blue-400 rounded-full mt-2 mr-3 flex-shrink-0"></div>
-                        Base proximity to town attractions
+                        Walking distance to vibrant nightlife
                       </li>
                       <li className="flex items-start">
                         <div className="w-2 h-2 bg-blue-400 rounded-full mt-2 mr-3 flex-shrink-0"></div>
-                        Incredible Japanese culture & food
+                        Incredible Japanese cuisine scene
                       </li>
                       <li className="flex items-start">
                         <div className="w-2 h-2 bg-blue-400 rounded-full mt-2 mr-3 flex-shrink-0"></div>
-                        Vibrant nightlife scene
+                        Professional, courteous port workers
                       </li>
                     </ul>
                   </div>
 
                   <div className="bg-gradient-to-br from-green-500/20 to-teal-500/20 rounded-xl p-6 border border-white/10">
                     <h3 className="text-xl font-semibold text-white mb-4">
-                      Port Characteristics
+                      Quick Facts
                     </h3>
                     <ul className="space-y-3 text-white/80">
                       <li className="flex items-start">
                         <div className="w-2 h-2 bg-green-400 rounded-full mt-2 mr-3 flex-shrink-0"></div>
-                        Professional, courteous workers
+                        English widely spoken in town
                       </li>
                       <li className="flex items-start">
                         <div className="w-2 h-2 bg-green-400 rounded-full mt-2 mr-3 flex-shrink-0"></div>
-                        Punctual loading operations
+                        15-20 minute liberty launch transit
                       </li>
                       <li className="flex items-start">
                         <div className="w-2 h-2 bg-green-400 rounded-full mt-2 mr-3 flex-shrink-0"></div>
-                        Well-equipped naval base
+                        Well-equipped naval base facilities
                       </li>
                       <li className="flex items-start">
                         <div className="w-2 h-2 bg-green-400 rounded-full mt-2 mr-3 flex-shrink-0"></div>
-                        Walking distance to attractions
+                        Cash preferred, cards limited
                       </li>
                     </ul>
+                  </div>
+                </div>
+              </div>
+
+              {/* Currency Converter */}
+              <div className="bg-gradient-to-br from-yellow-500/20 to-orange-500/20 rounded-xl p-6 border border-white/10">
+                <h3 className="text-xl font-semibold text-white mb-4">
+                  Currency Converter
+                </h3>
+                <div className="grid md:grid-cols-2 gap-6">
+                  <div>
+                    <label className="block text-white/80 text-sm font-medium mb-2">
+                      USD Amount
+                    </label>
+                    <input
+                      type="number"
+                      placeholder="100"
+                      value={usdAmount}
+                      onChange={(e) => {
+                        setUsdAmount(e.target.value);
+                        setYenAmount(convertUsdToYen(e.target.value));
+                      }}
+                      className="w-full bg-white/10 border border-white/20 rounded-lg px-4 py-3 text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-yellow-400"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-white/80 text-sm font-medium mb-2">
+                      Japanese Yen (¥)
+                    </label>
+                    <input
+                      type="text"
+                      placeholder="13,000"
+                      value={yenAmount}
+                      onChange={(e) => {
+                        setYenAmount(e.target.value);
+                        setUsdAmount(convertYenToUsd(e.target.value));
+                      }}
+                      className="w-full bg-white/10 border border-white/20 rounded-lg px-4 py-3 text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-yellow-400"
+                    />
+                  </div>
+                </div>
+                <div className="flex justify-between items-center mt-4">
+                  <p className="text-white/60 text-sm">
+                    Current rate: 1 USD = ¥{exchangeRate.toFixed(2)}
+                  </p>
+                  <p className="text-white/60 text-sm">Rates update hourly</p>
+                </div>
+              </div>
+
+              {/* Know Before You Go */}
+              <div className="bg-gradient-to-br from-purple-500/20 to-pink-500/20 rounded-xl p-6 border border-white/10">
+                <h3 className="text-xl font-semibold text-white mb-6">
+                  Know Before You Go
+                </h3>
+
+                <div className="grid md:grid-cols-2 gap-8">
+                  {/* Weather & Clothing */}
+                  <div>
+                    <h4 className="text-lg font-semibold text-white mb-4">
+                      Weather & What to Pack
+                    </h4>
+                    <div className="space-y-3 text-white/80">
+                      <div className="bg-white/10 rounded-lg p-4">
+                        <h5 className="font-medium text-white mb-2">
+                          Spring/Fall (Mar-May, Sep-Nov)
+                        </h5>
+                        <p className="text-sm">
+                          Mild temps 60-75°F. Pack layers, light jacket,
+                          comfortable walking shoes.
+                        </p>
+                      </div>
+                      <div className="bg-white/10 rounded-lg p-4">
+                        <h5 className="font-medium text-white mb-2">
+                          Summer (Jun-Aug)
+                        </h5>
+                        <p className="text-sm">
+                          Hot & humid 75-90°F. Light breathable clothes,
+                          umbrella for rain season.
+                        </p>
+                      </div>
+                      <div className="bg-white/10 rounded-lg p-4">
+                        <h5 className="font-medium text-white mb-2">
+                          Winter (Dec-Feb)
+                        </h5>
+                        <p className="text-sm">
+                          Cool 40-60°F. Warm jacket essential, especially for
+                          evening liberty.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Connectivity */}
+                  <div>
+                    <h4 className="text-lg font-semibold text-white mb-4">
+                      Stay Connected
+                    </h4>
+                    <div className="bg-white/10 rounded-lg p-4 mb-4">
+                      <p className="text-white/80 text-sm mb-4">
+                        Skip expensive roaming charges with a local eSIM. Get
+                        data plans starting at $4.50 for Japan coverage.
+                      </p>
+                      <a
+                        href="https://airalo.pxf.io/zxkLzG"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-block bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-medium transition-colors"
+                      >
+                        Get Japan eSIM →
+                      </a>
+                    </div>
+
+                    <div className="space-y-2">
+                      <h5 className="font-medium text-white">
+                        Recommended Plans:
+                      </h5>
+                      <ul className="space-y-2 text-sm text-white/70">
+                        <li>
+                          • <strong>Japan 7 Days:</strong> 1GB for $4.50
+                        </li>
+                        <li>
+                          • <strong>Japan 14 Days:</strong> 3GB for $11.00
+                        </li>
+                        <li>
+                          • <strong>Asia Regional:</strong> 5GB for $16.00
+                        </li>
+                      </ul>
+                    </div>
                   </div>
                 </div>
               </div>
