@@ -1,5 +1,10 @@
 'use client';
-
+// Add this type declaration at the top of your file
+declare global {
+  interface Window {
+    scrollToSection?: (sectionId: string) => void;
+  }
+}
 import Link from 'next/link';
 import mapboxgl from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
@@ -41,6 +46,8 @@ export default function SaseboPortPage() {
   const [exchangeRate, setExchangeRate] = useState(0);
   const [localSpotsIndex, setLocalSpotsIndex] = useState(0);
   const [tasteOfHomeIndex, setTasteOfHomeIndex] = useState(0);
+  const [hangsIndex, setHangsIndex] = useState(0);
+  const [highEnergyIndex, setHighEnergyIndex] = useState(0);
   // Weather useEffect
   useEffect(() => {
     const fetchWeatherAndTime = async () => {
@@ -81,7 +88,7 @@ export default function SaseboPortPage() {
     return () => clearInterval(interval);
   }, []);
 
-  // Map useEffect - separate from weather
+  // Update your existing map useEffect
   useEffect(() => {
     if (map.current) return;
     if (!mapContainer.current) return;
@@ -92,19 +99,116 @@ export default function SaseboPortPage() {
       container: mapContainer.current,
       style: 'mapbox://styles/mapbox/satellite-streets-v12',
       center: [129.7233, 33.1594],
-      zoom: 12,
+      zoom: 14, // Increased zoom to better show the pins
     });
 
-    // Add marker
-    new mapboxgl.Marker({ color: '#3b82f6' })
-      .setLngLat([129.7233, 33.1594])
-      .setPopup(
-        new mapboxgl.Popup().setHTML(
-          '<h3>Sasebo Naval Base</h3><p>Primary port facility</p>'
-        )
-      )
-      .addTo(map.current);
+    // Define all locations with their data - coordinates typed as tuples
+    const locations: Array<{
+      name: string;
+      coordinates: [number, number]; // Explicitly type as tuple
+      type: string;
+      description: string;
+      color: string;
+    }> = [
+      {
+        name: 'Sasebo Naval Base',
+        coordinates: [129.7233, 33.1594],
+        type: 'base',
+        description: 'Primary port facility',
+        color: '#3b82f6',
+      },
+      {
+        name: 'Fleet Landing',
+        coordinates: [129.71432, 33.16628],
+        type: 'landing',
+        description: 'Primary liberty launch drop-off point',
+        color: '#10b981',
+      },
+      {
+        name: 'Flag Landing',
+        coordinates: [129.71702, 33.16571],
+        type: 'landing',
+        description: 'Alternative liberty launch drop-off point',
+        color: '#10b981',
+      },
+      {
+        name: 'Steak Salon',
+        coordinates: [129.72305, 33.16701],
+        type: 'restaurant',
+        description: 'Intimate steakhouse with 4-course meals',
+        color: '#f59e0b',
+      },
+      {
+        name: 'Ra Ra Ramen',
+        coordinates: [129.72356, 33.16735],
+        type: 'restaurant',
+        description: 'Popular ramen spot with great gyoza',
+        color: '#f59e0b',
+      },
+      {
+        name: 'Kunimatsu Coffee',
+        coordinates: [129.72265, 33.17007],
+        type: 'restaurant',
+        description: 'Must-visit coffee shop owned by Hiro',
+        color: '#f59e0b',
+      },
+      {
+        name: "McDonald's",
+        coordinates: [129.72145, 33.17107],
+        type: 'restaurant',
+        description: 'Familiar American fast food',
+        color: '#ef4444',
+      },
+      {
+        name: "Chili's & Galaxies",
+        coordinates: [129.71145, 33.16662],
+        type: 'restaurant',
+        description: 'On-base American dining and bar',
+        color: '#ef4444',
+      },
+    ];
+
+    // Add markers for each location
+    locations.forEach((location) => {
+      // Create popup content with click handler
+      const popupHTML = `
+      <div class="p-2">
+        <h3 class="font-semibold text-gray-900 mb-1">${location.name}</h3>
+        <p class="text-gray-600 text-sm mb-2">${location.description}</p>
+        <button 
+          onclick="window.scrollToSection && window.scrollToSection('${
+            location.type === 'restaurant' ? 'food' : 'operations'
+          }')"
+          class="text-blue-600 hover:text-blue-800 text-sm font-medium"
+        >
+          ${
+            location.type === 'restaurant'
+              ? 'View Food Section →'
+              : 'View Operations →'
+          }
+        </button>
+      </div>
+    `;
+
+      new mapboxgl.Marker({
+        color: location.color,
+        scale: 0.8, // Make pins slightly smaller since there are many
+      })
+        .setLngLat(location.coordinates)
+        .setPopup(new mapboxgl.Popup({ offset: 25 }).setHTML(popupHTML))
+        .addTo(map.current!); // Add non-null assertion here
+    });
   }, []);
+
+  // Add this NEW useEffect to handle map resize when switching tabs
+  useEffect(() => {
+    if (map.current && activeSection === 'overview') {
+      // Small delay to ensure container is visible
+      setTimeout(() => {
+        map.current?.resize();
+      }, 100);
+    }
+  }, [activeSection]);
 
   // Currency exchange rate useEffect - separate from map
   useEffect(() => {
@@ -259,6 +363,92 @@ export default function SaseboPortPage() {
       location: 'Fleet Landing - On Base',
     },
   ];
+  const hangsAndDives = [
+    {
+      id: 1,
+      name: 'Kunimatsu Coffee',
+      type: 'Coffee & Conversation',
+      description:
+        'Must-visit coffee shop owned by sharply dressed Hiro. Perfect for quiet conversation.',
+      highlights: ['Great Coffee', 'Friendly Owner', 'Quiet Atmosphere'],
+      priceRange: '¥300-800',
+      location: 'Near Ginza',
+    },
+    {
+      id: 2,
+      name: 'Steak Salon',
+      type: 'Intimate Steakhouse',
+      description:
+        'Mom-and-pop steakhouse with semi-circle seating. Great for dinner conversation.',
+      highlights: ['4-Course Meals', 'Chef Performance', 'Intimate Setting'],
+      priceRange: '¥3,000-5,000',
+      location: 'Downtown Area',
+    },
+    {
+      id: 3,
+      name: 'G-rock Bar',
+      type: 'Sailor Bar',
+      description:
+        'Popular sailor hangout in Sailor Town. Good for conversation and meeting other mariners.',
+      highlights: ['Sailor Crowd', 'Good Conversation', 'Regular Hangout'],
+      priceRange: '¥500-1,500',
+      location: 'Sailor Town',
+    },
+    {
+      id: 4,
+      name: 'Gramophones',
+      type: 'Music Bar',
+      description:
+        'Relaxed music bar with good atmosphere for conversation over drinks.',
+      highlights: ['Music Theme', 'Relaxed Vibe', 'Good Drinks'],
+      priceRange: '¥600-1,800',
+      location: 'Sailor Town',
+    },
+  ];
+
+  const higherEnergy = [
+    {
+      id: 1,
+      name: 'Snake Alley Karaoke',
+      type: 'Filipino Karaoke',
+      description:
+        'Literal alley with multiple Filipino karaoke bars. High energy and interactive.',
+      highlights: ['Karaoke', 'Filipino Staff', 'Interactive'],
+      priceRange: '¥800-2,000',
+      location: 'Snake Alley',
+    },
+    {
+      id: 2,
+      name: 'Greenies Pool Hall',
+      type: '3-Story Pool Hall',
+      description:
+        '3-story entertainment complex with pool, games, and high-energy atmosphere.',
+      highlights: ['Pool Tables', '3 Stories', 'Games'],
+      priceRange: '¥1,000-2,500',
+      location: 'Sailor Town',
+    },
+    {
+      id: 3,
+      name: 'Lions Tower Bars',
+      type: 'Multi-Floor Entertainment',
+      description:
+        'Building with multiple karaoke and entertainment bars across different floors.',
+      highlights: ['Multiple Floors', 'Karaoke', 'Variety'],
+      priceRange: '¥700-2,000',
+      location: 'Near Ginza',
+    },
+    {
+      id: 4,
+      name: 'Video Game Bar',
+      type: 'Gaming Bar',
+      description:
+        'High-energy bar with arcade games and interactive entertainment.',
+      highlights: ['Arcade Games', 'High Energy', 'Interactive'],
+      priceRange: '¥600-1,800',
+      location: 'Snake Alley',
+    },
+  ];
+
   // Rest of your component continues here...
 
   const sections: Section[] = [
@@ -289,6 +479,23 @@ export default function SaseboPortPage() {
       icon: <AlertTriangle className="w-5 h-5" />,
     },
   ];
+
+  // Add this function to handle popup navigation
+  useEffect(() => {
+    // Make the scroll function available globally for popup buttons
+    window.scrollToSection = (sectionId: string) => {
+      setActiveSection(sectionId);
+      // Small delay to ensure section loads, then scroll to top
+      setTimeout(() => {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }, 100);
+    };
+
+    // Cleanup
+    return () => {
+      delete window.scrollToSection;
+    };
+  }, []);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-800">
@@ -1037,158 +1244,252 @@ export default function SaseboPortPage() {
                 </h2>
               </div>
 
-              <div className="bg-red-500/20 border border-red-400/30 rounded-xl p-6 mb-8">
-                <h3 className="text-xl font-semibold text-red-300 mb-4">
-                  ⚠️ The Last Liberty Launch Warning
+              {/* Key Points - Warning Section First */}
+              <div className="bg-gradient-to-br from-red-500/20 to-orange-500/20 rounded-xl p-6 border border-white/10">
+                <h3 className="text-xl font-semibold text-white mb-4">
+                  Key Points
                 </h3>
-                <p className="text-white/80 mb-4">
-                  <strong>DO NOT</strong> miss the last liberty launch! Finding
-                  last-minute hotels is difficult and expensive.
-                </p>
-                <div className="grid md:grid-cols-2 gap-4">
-                  <div>
-                    <h4 className="font-semibold text-white mb-2">
-                      What Happens If You Miss It:
+
+                <div className="grid md:grid-cols-2 gap-6">
+                  <div className="bg-white/10 rounded-lg p-4">
+                    <h4 className="font-semibold text-white mb-3">
+                      Essential Reminders
                     </h4>
-                    <ul className="space-y-1 text-white/70 text-sm">
-                      <li>• Sleep in Liberty Park (not recommended)</li>
-                      <li>• Sleep in Fleet Landing bathroom</li>
-                      <li>• Expensive last-minute hotels</li>
-                      <li>• Cold nights in winter</li>
+                    <ul className="space-y-2 text-white/80">
+                      <li className="flex items-start">
+                        <div className="w-2 h-2 bg-red-400 rounded-full mt-2 mr-3 flex-shrink-0"></div>
+                        <div>
+                          <strong>Last Liberty Launch:</strong> Never miss it!
+                          Hotels are expensive and limited
+                        </div>
+                      </li>
+                      <li className="flex items-start">
+                        <div className="w-2 h-2 bg-red-400 rounded-full mt-2 mr-3 flex-shrink-0"></div>
+                        <div>
+                          <strong>Get on Right Launch:</strong> Multiple ships =
+                          multiple schedules
+                        </div>
+                      </li>
+                      <li className="flex items-start">
+                        <div className="w-2 h-2 bg-red-400 rounded-full mt-2 mr-3 flex-shrink-0"></div>
+                        <div>
+                          <strong>Chuhai Warning:</strong> 9% ABV but doesn't
+                          taste like it
+                        </div>
+                      </li>
                     </ul>
                   </div>
-                  <div>
-                    <h4 className="font-semibold text-white mb-2">Remember:</h4>
-                    <ul className="space-y-1 text-white/70 text-sm">
-                      <li>• You cannot swim to your ship</li>
-                      <li>• Japan is farther north than you think</li>
-                      <li>• Winter nights are brutally cold</li>
-                      <li>• Get on the RIGHT launch</li>
-                    </ul>
-                  </div>
-                </div>
-              </div>
 
-              <div className="grid lg:grid-cols-2 gap-8">
-                <div className="space-y-6">
-                  <div className="bg-gradient-to-br from-yellow-500/20 to-orange-500/20 rounded-xl p-6 border border-white/10">
-                    <h3 className="text-xl font-semibold text-white mb-4">
-                      🛣️ Sailor Town/Snake Alley
-                    </h3>
-                    <p className="text-white/80 mb-4">
-                      Look for yellow Pele&apos;s sign off Ginza - great wings
-                      and chuhai!
-                    </p>
-
-                    <h4 className="font-semibold text-white mb-2">
-                      Sailor Town Bars:
+                  <div className="bg-white/10 rounded-lg p-4">
+                    <h4 className="font-semibold text-white mb-3">
+                      Local Etiquette & Tips
                     </h4>
-                    <div className="grid grid-cols-2 gap-2 text-sm text-white/70 mb-4">
-                      <div>• G-rock</div>
-                      <div>• Gramophones</div>
-                      <div>• Jumble Saloon</div>
-                      <div>• Shooters</div>
-                      <div>• Playmates</div>
-                      <div>• Greenies (3-story pool hall)</div>
-                    </div>
-
-                    <h4 className="font-semibold text-white mb-2">
-                      Snake Alley (Around the Corner):
-                    </h4>
-                    <p className="text-white/70 text-sm mb-2">
-                      Literal alley with Filipino karaoke bars.
-                    </p>
-                    <div className="grid grid-cols-2 gap-2 text-sm text-white/70">
-                      <div>• Video Game Bar</div>
-                      <div>• Garden Bar</div>
-                      <div>• River Run</div>
-                      <div>• Kings</div>
-                      <div>• AA&apos;s</div>
-                    </div>
-
-                    <div className="mt-4 p-3 bg-yellow-500/20 rounded-lg border border-yellow-400/30">
-                      <p className="text-yellow-300 text-sm">
-                        <strong>Caution:</strong> Girls may try to get you to
-                        buy them drinks. Be aware of this common practice.
-                      </p>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="space-y-6">
-                  <div className="bg-gradient-to-br from-purple-500/20 to-pink-500/20 rounded-xl p-6 border border-white/10">
-                    <h3 className="text-xl font-semibold text-white mb-4">
-                      🍶 Sake Town
-                    </h3>
-                    <p className="text-white/80 mb-4">
-                      Located on the other side of Ginza. More local clientele
-                      compared to Sailor Town&apos;s MSC/Navy crowd.
-                    </p>
-                    <div className="p-3 bg-red-500/20 rounded-lg border border-red-400/30">
-                      <p className="text-red-300 text-sm">
-                        <strong>Note:</strong> Some establishments are
-                        &quot;Japanese only&quot; - please respect these
-                        policies.
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="bg-gradient-to-br from-blue-500/20 to-indigo-500/20 rounded-xl p-6 border border-white/10">
-                    <h3 className="text-xl font-semibold text-white mb-4">
-                      🏢 Lions Tower
-                    </h3>
-                    <p className="text-white/80 mb-4">
-                      Building near Ginza that looks like apartments but
-                      contains small bars.
-                    </p>
-                    <ul className="space-y-2 text-white/70 text-sm">
-                      <li>• Golf-themed bars</li>
-                      <li>• More karaoke bars</li>
-                      <li>• Names change frequently</li>
-                      <li>• Multiple floors of entertainment</li>
+                    <ul className="space-y-2 text-white/80">
+                      <li className="flex items-start">
+                        <div className="w-2 h-2 bg-orange-400 rounded-full mt-2 mr-3 flex-shrink-0"></div>
+                        <div>
+                          <strong>No Tipping:</strong> Not customary in Japan,
+                          can be offensive
+                        </div>
+                      </li>
+                      <li className="flex items-start">
+                        <div className="w-2 h-2 bg-orange-400 rounded-full mt-2 mr-3 flex-shrink-0"></div>
+                        <div>
+                          <strong>Drink Buying:</strong> Be aware girls may ask
+                          you to buy drinks
+                        </div>
+                      </li>
+                      <li className="flex items-start">
+                        <div className="w-2 h-2 bg-orange-400 rounded-full mt-2 mr-3 flex-shrink-0"></div>
+                        <div>
+                          <strong>Japanese Only:</strong> Respect establishments
+                          with this policy
+                        </div>
+                      </li>
                     </ul>
                   </div>
                 </div>
               </div>
 
-              <div className="grid md:grid-cols-2 gap-6 mt-8">
-                <div className="bg-gradient-to-br from-green-500/20 to-teal-500/20 rounded-xl p-6 border border-white/10">
-                  <h3 className="text-xl font-semibold text-white mb-4">
-                    🍹 Chuhai
+              {/* Hangs and Dives Carousel */}
+              <div className="bg-gradient-to-br from-amber-500/20 to-yellow-500/20 rounded-xl p-6 border border-white/10">
+                <div className="flex items-center justify-between mb-6">
+                  <h3 className="text-xl font-semibold text-white">
+                    Hangs and Dives
                   </h3>
-                  <p className="text-white/80 mb-4">
-                    &quot;Shochu&quot; + &quot;Highball&quot; = Popular Japanese
-                    mixed drink
-                  </p>
-                  <ul className="space-y-2 text-white/70 text-sm">
-                    <li>
-                      • <strong>9% ABV</strong> but doesn&apos;t taste like it
-                    </li>
-                    <li>• Available in cans and on tap</li>
-                    <li>
-                      • Multiple flavors: lemon, lime, grapefruit, apple, etc.
-                    </li>
-                    <li>
-                      • <strong>Warning:</strong> Often the &quot;jet fuel on
-                      the Sasebo fire&quot;
-                    </li>
-                  </ul>
+                  <div className="flex space-x-2">
+                    <button
+                      onClick={() => setHangsIndex(Math.max(0, hangsIndex - 4))}
+                      disabled={hangsIndex === 0}
+                      className="p-2 rounded-lg bg-white/10 text-white hover:bg-white/20 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                    >
+                      ←
+                    </button>
+                    <button
+                      onClick={() =>
+                        setHangsIndex(
+                          Math.min(hangsAndDives.length - 4, hangsIndex + 4)
+                        )
+                      }
+                      disabled={hangsIndex >= hangsAndDives.length - 4}
+                      className="p-2 rounded-lg bg-white/10 text-white hover:bg-white/20 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                    >
+                      →
+                    </button>
+                  </div>
                 </div>
 
-                <div className="bg-gradient-to-br from-red-500/20 to-orange-500/20 rounded-xl p-6 border border-white/10">
-                  <h3 className="text-xl font-semibold text-white mb-4">
-                    🐍 Habusake
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                  {hangsAndDives
+                    .slice(hangsIndex, hangsIndex + 4)
+                    .map((spot) => (
+                      <div
+                        key={spot.id}
+                        className="bg-white/10 rounded-lg p-4 hover:bg-white/15 transition-all cursor-pointer group"
+                      >
+                        <h4 className="font-semibold text-white mb-1 group-hover:text-amber-300 transition-colors">
+                          {spot.name}
+                        </h4>
+                        <p className="text-amber-300 text-sm mb-2">
+                          {spot.type}
+                        </p>
+                        <p className="text-white/70 text-sm mb-3 line-clamp-2">
+                          {spot.description}
+                        </p>
+
+                        <div className="space-y-2">
+                          <div className="flex flex-wrap gap-1">
+                            {spot.highlights
+                              .slice(0, 2)
+                              .map((highlight, idx) => (
+                                <span
+                                  key={idx}
+                                  className="text-xs bg-amber-500/30 text-amber-200 px-2 py-1 rounded"
+                                >
+                                  {highlight}
+                                </span>
+                              ))}
+                          </div>
+                          <div className="flex justify-between items-center text-xs">
+                            <span className="text-green-300">
+                              {spot.priceRange}
+                            </span>
+                            <span className="text-white/50">
+                              {spot.location}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                </div>
+
+                <div className="flex justify-center mt-4">
+                  <div className="flex space-x-2">
+                    {Array.from({
+                      length: Math.ceil(hangsAndDives.length / 4),
+                    }).map((_, idx) => (
+                      <div
+                        key={idx}
+                        className={`w-2 h-2 rounded-full transition-all ${
+                          Math.floor(hangsIndex / 4) === idx
+                            ? 'bg-amber-400'
+                            : 'bg-white/30'
+                        }`}
+                      />
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              {/* Higher Energy Carousel */}
+              <div className="bg-gradient-to-br from-purple-500/20 to-pink-500/20 rounded-xl p-6 border border-white/10">
+                <div className="flex items-center justify-between mb-6">
+                  <h3 className="text-xl font-semibold text-white">
+                    Higher Energy
                   </h3>
-                  <p className="text-white/80 mb-4">
-                    Sake with preserved pit viper snake - most unique drink in
-                    the world
-                  </p>
-                  <ul className="space-y-2 text-white/70 text-sm">
-                    <li>• Rice wine with snake in bottle</li>
-                    <li>• Served as shots ladled from mason jars</li>
-                    <li>• Local legend about 24-hour mating snakes</li>
-                    <li>• Available at small liquor stores to buy</li>
-                  </ul>
+                  <div className="flex space-x-2">
+                    <button
+                      onClick={() =>
+                        setHighEnergyIndex(Math.max(0, highEnergyIndex - 4))
+                      }
+                      disabled={highEnergyIndex === 0}
+                      className="p-2 rounded-lg bg-white/10 text-white hover:bg-white/20 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                    >
+                      ←
+                    </button>
+                    <button
+                      onClick={() =>
+                        setHighEnergyIndex(
+                          Math.min(higherEnergy.length - 4, highEnergyIndex + 4)
+                        )
+                      }
+                      disabled={highEnergyIndex >= higherEnergy.length - 4}
+                      className="p-2 rounded-lg bg-white/10 text-white hover:bg-white/20 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                    >
+                      →
+                    </button>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                  {higherEnergy
+                    .slice(highEnergyIndex, highEnergyIndex + 4)
+                    .map((spot) => (
+                      <div
+                        key={spot.id}
+                        className="bg-white/10 rounded-lg p-4 hover:bg-white/15 transition-all cursor-pointer group"
+                      >
+                        <h4 className="font-semibold text-white mb-1 group-hover:text-purple-300 transition-colors">
+                          {spot.name}
+                        </h4>
+                        <p className="text-purple-300 text-sm mb-2">
+                          {spot.type}
+                        </p>
+                        <p className="text-white/70 text-sm mb-3 line-clamp-2">
+                          {spot.description}
+                        </p>
+
+                        <div className="space-y-2">
+                          <div className="flex flex-wrap gap-1">
+                            {spot.highlights
+                              .slice(0, 2)
+                              .map((highlight, idx) => (
+                                <span
+                                  key={idx}
+                                  className="text-xs bg-purple-500/30 text-purple-200 px-2 py-1 rounded"
+                                >
+                                  {highlight}
+                                </span>
+                              ))}
+                          </div>
+                          <div className="flex justify-between items-center text-xs">
+                            <span className="text-green-300">
+                              {spot.priceRange}
+                            </span>
+                            <span className="text-white/50">
+                              {spot.location}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                </div>
+
+                <div className="flex justify-center mt-4">
+                  <div className="flex space-x-2">
+                    {Array.from({
+                      length: Math.ceil(higherEnergy.length / 4),
+                    }).map((_, idx) => (
+                      <div
+                        key={idx}
+                        className={`w-2 h-2 rounded-full transition-all ${
+                          Math.floor(highEnergyIndex / 4) === idx
+                            ? 'bg-purple-400'
+                            : 'bg-white/30'
+                        }`}
+                      />
+                    ))}
+                  </div>
                 </div>
               </div>
             </div>
@@ -1204,16 +1505,22 @@ export default function SaseboPortPage() {
                 </h2>
               </div>
 
-              <div className="grid md:grid-cols-2 gap-8">
-                <div className="space-y-6">
-                  <div className="bg-gradient-to-br from-blue-500/20 to-indigo-500/20 rounded-xl p-6 border border-white/10">
-                    <h3 className="text-xl font-semibold text-white mb-4">
-                      🚤 Liberty Launches
-                    </h3>
-                    <p className="text-white/80 mb-4">
-                      Primary transportation between ship and shore.
+              {/* To Town from Berth */}
+              <div className="bg-gradient-to-br from-blue-500/20 to-indigo-500/20 rounded-xl p-6 border border-white/10">
+                <h3 className="text-xl font-semibold text-white mb-4">
+                  🚤 To Town from Berth
+                </h3>
+
+                <div className="grid md:grid-cols-2 gap-6">
+                  <div className="bg-white/10 rounded-lg p-4">
+                    <h4 className="font-semibold text-white mb-3">
+                      Liberty Launches
+                    </h4>
+                    <p className="text-white/80 mb-3">
+                      Primary transportation between anchored ships and shore
+                      facilities.
                     </p>
-                    <ul className="space-y-2 text-white/70">
+                    <ul className="space-y-2 text-white/70 text-sm">
                       <li>
                         • <strong>Operating Hours:</strong> 0600-0100 (varies by
                         ship)
@@ -1225,96 +1532,387 @@ export default function SaseboPortPage() {
                         • <strong>Drop-off Points:</strong> Fleet Landing or
                         Flag Landing
                       </li>
+                      <li>
+                        • <strong>Frequency:</strong> Every 30-60 minutes
+                      </li>
                       <li>• Well-maintained and punctual service</li>
                     </ul>
-
-                    <div className="mt-4 p-3 bg-red-500/20 rounded-lg border border-red-400/30">
-                      <p className="text-red-300 text-sm">
-                        <strong>Critical:</strong> Take a photo of your
-                        ship&apos;s launch schedule! Multiple ships = multiple
-                        launches.
-                      </p>
-                    </div>
                   </div>
 
-                  <div className="bg-gradient-to-br from-green-500/20 to-teal-500/20 rounded-xl p-6 border border-white/10">
-                    <h3 className="text-xl font-semibold text-white mb-4">
-                      🚌 Local Transportation
-                    </h3>
-                    <ul className="space-y-2 text-white/70">
+                  <div className="bg-white/10 rounded-lg p-4">
+                    <h4 className="font-semibold text-white mb-3">
+                      Pier-Side Access
+                    </h4>
+                    <p className="text-white/80 mb-3">
+                      When moored pier-side, direct walking access to base
+                      facilities.
+                    </p>
+                    <ul className="space-y-2 text-white/70 text-sm">
                       <li>
-                        • <strong>Walking:</strong> Most attractions within
-                        walking distance
+                        • <strong>Walking Distance:</strong> 5-10 minutes to
+                        base gate
                       </li>
                       <li>
-                        • <strong>Local Buses:</strong> Connect to nearby areas
+                        • <strong>Base Facilities:</strong> NEX, commissary,
+                        food court
                       </li>
                       <li>
-                        • <strong>Taxis:</strong> Available but more expensive
+                        • <strong>Town Access:</strong> 10-15 minute walk to
+                        Ginza
                       </li>
                       <li>
-                        • <strong>Base Shuttle:</strong> Limited routes on base
+                        • <strong>Security:</strong> Valid military ID required
                       </li>
                     </ul>
                   </div>
                 </div>
 
-                <div className="space-y-6">
-                  <div className="bg-gradient-to-br from-purple-500/20 to-pink-500/20 rounded-xl p-6 border border-white/10">
-                    <h3 className="text-xl font-semibold text-white mb-4">
-                      🗺️ Getting Around Town
-                    </h3>
-                    <p className="text-white/80 mb-4">
-                      Sasebo&apos;s compact layout makes it very walkable for
-                      sailors.
+                <div className="mt-6 p-4 bg-red-500/20 rounded-lg border border-red-400/30">
+                  <h4 className="font-semibold text-red-300 mb-2">
+                    ⚠️ Critical Reminder
+                  </h4>
+                  <p className="text-white/80 text-sm">
+                    <strong>
+                      Take a photo of your ship's launch schedule!
+                    </strong>{' '}
+                    Multiple ships = multiple launches. Missing the last launch
+                    means expensive hotels or sleeping in Liberty Park.
+                  </p>
+                </div>
+              </div>
+
+              {/* Around Town */}
+              <div className="bg-gradient-to-br from-green-500/20 to-teal-500/20 rounded-xl p-6 border border-white/10">
+                <h3 className="text-xl font-semibold text-white mb-4">
+                  🚗 Around Town
+                </h3>
+
+                <div className="grid md:grid-cols-2 gap-6">
+                  <div className="bg-white/10 rounded-lg p-4">
+                    <h4 className="font-semibold text-white mb-3">Walking</h4>
+                    <p className="text-white/80 mb-3">
+                      Sasebo's compact layout makes most attractions easily
+                      walkable.
                     </p>
+                    <ul className="space-y-2 text-white/70 text-sm">
+                      <li>
+                        • <strong>Ginza Street:</strong> Main dining/shopping
+                        area
+                      </li>
+                      <li>
+                        • <strong>Sailor Town:</strong> 5-minute walk from base
+                      </li>
+                      <li>
+                        • <strong>Snake Alley:</strong> Adjacent to Sailor Town
+                      </li>
+                      <li>
+                        • <strong>Sake Town:</strong> 10-minute walk from Ginza
+                      </li>
+                      <li>• Most attractions within 15-minute walk</li>
+                    </ul>
+                  </div>
+
+                  <div className="bg-white/10 rounded-lg p-4">
+                    <h4 className="font-semibold text-white mb-3">
+                      Taxis & Ride Services
+                    </h4>
+                    <p className="text-white/80 mb-3">
+                      Limited ride-sharing, but taxis are readily available.
+                    </p>
+                    <ul className="space-y-2 text-white/70 text-sm">
+                      <li>
+                        • <strong>Uber:</strong> Very limited availability in
+                        Sasebo
+                      </li>
+                      <li>
+                        • <strong>Local Taxis:</strong> Available at base and
+                        town
+                      </li>
+                      <li>
+                        • <strong>Cost:</strong> ¥500-1,500 for local trips
+                      </li>
+                      <li>
+                        • <strong>Language:</strong> Basic English, use
+                        translation app
+                      </li>
+                      <li>
+                        • <strong>Payment:</strong> Cash preferred, some accept
+                        cards
+                      </li>
+                    </ul>
+                  </div>
+                </div>
+
+                <div className="bg-white/10 rounded-lg p-4 mt-4">
+                  <h4 className="font-semibold text-white mb-3">
+                    🚌 Public Transportation
+                  </h4>
+                  <div className="grid md:grid-cols-2 gap-4">
+                    <div>
+                      <h5 className="font-medium text-white mb-2">
+                        Local Buses
+                      </h5>
+                      <ul className="space-y-1 text-white/70 text-xs">
+                        <li>• Connect to nearby neighborhoods</li>
+                        <li>• ¥200-400 per trip</li>
+                        <li>• Limited English signage</li>
+                      </ul>
+                    </div>
+                    <div>
+                      <h5 className="font-medium text-white mb-2">
+                        Base Shuttle
+                      </h5>
+                      <ul className="space-y-1 text-white/70 text-xs">
+                        <li>• Limited routes within base</li>
+                        <li>• Free for military personnel</li>
+                        <li>• Connects major base facilities</li>
+                      </ul>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Regional Travel */}
+              <div className="bg-gradient-to-br from-purple-500/20 to-pink-500/20 rounded-xl p-6 border border-white/10">
+                <h3 className="text-xl font-semibold text-white mb-4">
+                  🚆 Regional Travel
+                </h3>
+
+                <p className="text-white/80 mb-6">
+                  Sasebo's location provides excellent access to major Japanese
+                  destinations for longer port visits.
+                </p>
+
+                <div className="grid md:grid-cols-2 gap-6">
+                  <div className="space-y-4">
+                    <div className="bg-white/10 rounded-lg p-4">
+                      <div className="flex items-center mb-3">
+                        <span className="text-2xl mr-3">🏮</span>
+                        <div>
+                          <h4 className="font-semibold text-white">Nagasaki</h4>
+                          <p className="text-purple-300 text-sm">
+                            1.5 hours by train
+                          </p>
+                        </div>
+                      </div>
+                      <p className="text-white/70 text-sm mb-2">
+                        Historic city with Peace Park, Atomic Bomb Museum, and
+                        unique culture.
+                      </p>
+                      <ul className="space-y-1 text-white/60 text-xs">
+                        <li>• JR Sasebo Line direct connection</li>
+                        <li>• ¥1,140 one-way ticket</li>
+                        <li>• Perfect for day trips</li>
+                      </ul>
+                    </div>
+
+                    <div className="bg-white/10 rounded-lg p-4">
+                      <div className="flex items-center mb-3">
+                        <span className="text-2xl mr-3">🏙️</span>
+                        <div>
+                          <h4 className="font-semibold text-white">Fukuoka</h4>
+                          <p className="text-purple-300 text-sm">
+                            2 hours by train
+                          </p>
+                        </div>
+                      </div>
+                      <p className="text-white/70 text-sm mb-2">
+                        Major city with shopping, dining, and nightlife. Gateway
+                        to wider Japan.
+                      </p>
+                      <ul className="space-y-1 text-white/60 text-xs">
+                        <li>• JR Midori line to Hakata Station</li>
+                        <li>• ¥2,470 one-way ticket</li>
+                        <li>• International airport connections</li>
+                      </ul>
+                    </div>
+                  </div>
+
+                  <div className="space-y-4">
+                    <div className="bg-white/10 rounded-lg p-4">
+                      <div className="flex items-center mb-3">
+                        <span className="text-2xl mr-3">⛩️</span>
+                        <div>
+                          <h4 className="font-semibold text-white">
+                            Local Attractions
+                          </h4>
+                          <p className="text-purple-300 text-sm">
+                            30min - 1 hour
+                          </p>
+                        </div>
+                      </div>
+                      <ul className="space-y-1 text-white/70 text-sm">
+                        <li>
+                          • <strong>Huis Ten Bosch:</strong> Dutch theme park (1
+                          hour)
+                        </li>
+                        <li>
+                          • <strong>Kujukushima Islands:</strong> Scenic boat
+                          tours
+                        </li>
+                        <li>
+                          • <strong>Mount Yumihari:</strong> Hiking and views
+                        </li>
+                        <li>
+                          • <strong>Sasebo Burgers:</strong> Local specialty
+                          food
+                        </li>
+                      </ul>
+                    </div>
+
+                    <div className="bg-white/10 rounded-lg p-4">
+                      <h4 className="font-semibold text-white mb-3">
+                        Transportation Tips
+                      </h4>
+                      <ul className="space-y-1 text-white/70 text-sm">
+                        <li>
+                          • <strong>JR Pass:</strong> Worth it for 3+ day trips
+                        </li>
+                        <li>
+                          • <strong>IC Cards:</strong> Convenient for local
+                          transport
+                        </li>
+                        <li>
+                          • <strong>Google Maps:</strong> Works well for train
+                          routes
+                        </li>
+                        <li>
+                          • <strong>Hyperdia App:</strong> Train timetables in
+                          English
+                        </li>
+                      </ul>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Local Airports */}
+              <div className="bg-gradient-to-br from-orange-500/20 to-red-500/20 rounded-xl p-6 border border-white/10">
+                <h3 className="text-xl font-semibold text-white mb-4">
+                  ✈️ Local Airports
+                </h3>
+
+                <div className="grid md:grid-cols-2 gap-6">
+                  <div className="bg-white/10 rounded-lg p-4">
+                    <div className="flex items-center mb-4">
+                      <span className="text-3xl mr-4">🛬</span>
+                      <div>
+                        <h4 className="font-semibold text-white">
+                          Fukuoka Airport (FUK)
+                        </h4>
+                        <p className="text-orange-300 text-sm">
+                          Primary International Gateway
+                        </p>
+                      </div>
+                    </div>
 
                     <div className="space-y-3">
-                      <div className="flex items-center">
-                        <div className="w-3 h-3 bg-blue-400 rounded-full mr-3"></div>
-                        <span className="text-white/80">
-                          <strong>Ginza:</strong> Main shopping/dining street
-                        </span>
+                      <div>
+                        <h5 className="font-medium text-white mb-2">
+                          Distance & Travel Time
+                        </h5>
+                        <ul className="space-y-1 text-white/70 text-sm">
+                          <li>
+                            • <strong>Distance:</strong> 85 km (53 miles) from
+                            Sasebo
+                          </li>
+                          <li>
+                            • <strong>By Train:</strong> 2-2.5 hours via JR
+                            lines
+                          </li>
+                          <li>
+                            • <strong>By Bus:</strong> 2 hours direct highway
+                            bus
+                          </li>
+                          <li>
+                            • <strong>By Taxi:</strong> 1.5 hours
+                            (¥15,000-20,000)
+                          </li>
+                        </ul>
                       </div>
-                      <div className="flex items-center">
-                        <div className="w-3 h-3 bg-green-400 rounded-full mr-3"></div>
-                        <span className="text-white/80">
-                          <strong>Sailor Town:</strong> 5-min walk from base
-                        </span>
-                      </div>
-                      <div className="flex items-center">
-                        <div className="w-3 h-3 bg-purple-400 rounded-full mr-3"></div>
-                        <span className="text-white/80">
-                          <strong>Snake Alley:</strong> Adjacent to Sailor Town
-                        </span>
-                      </div>
-                      <div className="flex items-center">
-                        <div className="w-3 h-3 bg-orange-400 rounded-full mr-3"></div>
-                        <span className="text-white/80">
-                          <strong>Sake Town:</strong> Other side of Ginza
-                        </span>
+
+                      <div>
+                        <h5 className="font-medium text-white mb-2">
+                          Flight Connections
+                        </h5>
+                        <ul className="space-y-1 text-white/70 text-sm">
+                          <li>
+                            • <strong>International:</strong> Seoul, Shanghai,
+                            Manila, etc.
+                          </li>
+                          <li>
+                            • <strong>Domestic:</strong> Tokyo, Osaka, Okinawa
+                          </li>
+                          <li>
+                            • <strong>Airlines:</strong> ANA, JAL, Korean Air,
+                            Cebu Pacific
+                          </li>
+                        </ul>
                       </div>
                     </div>
                   </div>
 
-                  <div className="bg-gradient-to-br from-yellow-500/20 to-orange-500/20 rounded-xl p-6 border border-white/10">
-                    <h3 className="text-xl font-semibold text-white mb-4">
-                      🚆 Regional Travel
-                    </h3>
-                    <p className="text-white/80 mb-4">
-                      Explore beyond Sasebo during longer port visits.
-                    </p>
-                    <ul className="space-y-2 text-white/70">
-                      <li>
-                        • <strong>Nagasaki:</strong> 1.5 hours by train
-                      </li>
-                      <li>
-                        • <strong>Fukuoka:</strong> 2 hours by train
-                      </li>
-                      <li>
-                        • <strong>Local JR Station:</strong> Near downtown area
-                      </li>
-                      <li>• Consider day trips for 3+ day visits</li>
+                  <div className="space-y-4">
+                    <div className="bg-white/10 rounded-lg p-4">
+                      <h4 className="font-semibold text-white mb-3">
+                        Crew Change Logistics
+                      </h4>
+                      <ul className="space-y-2 text-white/70 text-sm">
+                        <li>
+                          • <strong>Advance Booking:</strong> Reserve transport
+                          24-48 hours ahead
+                        </li>
+                        <li>
+                          • <strong>Highway Bus:</strong> Most economical option
+                          (¥2,000-3,000)
+                        </li>
+                        <li>
+                          • <strong>Shared Taxi:</strong> Coordinate with other
+                          crew members
+                        </li>
+                        <li>
+                          • <strong>Luggage:</strong> All transport options
+                          accommodate seabags
+                        </li>
+                      </ul>
+                    </div>
+
+                    <div className="bg-white/10 rounded-lg p-4">
+                      <h4 className="font-semibold text-white mb-3">
+                        Alternative Airports
+                      </h4>
+                      <ul className="space-y-2 text-white/70 text-sm">
+                        <li>
+                          • <strong>Nagasaki Airport:</strong> 1.5 hours,
+                          limited international
+                        </li>
+                        <li>
+                          • <strong>Kumamoto Airport:</strong> 2.5 hours, some
+                          international
+                        </li>
+                        <li>
+                          • <strong>Saga Airport:</strong> 1.5 hours, budget
+                          domestic flights
+                        </li>
+                      </ul>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="mt-6 p-4 bg-blue-500/20 rounded-lg border border-blue-400/30">
+                  <h4 className="font-semibold text-blue-300 mb-2">
+                    💡 Pro Tips for Crew Changes
+                  </h4>
+                  <div className="grid md:grid-cols-2 gap-4">
+                    <ul className="space-y-1 text-white/80 text-sm">
+                      <li>• Book transportation when flight is confirmed</li>
+                      <li>• Allow 3+ hours for domestic connections</li>
+                      <li>• Keep ship contact info for schedule changes</li>
+                    </ul>
+                    <ul className="space-y-1 text-white/80 text-sm">
+                      <li>• Download Google Translate offline</li>
+                      <li>• Carry cash for local transport</li>
+                      <li>• Confirm pickup times day before travel</li>
                     </ul>
                   </div>
                 </div>
@@ -1330,152 +1928,309 @@ export default function SaseboPortPage() {
                 <h2 className="text-3xl font-bold text-white">Safety & Tips</h2>
               </div>
 
-              <div className="grid md:grid-cols-2 gap-8">
-                <div className="space-y-6">
-                  <div className="bg-gradient-to-br from-red-500/20 to-orange-500/20 rounded-xl p-6 border border-white/10">
-                    <h3 className="text-xl font-semibold text-white mb-4">
-                      ⚠️ Critical Safety Reminders
-                    </h3>
+              {/* How People Get in Trouble */}
+              <div className="bg-gradient-to-br from-red-500/20 to-orange-500/20 rounded-xl p-6 border border-white/10">
+                <h3 className="text-xl font-semibold text-white mb-4">
+                  ⚠️ How People Get in Trouble
+                </h3>
 
-                    <div className="space-y-4">
-                      <div className="p-3 bg-red-600/30 rounded-lg border border-red-400/50">
-                        <h4 className="font-semibold text-red-200 mb-2">
-                          🚤 Liberty Launch Safety
-                        </h4>
-                        <ul className="space-y-1 text-white/80 text-sm">
-                          <li>• Never miss the last launch</li>
-                          <li>• Verify your ship&apos;s schedule</li>
-                          <li>• Get on the correct launch</li>
-                          <li>• Have backup communication plan</li>
-                        </ul>
-                      </div>
+                <p className="text-white/80 mb-6">
+                  Learn from others' mistakes. These are the most common liberty
+                  incidents that can ruin your port visit or career.
+                </p>
 
-                      <div className="p-3 bg-yellow-600/30 rounded-lg border border-yellow-400/50">
-                        <h4 className="font-semibold text-yellow-200 mb-2">
-                          🍺 Drinking Responsibly
-                        </h4>
-                        <ul className="space-y-1 text-white/80 text-sm">
-                          <li>• Chuhai is stronger than it tastes (9% ABV)</li>
-                          <li>• Pace yourself throughout the day</li>
-                          <li>• Stay hydrated with water</li>
-                          <li>• Never drink and swim</li>
-                        </ul>
-                      </div>
+                <div className="grid md:grid-cols-2 gap-6">
+                  <div className="space-y-4">
+                    <div className="bg-white/10 rounded-lg p-4">
+                      <h4 className="font-semibold text-red-300 mb-3">
+                        🚤 Missing Liberty Launch
+                      </h4>
+                      <p className="text-white/80 text-sm mb-2">
+                        The #1 liberty incident. Missing the last launch leads
+                        to expensive hotels or sleeping rough.
+                      </p>
+                      <ul className="space-y-1 text-white/70 text-xs">
+                        <li>• Getting on wrong ship's launch</li>
+                        <li>• Losing track of time at bars</li>
+                        <li>• Not knowing launch schedule changes</li>
+                        <li>• Weather delays without backup plan</li>
+                      </ul>
+                    </div>
 
-                      <div className="p-3 bg-blue-600/30 rounded-lg border border-blue-400/50">
-                        <h4 className="font-semibold text-blue-200 mb-2">
-                          ❄️ Weather Awareness
-                        </h4>
-                        <ul className="space-y-1 text-white/80 text-sm">
-                          <li>• Japan is farther north than expected</li>
-                          <li>• Winter nights can be brutally cold</li>
-                          <li>• Dress appropriately for season</li>
-                          <li>• Pack layers for temperature changes</li>
-                        </ul>
-                      </div>
+                    <div className="bg-white/10 rounded-lg p-4">
+                      <h4 className="font-semibold text-red-300 mb-3">
+                        🍺 Alcohol-Related Incidents
+                      </h4>
+                      <p className="text-white/80 text-sm mb-2">
+                        Chuhai and other local drinks are stronger than they
+                        taste. Overindulging leads to problems.
+                      </p>
+                      <ul className="space-y-1 text-white/70 text-xs">
+                        <li>• Underestimating 9% ABV chuhai</li>
+                        <li>• Drinking competitions with locals</li>
+                        <li>• Public intoxication and disturbances</li>
+                        <li>• Getting rolled or overcharged</li>
+                      </ul>
+                    </div>
+                  </div>
+
+                  <div className="space-y-4">
+                    <div className="bg-white/10 rounded-lg p-4">
+                      <h4 className="font-semibold text-red-300 mb-3">
+                        💸 Financial Incidents
+                      </h4>
+                      <p className="text-white/80 text-sm mb-2">
+                        Money problems can escalate quickly in foreign ports,
+                        especially with language barriers.
+                      </p>
+                      <ul className="space-y-1 text-white/70 text-xs">
+                        <li>• Buying drinks for bar girls repeatedly</li>
+                        <li>• Not understanding pricing at clubs</li>
+                        <li>• Credit card fraud or overcharges</li>
+                        <li>• Falling for tourist scams</li>
+                      </ul>
+                    </div>
+
+                    <div className="bg-white/10 rounded-lg p-4">
+                      <h4 className="font-semibold text-red-300 mb-3">
+                        🚫 Cultural Missteps
+                      </h4>
+                      <p className="text-white/80 text-sm mb-2">
+                        Disrespecting local customs can escalate from
+                        embarrassing to serious quickly.
+                      </p>
+                      <ul className="space-y-1 text-white/70 text-xs">
+                        <li>• Ignoring "Japanese only" policies</li>
+                        <li>• Being loud or disruptive in public</li>
+                        <li>• Inappropriate behavior in sacred spaces</li>
+                        <li>• Disrespecting local customs or people</li>
+                      </ul>
                     </div>
                   </div>
                 </div>
+              </div>
 
-                <div className="space-y-6">
-                  <div className="bg-gradient-to-br from-green-500/20 to-teal-500/20 rounded-xl p-6 border border-white/10">
-                    <h3 className="text-xl font-semibold text-white mb-4">
-                      🤝 Cultural Respect
-                    </h3>
-                    <p className="text-white/80 mb-4">
-                      Japan has a strong culture of respect and politeness.
-                    </p>
+              {/* Critical Reminders */}
+              <div className="bg-gradient-to-br from-yellow-500/20 to-orange-500/20 rounded-xl p-6 border border-white/10">
+                <h3 className="text-xl font-semibold text-white mb-4">
+                  🛡️ Critical Reminders
+                </h3>
 
-                    <div className="space-y-3">
-                      <div>
-                        <h4 className="font-semibold text-white mb-2">
-                          Do&apos;s:
-                        </h4>
-                        <ul className="space-y-1 text-white/70 text-sm">
-                          <li>• Bow as a greeting</li>
-                          <li>• Remove shoes when required</li>
-                          <li>• Be quiet on public transport</li>
-                          <li>
-                            • Respect &quot;Japanese only&quot; establishments
-                          </li>
-                        </ul>
-                      </div>
+                <p className="text-white/80 mb-6">
+                  Follow these guidelines to stay safe and avoid incidents that
+                  could impact your career or liberty.
+                </p>
 
-                      <div>
-                        <h4 className="font-semibold text-white mb-2">
-                          Don&apos;ts:
-                        </h4>
-                        <ul className="space-y-1 text-white/70 text-sm">
-                          <li>• Don&apos;t tip (it&apos;s not customary)</li>
-                          <li>• Don&apos;t eat while walking</li>
-                          <li>• Don&apos;t be loud in public</li>
-                          <li>• Don&apos;t point with chopsticks</li>
-                        </ul>
-                      </div>
-                    </div>
+                <div className="grid md:grid-cols-3 gap-6">
+                  <div className="bg-white/10 rounded-lg p-4">
+                    <h4 className="font-semibold text-yellow-300 mb-3">
+                      🕒 Time Management
+                    </h4>
+                    <ul className="space-y-2 text-white/80 text-sm">
+                      <li>• Set multiple alarms for launch times</li>
+                      <li>• Take photo of ship's launch schedule</li>
+                      <li>• Account for travel time back to landing</li>
+                      <li>• Have backup plan if you miss launch</li>
+                      <li>• Know which launch is yours</li>
+                    </ul>
                   </div>
 
-                  <div className="bg-gradient-to-br from-purple-500/20 to-pink-500/20 rounded-xl p-6 border border-white/10">
-                    <h3 className="text-xl font-semibold text-white mb-4">
-                      💡 Pro Tips
-                    </h3>
+                  <div className="bg-white/10 rounded-lg p-4">
+                    <h4 className="font-semibold text-yellow-300 mb-3">
+                      💰 Money Safety
+                    </h4>
+                    <ul className="space-y-2 text-white/80 text-sm">
+                      <li>• Carry cash, cards have limited acceptance</li>
+                      <li>• Set spending limits before going out</li>
+                      <li>• Don't flash large amounts of cash</li>
+                      <li>• Understand pricing before ordering</li>
+                      <li>• Never leave drinks unattended</li>
+                    </ul>
+                  </div>
 
-                    <ul className="space-y-3 text-white/80">
-                      <li className="flex items-start">
-                        <div className="w-2 h-2 bg-purple-400 rounded-full mt-2 mr-3 flex-shrink-0"></div>
-                        Download Google Translate with camera feature for menus
-                      </li>
-                      <li className="flex items-start">
-                        <div className="w-2 h-2 bg-purple-400 rounded-full mt-2 mr-3 flex-shrink-0"></div>
-                        Carry cash - many places don&apos;t accept cards
-                      </li>
-                      <li className="flex items-start">
-                        <div className="w-2 h-2 bg-purple-400 rounded-full mt-2 mr-3 flex-shrink-0"></div>
-                        Learn basic Japanese phrases (arigatou, sumimasen)
-                      </li>
-                      <li className="flex items-start">
-                        <div className="w-2 h-2 bg-purple-400 rounded-full mt-2 mr-3 flex-shrink-0"></div>
-                        Exchange money at base before going to town
-                      </li>
-                      <li className="flex items-start">
-                        <div className="w-2 h-2 bg-purple-400 rounded-full mt-2 mr-3 flex-shrink-0"></div>
-                        Keep your military ID accessible
-                      </li>
+                  <div className="bg-white/10 rounded-lg p-4">
+                    <h4 className="font-semibold text-yellow-300 mb-3">
+                      🤝 Cultural Respect
+                    </h4>
+                    <ul className="space-y-2 text-white/80 text-sm">
+                      <li>• Bow as greeting, don't tip</li>
+                      <li>• Respect "Japanese only" establishments</li>
+                      <li>• Keep voices down in public</li>
+                      <li>• Remove shoes when required</li>
+                      <li>• Learn basic phrases: arigatou, sumimasen</li>
+                    </ul>
+                  </div>
+                </div>
+
+                <div className="mt-6 grid md:grid-cols-2 gap-6">
+                  <div className="bg-blue-500/20 rounded-lg border border-blue-400/30 p-4">
+                    <h4 className="font-semibold text-blue-300 mb-3">
+                      📱 Communication & Documentation
+                    </h4>
+                    <ul className="space-y-2 text-white/80 text-sm">
+                      <li>• Keep military ID accessible at all times</li>
+                      <li>• Download Google Translate offline</li>
+                      <li>• Share location with shipmates</li>
+                      <li>• Keep ship contact info handy</li>
+                      <li>• Take photos of important addresses</li>
+                    </ul>
+                  </div>
+
+                  <div className="bg-purple-500/20 rounded-lg border border-purple-400/30 p-4">
+                    <h4 className="font-semibold text-purple-300 mb-3">
+                      🌡️ Weather & Health
+                    </h4>
+                    <ul className="space-y-2 text-white/80 text-sm">
+                      <li>• Japan is farther north than expected</li>
+                      <li>• Winter nights are brutally cold</li>
+                      <li>• Pack layers for temperature changes</li>
+                      <li>• Stay hydrated, especially when drinking</li>
+                      <li>• Know location of nearest medical facilities</li>
                     </ul>
                   </div>
                 </div>
               </div>
 
-              <div className="bg-gradient-to-br from-blue-600/20 to-indigo-600/20 rounded-xl p-6 border border-white/10">
+              {/* Key Contacts */}
+              <div className="bg-gradient-to-br from-blue-500/20 to-indigo-500/20 rounded-xl p-6 border border-white/10">
                 <h3 className="text-xl font-semibold text-white mb-4">
-                  📞 Emergency Information
+                  📞 Key Contacts
                 </h3>
-                <div className="grid md:grid-cols-3 gap-4">
-                  <div>
-                    <h4 className="font-semibold text-blue-300 mb-2">
-                      Base Security
-                    </h4>
-                    <p className="text-white/70 text-sm">
-                      Contact base security for any incidents or emergencies on
-                      base
-                    </p>
+
+                <p className="text-white/80 mb-6">
+                  Keep these contact numbers accessible. Save them in your phone
+                  before going on liberty.
+                </p>
+
+                <div className="grid md:grid-cols-2 gap-6">
+                  <div className="space-y-4">
+                    <div className="bg-white/10 rounded-lg p-4">
+                      <h4 className="font-semibold text-blue-300 mb-3">
+                        🚨 Emergency Numbers
+                      </h4>
+                      <div className="space-y-2">
+                        <div className="flex justify-between items-center p-2 bg-red-500/20 rounded border border-red-400/30">
+                          <span className="text-white font-medium">Police</span>
+                          <span className="text-red-300 font-bold text-lg">
+                            110
+                          </span>
+                        </div>
+                        <div className="flex justify-between items-center p-2 bg-red-500/20 rounded border border-red-400/30">
+                          <span className="text-white font-medium">
+                            Fire/Ambulance
+                          </span>
+                          <span className="text-red-300 font-bold text-lg">
+                            119
+                          </span>
+                        </div>
+                        <div className="flex justify-between items-center p-2 bg-blue-500/20 rounded border border-blue-400/30">
+                          <span className="text-white font-medium">
+                            Base Security
+                          </span>
+                          <span className="text-blue-300 font-medium">
+                            Contact via base operator
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="bg-white/10 rounded-lg p-4">
+                      <h4 className="font-semibold text-blue-300 mb-3">
+                        🇺🇸 U.S. Embassy & Consulate
+                      </h4>
+                      <div className="space-y-2 text-white/80 text-sm">
+                        <div>
+                          <strong>U.S. Consulate Fukuoka</strong>
+                          <p className="text-white/70">
+                            5-26 Ohori 2-chome, Chuo-ku, Fukuoka 810-0052
+                          </p>
+                          <p className="text-blue-300">+81-92-751-9331</p>
+                        </div>
+                        <div className="mt-3">
+                          <strong>U.S. Embassy Tokyo (24/7 Emergency)</strong>
+                          <p className="text-blue-300">+81-3-3224-5000</p>
+                        </div>
+                      </div>
+                    </div>
                   </div>
-                  <div>
-                    <h4 className="font-semibold text-blue-300 mb-2">
-                      Local Emergency
-                    </h4>
-                    <p className="text-white/70 text-sm">
-                      110 (Police) / 119 (Fire/Ambulance) - Japanese emergency
-                      numbers
-                    </p>
+
+                  <div className="space-y-4">
+                    <div className="bg-white/10 rounded-lg p-4">
+                      <h4 className="font-semibold text-blue-300 mb-3">
+                        🏥 Medical Facilities
+                      </h4>
+                      <div className="space-y-3 text-white/80 text-sm">
+                        <div>
+                          <strong>U.S. Naval Hospital Sasebo</strong>
+                          <p className="text-white/70">
+                            On base - Primary medical care
+                          </p>
+                          <p className="text-green-300">
+                            Emergency: Dial base operator
+                          </p>
+                        </div>
+                        <div>
+                          <strong>Sasebo City General Hospital</strong>
+                          <p className="text-white/70">
+                            Off-base emergency facility
+                          </p>
+                          <p className="text-white/60">
+                            9-3 Hirase-cho, Sasebo
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="bg-white/10 rounded-lg p-4">
+                      <h4 className="font-semibold text-blue-300 mb-3">
+                        🚢 Ship & Base Contacts
+                      </h4>
+                      <div className="space-y-2 text-white/80 text-sm">
+                        <div className="p-2 bg-yellow-500/20 rounded border border-yellow-400/30">
+                          <strong className="text-yellow-300">
+                            Your Ship:
+                          </strong>
+                          <p className="text-white/70">
+                            Always keep your ship's emergency contact number
+                          </p>
+                        </div>
+                        <div>
+                          <strong>Base Information:</strong>
+                          <p className="text-white/70">
+                            +81-956-50-3000 (main base number)
+                          </p>
+                        </div>
+                        <div>
+                          <strong>Shore Patrol:</strong>
+                          <p className="text-white/70">
+                            Contact through base security
+                          </p>
+                        </div>
+                      </div>
+                    </div>
                   </div>
-                  <div>
-                    <h4 className="font-semibold text-blue-300 mb-2">
-                      Ship Contact
-                    </h4>
-                    <p className="text-white/70 text-sm">
-                      Always have your ship&apos;s emergency contact information
-                    </p>
+                </div>
+
+                <div className="mt-6 p-4 bg-green-500/20 rounded-lg border border-green-400/30">
+                  <h4 className="font-semibold text-green-300 mb-3">
+                    💡 Contact Tips
+                  </h4>
+                  <div className="grid md:grid-cols-3 gap-4 text-white/80 text-sm">
+                    <ul className="space-y-1">
+                      <li>• Save all numbers in your phone</li>
+                      <li>• Screenshot important contacts</li>
+                      <li>• Share emergency contacts with shipmates</li>
+                    </ul>
+                    <ul className="space-y-1">
+                      <li>• Keep written backup in wallet</li>
+                      <li>• Know your ship's name in Japanese</li>
+                      <li>• Learn basic emergency phrases</li>
+                    </ul>
+                    <ul className="space-y-1">
+                      <li>• Always carry military ID</li>
+                      <li>• Know base address in Japanese</li>
+                      <li>• Download offline translation app</li>
+                    </ul>
                   </div>
                 </div>
               </div>
