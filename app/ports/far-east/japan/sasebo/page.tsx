@@ -60,7 +60,7 @@ export default function SaseboPortPage() {
 
         // Fetch time for Japan
         const timeResponse = await fetch(
-          'http://worldtimeapi.org/api/timezone/Asia/Tokyo'
+          'https://worldtimeapi.org/api/timezone/Asia/Tokyo'
         );
         const timeData = await timeResponse.json();
         const localTime = new Date(timeData.datetime).toLocaleTimeString(
