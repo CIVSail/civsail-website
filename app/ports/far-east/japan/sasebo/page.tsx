@@ -35,6 +35,15 @@ interface Section {
   title: string;
   icon: React.ReactNode;
 }
+interface SpotData {
+  id: number;
+  name: string;
+  type: string;
+  description: string;
+  highlights: string[];
+  priceRange: string;
+  location: string;
+}
 
 export default function SaseboPortPage() {
   const [activeSection, setActiveSection] = useState('overview');
@@ -268,7 +277,7 @@ export default function SaseboPortPage() {
       value: `${weatherData.temp}°F • JST ${weatherData.time}`,
     },
   ];
-  const localSpots = [
+  const localSpots: SpotData[] = [
     {
       id: 1,
       name: 'DDD Ramen',
@@ -321,7 +330,7 @@ export default function SaseboPortPage() {
     },
   ];
 
-  const tasteOfHome = [
+  const tasteOfHome: SpotData[] = [
     {
       id: 1,
       name: 'Galaxies Bar',
@@ -363,7 +372,7 @@ export default function SaseboPortPage() {
       location: 'Fleet Landing - On Base',
     },
   ];
-  const hangsAndDives = [
+  const hangsAndDives: SpotData[] = [
     {
       id: 1,
       name: 'Kunimatsu Coffee',
@@ -406,7 +415,7 @@ export default function SaseboPortPage() {
     },
   ];
 
-  const higherEnergy = [
+  const higherEnergy: SpotData[] = [
     {
       id: 1,
       name: 'Snake Alley Karaoke',
