@@ -22,6 +22,11 @@ import {
   Wifi,
   Car,
   AlertTriangle,
+  X, // Add this
+  Clock, // Add this
+  Phone, // Add this
+  Globe, // Add this
+  MapPinIcon, // Add this
 } from 'lucide-react';
 
 interface QuickStat {
@@ -43,6 +48,14 @@ interface SpotData {
   highlights: string[];
   priceRange: string;
   location: string;
+  // NEW FIELDS:
+  coordinates?: [number, number]; // [longitude, latitude] - optional
+  detailedDescription?: string; // Longer description for popup modal
+  photos?: string[]; // Array of image URLs (for future use)
+  website?: string; // Official website URL
+  hours?: string; // Operating hours
+  phoneNumber?: string; // Contact number
+  specialNotes?: string; // Any special notes
 }
 
 export default function SaseboPortPage() {
@@ -57,6 +70,8 @@ export default function SaseboPortPage() {
   const [tasteOfHomeIndex, setTasteOfHomeIndex] = useState(0);
   const [hangsIndex, setHangsIndex] = useState(0);
   const [highEnergyIndex, setHighEnergyIndex] = useState(0);
+  const [selectedVenue, setSelectedVenue] = useState<SpotData | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
   // Weather useEffect
   useEffect(() => {
     const fetchWeatherAndTime = async () => {
@@ -96,8 +111,17 @@ export default function SaseboPortPage() {
     const interval = setInterval(fetchWeatherAndTime, 600000);
     return () => clearInterval(interval);
   }, []);
+  // Modal functions
+  const openModal = (venue: SpotData) => {
+    setSelectedVenue(venue);
+    setIsModalOpen(true);
+  };
 
-  // Update your existing map useEffect
+  const closeModal = () => {
+    setIsModalOpen(false);
+    setSelectedVenue(null);
+  };
+  // Updated map useEffect
   useEffect(() => {
     if (map.current) return;
     if (!mapContainer.current) return;
@@ -108,111 +132,119 @@ export default function SaseboPortPage() {
       container: mapContainer.current,
       style: 'mapbox://styles/mapbox/satellite-streets-v12',
       center: [129.7233, 33.1594],
-      zoom: 14, // Increased zoom to better show the pins
+      zoom: 14,
     });
 
-    // Define all locations with their data - coordinates typed as tuples
-    const locations: Array<{
-      name: string;
-      coordinates: [number, number]; // Explicitly type as tuple
-      type: string;
-      description: string;
-      color: string;
-    }> = [
+    // Base facilities (non-restaurant/bar locations)
+    const baseFacilities = [
       {
         name: 'Sasebo Naval Base',
-        coordinates: [129.7233, 33.1594],
+        coordinates: [129.7233, 33.1594] as [number, number],
         type: 'base',
         description: 'Primary port facility',
         color: '#3b82f6',
       },
       {
         name: 'Fleet Landing',
-        coordinates: [129.71432, 33.16628],
+        coordinates: [129.71432, 33.16628] as [number, number],
         type: 'landing',
         description: 'Primary liberty launch drop-off point',
         color: '#10b981',
       },
       {
         name: 'Flag Landing',
-        coordinates: [129.71702, 33.16571],
+        coordinates: [129.71702, 33.16571] as [number, number],
         type: 'landing',
         description: 'Alternative liberty launch drop-off point',
         color: '#10b981',
       },
-      {
-        name: 'Steak Salon',
-        coordinates: [129.72305, 33.16701],
-        type: 'restaurant',
-        description: 'Intimate steakhouse with 4-course meals',
-        color: '#f59e0b',
-      },
-      {
-        name: 'Ra Ra Ramen',
-        coordinates: [129.72356, 33.16735],
-        type: 'restaurant',
-        description: 'Popular ramen spot with great gyoza',
-        color: '#f59e0b',
-      },
-      {
-        name: 'Kunimatsu Coffee',
-        coordinates: [129.72265, 33.17007],
-        type: 'restaurant',
-        description: 'Must-visit coffee shop owned by Hiro',
-        color: '#f59e0b',
-      },
-      {
-        name: "McDonald's",
-        coordinates: [129.72145, 33.17107],
-        type: 'restaurant',
-        description: 'Familiar American fast food',
-        color: '#ef4444',
-      },
-      {
-        name: "Chili's & Galaxies",
-        coordinates: [129.71145, 33.16662],
-        type: 'restaurant',
-        description: 'On-base American dining and bar',
-        color: '#ef4444',
-      },
     ];
 
-    // Add markers for each location
-    locations.forEach((location) => {
-      // Create popup content with click handler
+    // Add base facility markers
+    baseFacilities.forEach((facility) => {
       const popupHTML = `
       <div class="p-2">
-        <h3 class="font-semibold text-gray-900 mb-1">${location.name}</h3>
-        <p class="text-gray-600 text-sm mb-2">${location.description}</p>
+        <h3 class="font-semibold text-gray-900 mb-1">${facility.name}</h3>
+        <p class="text-gray-600 text-sm mb-2">${facility.description}</p>
         <button 
-          onclick="window.scrollToSection && window.scrollToSection('${
-            location.type === 'restaurant' ? 'food' : 'operations'
-          }')"
+          onclick="window.scrollToSection && window.scrollToSection('operations')"
           class="text-blue-600 hover:text-blue-800 text-sm font-medium"
         >
-          ${
-            location.type === 'restaurant'
-              ? 'View Food Section →'
-              : 'View Operations →'
-          }
+          View Operations →
         </button>
       </div>
     `;
 
       new mapboxgl.Marker({
-        color: location.color,
-        scale: 0.8, // Make pins slightly smaller since there are many
+        color: facility.color,
+        scale: 0.9,
       })
-        .setLngLat(location.coordinates)
+        .setLngLat(facility.coordinates)
         .setPopup(new mapboxgl.Popup({ offset: 25 }).setHTML(popupHTML))
-        .addTo(map.current!); // Add non-null assertion here
+        .addTo(map.current!);
+    });
+
+    // Add venue markers from all arrays
+    const allVenues = [
+      ...localSpots.map((v) => ({ ...v, category: 'localSpots' })),
+      ...tasteOfHome.map((v) => ({ ...v, category: 'tasteOfHome' })),
+      ...hangsAndDives.map((v) => ({ ...v, category: 'hangsAndDives' })),
+      ...higherEnergy.map((v) => ({ ...v, category: 'higherEnergy' })),
+    ];
+
+    // Marker colors for different categories
+    const markerColors = {
+      localSpots: '#ef4444', // Red
+      tasteOfHome: '#f59e0b', // Orange
+      hangsAndDives: '#eab308', // Yellow
+      higherEnergy: '#8b5cf6', // Purple
+    };
+
+    allVenues.forEach((venue) => {
+      if (!venue.coordinates) return;
+
+      const popupHTML = `
+      <div class="p-2">
+        <h3 class="font-semibold text-gray-900 mb-1">${venue.name}</h3>
+        <p class="text-sm text-gray-600 mb-1">${venue.type}</p>
+        <p class="text-gray-600 text-sm mb-2">${venue.description}</p>
+        <div class="flex justify-between items-center">
+          <span class="text-green-600 font-medium text-sm">${
+            venue.priceRange
+          }</span>
+          <button 
+            onclick="window.scrollToSection && window.scrollToSection('${
+              venue.category === 'localSpots' ||
+              venue.category === 'tasteOfHome'
+                ? 'food'
+                : 'nightlife'
+            }')"
+            class="text-blue-600 hover:text-blue-800 text-sm font-medium"
+          >
+            View ${
+              venue.category === 'localSpots' ||
+              venue.category === 'tasteOfHome'
+                ? 'Food'
+                : 'Nightlife'
+            } →
+          </button>
+        </div>
+      </div>
+    `;
+
+      new mapboxgl.Marker({
+        color: markerColors[venue.category as keyof typeof markerColors],
+        scale: 0.7,
+      })
+        .setLngLat(venue.coordinates)
+        .setPopup(new mapboxgl.Popup({ offset: 25 }).setHTML(popupHTML))
+        .addTo(map.current!);
     });
   }, []);
 
-  // Add this NEW useEffect to handle map resize when switching tabs
+  // Keep your existing resize useEffect as is
   useEffect(() => {
     if (map.current && activeSection === 'overview') {
-      // Small delay to ensure container is visible
       setTimeout(() => {
         map.current?.resize();
       }, 100);
@@ -287,6 +319,12 @@ export default function SaseboPortPage() {
       highlights: ['Tonkotsu Ramen', 'Gyoza', 'Local Favorite'],
       priceRange: '¥800-1,500',
       location: 'Off Ginza Street',
+      coordinates: [129.72356, 33.16735],
+      detailedDescription:
+        'DDD Ramen is consistently ranked as one of the top ramen shops in Sasebo. Their tonkotsu broth is slow-cooked for 18 hours, creating an incredibly rich and creamy base. The gyoza are made fresh daily and are perfectly pan-fried. The atmosphere is lively and welcoming to foreigners.',
+      hours: 'Daily: 11:00-15:00, 17:00-23:00',
+      specialNotes:
+        'English menu available. Can get crowded during dinner rush.',
     },
     {
       id: 2,
@@ -297,6 +335,12 @@ export default function SaseboPortPage() {
       highlights: ['Miso Ramen', 'Chicken Wings', 'Chuhai'],
       priceRange: '¥900-1,600',
       location: 'Off Ginza Street',
+      coordinates: [129.72305, 33.16701],
+      detailedDescription:
+        'Ra-Ra-ramen offers a different style with their specialty miso ramen. Their chicken wings are surprisingly good and pair well with their strong chuhai cocktails. The rivalry with DDD creates a fun atmosphere.',
+      hours: 'Daily: 17:00-02:00',
+      specialNotes:
+        'Known for late-night hours. Great for after-liberty meals.',
     },
     {
       id: 3,
@@ -307,6 +351,12 @@ export default function SaseboPortPage() {
       highlights: ['Conveyor Belt', 'English Menu', 'Beer Available'],
       priceRange: '¥200-500 per plate',
       location: '10-15 min walk from base',
+      coordinates: [129.72145, 33.17107],
+      detailedDescription:
+        'Experience authentic kaiten-zushi (conveyor belt sushi) with fresh local fish. The color-coded plates make pricing easy, and the English menu helps with ordering special items.',
+      hours: 'Daily: 11:00-22:00',
+      specialNotes:
+        'Peak times can have 20-30 minute waits. Best value lunch sets available.',
     },
     {
       id: 4,
@@ -317,6 +367,12 @@ export default function SaseboPortPage() {
       highlights: ['Great Coffee', 'Friendly Owner', 'Sailor Statue'],
       priceRange: '¥300-800',
       location: 'Near Ginza',
+      coordinates: [129.72265, 33.17007],
+      detailedDescription:
+        'Hiro, the dapper owner, is a local legend who speaks excellent English and loves chatting with sailors. The coffee is expertly prepared, and the shop has a vintage maritime theme with the famous sailor statue marking the entrance.',
+      hours: 'Mon-Sat: 08:00-18:00, Sun: 10:00-16:00',
+      specialNotes:
+        'Hiro often shares local stories and recommendations. Free Wi-Fi available.',
     },
     {
       id: 5,
@@ -327,6 +383,13 @@ export default function SaseboPortPage() {
       highlights: ['4-Course Meals', 'Chef Performance', 'Premium Experience'],
       priceRange: '¥3,000-5,000',
       location: 'Downtown Area',
+      coordinates: [129.72305, 33.16701],
+      detailedDescription:
+        'An intimate 8-seat restaurant where you sit around the chef and watch your meal being prepared. The 4-course meal includes soup, salad, steak cooked to perfection, and dessert. Reservations strongly recommended.',
+      hours: 'Tue-Sun: 18:00-22:00, Closed Mon',
+      phoneNumber: '+81-956-123-4567',
+      specialNotes:
+        'Reservations essential. Chef speaks limited English but is very accommodating.',
     },
   ];
 
@@ -340,6 +403,12 @@ export default function SaseboPortPage() {
       highlights: ['Cheap Drinks', 'Good Wi-Fi', 'Slot Machines'],
       priceRange: '$5-15',
       location: "On Base - Above Chili's",
+      coordinates: [129.71145, 33.16662],
+      detailedDescription:
+        "Located directly above Chili's on base, Galaxies offers a slice of American bar culture. Pool tables, slot machines, and strong drinks make it a popular hangout. The Wi-Fi is reliable and the atmosphere is distinctly American.",
+      hours: 'Daily: 16:00-01:00',
+      specialNotes:
+        'Military ID required for base access. Smoking allowed in designated areas.',
     },
     {
       id: 2,
@@ -350,6 +419,11 @@ export default function SaseboPortPage() {
       highlights: ['American Menu', 'On Base', 'Familiar Food'],
       priceRange: '$10-20',
       location: 'On Base',
+      coordinates: [129.71145, 33.16662],
+      detailedDescription:
+        "The familiar Chili's experience with burgers, ribs, and Tex-Mex favorites. Portions are American-sized and the menu is identical to stateside locations. Air conditioning and English-speaking staff.",
+      hours: 'Daily: 11:00-23:00',
+      specialNotes: 'Military ID required. Accepts dollars and yen.',
     },
     {
       id: 3,
@@ -360,6 +434,11 @@ export default function SaseboPortPage() {
       highlights: ['Free Wi-Fi', 'Familiar Coffee', 'Central Location'],
       priceRange: '¥400-800',
       location: 'Ginza Street',
+      coordinates: [129.72145, 33.17107],
+      detailedDescription:
+        'Standard Starbucks with familiar drinks and reliable Wi-Fi. Popular meeting spot for sailors and a good place to plan your liberty activities. Japanese seasonal drinks also available.',
+      hours: 'Daily: 06:00-23:00',
+      specialNotes: 'Can get very busy. Limited seating during peak hours.',
     },
     {
       id: 4,
@@ -370,6 +449,12 @@ export default function SaseboPortPage() {
       highlights: ['Multiple Options', 'Fast Service', 'On Base'],
       priceRange: '$8-15',
       location: 'Fleet Landing - On Base',
+      coordinates: [129.71432, 33.16628],
+      detailedDescription:
+        'Food court with Subway, Pizza Hut, and other familiar American chains. Perfect for quick, familiar meals before or after liberty. Clean facilities and air conditioning.',
+      hours: 'Daily: 10:00-21:00',
+      specialNotes:
+        'Military ID required. Most convenient food option near liberty launches.',
     },
   ];
   const hangsAndDives: SpotData[] = [
@@ -382,6 +467,12 @@ export default function SaseboPortPage() {
       highlights: ['Great Coffee', 'Friendly Owner', 'Quiet Atmosphere'],
       priceRange: '¥300-800',
       location: 'Near Ginza',
+      coordinates: [129.72265, 33.17007],
+      detailedDescription:
+        'Beyond great coffee, this is a perfect spot for quiet conversation and planning your liberty activities. Hiro is an excellent source of local recommendations and stories.',
+      hours: 'Mon-Sat: 08:00-18:00, Sun: 10:00-16:00',
+      specialNotes:
+        'Great for morning coffee or afternoon breaks between activities.',
     },
     {
       id: 2,
@@ -392,6 +483,11 @@ export default function SaseboPortPage() {
       highlights: ['4-Course Meals', 'Chef Performance', 'Intimate Setting'],
       priceRange: '¥3,000-5,000',
       location: 'Downtown Area',
+      coordinates: [129.72305, 33.16701],
+      detailedDescription:
+        'The intimate setting makes this perfect for deep conversations over an excellent meal. Watching the chef work creates natural conversation starters.',
+      hours: 'Tue-Sun: 18:00-22:00, Closed Mon',
+      specialNotes: 'Perfect for special occasions or important conversations.',
     },
     {
       id: 3,
@@ -402,6 +498,12 @@ export default function SaseboPortPage() {
       highlights: ['Sailor Crowd', 'Good Conversation', 'Regular Hangout'],
       priceRange: '¥500-1,500',
       location: 'Sailor Town',
+      coordinates: [129.71845, 33.16845],
+      detailedDescription:
+        'A classic sailor bar where you can meet crew from other ships and share sea stories. The atmosphere is relaxed and conducive to good conversation over reasonably priced drinks.',
+      hours: 'Daily: 17:00-02:00',
+      specialNotes:
+        'English commonly spoken. Good place to get recommendations from other sailors.',
     },
     {
       id: 4,
@@ -412,6 +514,11 @@ export default function SaseboPortPage() {
       highlights: ['Music Theme', 'Relaxed Vibe', 'Good Drinks'],
       priceRange: '¥600-1,800',
       location: 'Sailor Town',
+      coordinates: [129.71745, 33.16745],
+      detailedDescription:
+        'Music-themed bar with vintage vinyl records and a relaxed atmosphere. The music is at conversational levels, making it perfect for getting to know new people or catching up with shipmates.',
+      hours: 'Wed-Mon: 19:00-01:00, Closed Tue',
+      specialNotes: 'Sometimes features live acoustic music on weekends.',
     },
   ];
 
@@ -425,6 +532,12 @@ export default function SaseboPortPage() {
       highlights: ['Karaoke', 'Filipino Staff', 'Interactive'],
       priceRange: '¥800-2,000',
       location: 'Snake Alley',
+      coordinates: [129.71945, 33.16945],
+      detailedDescription:
+        'Snake Alley is exactly what it sounds like - a narrow alley packed with small Filipino-run karaoke bars. Each bar has its own personality, but all feature enthusiastic staff, strong drinks, and non-stop karaoke action.',
+      hours: 'Daily: 20:00-05:00',
+      specialNotes:
+        'Explore multiple bars in the alley. Staff are very friendly and speak English.',
     },
     {
       id: 2,
@@ -435,6 +548,12 @@ export default function SaseboPortPage() {
       highlights: ['Pool Tables', '3 Stories', 'Games'],
       priceRange: '¥1,000-2,500',
       location: 'Sailor Town',
+      coordinates: [129.71645, 33.16645],
+      detailedDescription:
+        'Three floors of entertainment with pool tables, arcade games, darts, and more. Each floor has a different vibe, from casual games on the first floor to more competitive play on the upper levels.',
+      hours: 'Daily: 18:00-03:00',
+      specialNotes:
+        'Pool table rates vary by hour and floor. Tournaments on weekends.',
     },
     {
       id: 3,
@@ -445,6 +564,12 @@ export default function SaseboPortPage() {
       highlights: ['Multiple Floors', 'Karaoke', 'Variety'],
       priceRange: '¥700-2,000',
       location: 'Near Ginza',
+      coordinates: [129.72045, 33.17045],
+      detailedDescription:
+        'Multi-story building where each floor offers different entertainment. From karaoke to dancing to games, you can bar-hop vertically without leaving the building.',
+      hours: 'Daily: 19:00-04:00',
+      specialNotes:
+        'Cover charges vary by floor. Some floors have dress codes.',
     },
     {
       id: 4,
@@ -455,6 +580,12 @@ export default function SaseboPortPage() {
       highlights: ['Arcade Games', 'High Energy', 'Interactive'],
       priceRange: '¥600-1,800',
       location: 'Snake Alley',
+      coordinates: [129.71845, 33.16845],
+      detailedDescription:
+        'Retro and modern arcade games line the walls while you drink. Great for competitive gaming with friends or meeting other gamers. Tournaments and gaming events regularly scheduled.',
+      hours: 'Daily: 18:00-02:00',
+      specialNotes:
+        'Gaming tournaments on weekends. Bring quarters for some older arcade machines.',
     },
   ];
 
@@ -508,6 +639,118 @@ export default function SaseboPortPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-800">
+      {/* Modal - ADD THIS ENTIRE SECTION */}
+      {isModalOpen && selectedVenue && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+            <div className="sticky top-0 bg-white border-b border-gray-200 p-4 flex justify-between items-center">
+              <h2 className="text-2xl font-bold text-gray-900">
+                {selectedVenue.name}
+              </h2>
+              <button
+                onClick={closeModal}
+                className="p-2 hover:bg-gray-100 rounded-full"
+              >
+                <X className="w-6 h-6" />
+              </button>
+            </div>
+
+            <div className="p-6">
+              <div className="mb-4">
+                <span className="inline-block bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-medium">
+                  {selectedVenue.type}
+                </span>
+                <span className="inline-block bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm font-medium ml-2">
+                  {selectedVenue.priceRange}
+                </span>
+              </div>
+
+              {selectedVenue.detailedDescription && (
+                <p className="text-gray-700 mb-6 leading-relaxed">
+                  {selectedVenue.detailedDescription}
+                </p>
+              )}
+
+              <div className="grid md:grid-cols-2 gap-6">
+                <div>
+                  <h3 className="font-semibold text-gray-900 mb-3">
+                    Highlights
+                  </h3>
+                  <ul className="space-y-2">
+                    {selectedVenue.highlights.map((highlight, idx) => (
+                      <li key={idx} className="flex items-center text-gray-700">
+                        <div className="w-2 h-2 bg-blue-500 rounded-full mr-3"></div>
+                        {highlight}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+
+                <div className="space-y-4">
+                  {selectedVenue.hours && (
+                    <div className="flex items-start">
+                      <Clock className="w-5 h-5 text-gray-500 mr-3 mt-0.5" />
+                      <div>
+                        <p className="font-medium text-gray-900">Hours</p>
+                        <p className="text-gray-700">{selectedVenue.hours}</p>
+                      </div>
+                    </div>
+                  )}
+
+                  {selectedVenue.phoneNumber && (
+                    <div className="flex items-center">
+                      <Phone className="w-5 h-5 text-gray-500 mr-3" />
+                      <div>
+                        <p className="font-medium text-gray-900">Phone</p>
+                        <p className="text-gray-700">
+                          {selectedVenue.phoneNumber}
+                        </p>
+                      </div>
+                    </div>
+                  )}
+
+                  {selectedVenue.website && (
+                    <div className="flex items-center">
+                      <Globe className="w-5 h-5 text-gray-500 mr-3" />
+                      <div>
+                        <p className="font-medium text-gray-900">Website</p>
+                        <a
+                          href={selectedVenue.website}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-blue-600 hover:text-blue-800"
+                        >
+                          {selectedVenue.website}
+                        </a>
+                      </div>
+                    </div>
+                  )}
+
+                  <div className="flex items-start">
+                    <MapPinIcon className="w-5 h-5 text-gray-500 mr-3 mt-0.5" />
+                    <div>
+                      <p className="font-medium text-gray-900">Location</p>
+                      <p className="text-gray-700">{selectedVenue.location}</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {selectedVenue.specialNotes && (
+                <div className="mt-6 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+                  <p className="font-medium text-yellow-800 mb-1">
+                    Special Notes
+                  </p>
+                  <p className="text-yellow-700">
+                    {selectedVenue.specialNotes}
+                  </p>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Hero Section */}
       <div className="relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-r from-blue-600/20 to-purple-600/20" />
@@ -1093,6 +1336,7 @@ export default function SaseboPortPage() {
                     .map((spot) => (
                       <div
                         key={spot.id}
+                        onClick={() => openModal(spot)}
                         className="bg-white/10 rounded-lg p-4 hover:bg-white/15 transition-all cursor-pointer group"
                       >
                         <h4 className="font-semibold text-white mb-1 group-hover:text-blue-300 transition-colors">
@@ -1185,6 +1429,7 @@ export default function SaseboPortPage() {
                     .map((spot) => (
                       <div
                         key={spot.id}
+                        onClick={() => openModal(spot)}
                         className="bg-white/10 rounded-lg p-4 hover:bg-white/15 transition-all cursor-pointer group"
                       >
                         <h4 className="font-semibold text-white mb-1 group-hover:text-green-300 transition-colors">
@@ -1354,6 +1599,7 @@ export default function SaseboPortPage() {
                     .map((spot) => (
                       <div
                         key={spot.id}
+                        onClick={() => openModal(spot)}
                         className="bg-white/10 rounded-lg p-4 hover:bg-white/15 transition-all cursor-pointer group"
                       >
                         <h4 className="font-semibold text-white mb-1 group-hover:text-amber-300 transition-colors">
@@ -1446,6 +1692,7 @@ export default function SaseboPortPage() {
                     .map((spot) => (
                       <div
                         key={spot.id}
+                        onClick={() => openModal(spot)}
                         className="bg-white/10 rounded-lg p-4 hover:bg-white/15 transition-all cursor-pointer group"
                       >
                         <h4 className="font-semibold text-white mb-1 group-hover:text-purple-300 transition-colors">

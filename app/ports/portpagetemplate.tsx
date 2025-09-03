@@ -1,997 +1,559 @@
-// /* 'use client';
-// /**
-//  * =============================
-//  * CIVSail Port Page Template
-//  * =============================
-//  * Copy this file into: app/ports/<region>/<country>/<port>/page.tsx
-//  * and fill in the TODO items.
-//  *
-//  * What this template gives you:
-//  * - Consistent layout + sections for every port
-//  * - Interactive Mapbox map with clickable pins
-//  * - Live weather/time (optional) and USD↔Local currency converter (optional)
-//  * - Prebuilt UI for Operations, Food, Nightlife, Transportation, Safety
-//  *
-//  * Beginner-friendly notes:
-//  * - Look for lines that start with `TODO:` — those are things you should edit.
-//  * - If you don't need a feature (weather, converter, etc.), set the toggle to false in the CONFIG area.
-//  * - If something breaks, open your browser console (Right click → Inspect → Console) for hints.
-//  */
-
-// // =============================
-// // GLOBAL WINDOW TYPE (for popup scroll helper)
-// // =============================
-// declare global {
-//   interface Window {
-//     scrollToSection?: (sectionId: string) => void;
-//   }
-// }
-
-// // =============================
-// // IMPORTS
-// // =============================
-// import Link from 'next/link';
-// import mapboxgl from 'mapbox-gl';
-// import 'mapbox-gl/dist/mapbox-gl.css';
-// import { useEffect, useRef, useState } from 'react';
-// import {
-//   ChevronRight,
-//   MapPin,
-//   Users,
-//   Thermometer,
-//   Anchor,
-//   Ship,
-//   Utensils,
-//   Wine,
-//   Car,
-//   AlertTriangle,
-// } from 'lucide-react';
-
-// // =============================
-// // CONFIG — TURN FEATURES ON/OFF
-// // =============================
-// const CONFIG = {
-//   ENABLE_WEATHER_TIME: true, // set to false to hide live weather/time
-//   ENABLE_CURRENCY_CONVERTER: true, // set to false to hide converter
-//   DEFAULT_CURRENCY: 'JPY', // TODO: Replace with local currency code for this port (e.g., 'EUR', 'KRW')
-//   LOCAL_TIMEZONE: 'Asia/Tokyo', // TODO: Replace with IANA timezone for this port
-//   MAP_STYLE: 'mapbox://styles/mapbox/satellite-streets-v12',
-// };
-
-// // =============================
-// // TYPES
-// // =============================
-// interface QuickStat {
-//   icon: React.ReactNode;
-//   label: string;
-//   value: string;
-// }
-
-// interface Section {
-//   id: string;
-//   title: string;
-//   icon: React.ReactNode;
-// }
-
-// // =============================
-// // MAIN COMPONENT — COPY/RENAME FOR EACH PORT
-// // =============================
-// // export default function PortPageTemplate() {
-//   // ====== STATE ======
-//   const [activeSection, setActiveSection] = useState<string>('overview');
-//   const [weatherData, setWeatherData] = useState<{ temp: string; time: string }>({ temp: '--', time: '--:--' });
-//   const [exchangeRate, setExchangeRate] = useState<number>(0);
-//   const [usdAmount, setUsdAmount] = useState<string>('');
-//   const [localAmount, setLocalAmount] = useState<string>('');
-//   const mapContainer = useRef<HTMLDivElement>(null);
-//   const map = useRef<mapboxgl.Map | null>(null);
-
-//   // Carousels (leave as-is, just fill the arrays below)
-//   const [localSpotsIndex, setLocalSpotsIndex] = useState(0);
-//   const [tasteOfHomeIndex, setTasteOfHomeIndex] = useState(0);
-//   const [hangsIndex, setHangsIndex] = useState(0);
-//   const [highEnergyIndex, setHighEnergyIndex] = useState(0);
-
-//   // =============================
-//   // TODO: PORT METADATA
-//   // Replace all placeholder strings for each port
-//   // =============================
-//   const PORT = {
-//     name: 'PORT NAME', // TODO: e.g., 'Sasebo'
-//     regionHref: '/ports/REGION', // TODO: e.g., '/ports/far-east'
-//     countryHref: '/ports/REGION/COUNTRY', // TODO: e.g., '/ports/far-east/japan'
-//     countryLabel: 'COUNTRY', // TODO: e.g., 'Japan'
-//     breadcrumbRegion: 'REGION', // TODO: e.g., 'Far East'
-//     heroBadge: 'BADGE TEXT', // TODO: e.g., 'Naval Base • 7th Fleet Hub'
-//     // Center the map on this port
-//     center: [0, 0] as [number, number], // TODO: e.g., [129.7233, 33.1594]
-//     defaultZoom: 13, // adjust as needed per port
-//     vesselTypes: 'INSERT VESSEL TYPES HERE', // e.g., 'T-AKE, T-AO, Navy Vessels'
-//     typicalStay: 'INSERT TYPICAL STAY', // e.g., '2-5 days'
-//     portType: 'INSERT PORT TYPE', // e.g., 'Military • Naval Base'
-//     description:
-//       'INSERT PORT DESCRIPTION HERE — a short 1–2 sentence overview tailored to mariners.',
-//   };
-
-//   // =============================
-//   // TODO: MAP LOCATIONS
-//   // Add pins for base, landings, and notable places
-//   // Use coordinates as [lng, lat]
-//   // =============================
-//   type LocationPin = {
-//     name: string;
-//     coordinates: [number, number];
-//     type: 'base' | 'landing' | 'restaurant' | 'bar' | 'other';
-//     description: string;
-//     color: string; // hex or css color
-//   };
-
-//   const locations: LocationPin[] = [
-//     // Example entries (delete or replace):
-//     // {
-//     //   name: 'Base Gate',
-//     //   coordinates: [0, 0], // TODO: Add Base Coordinates Here
-//     //   type: 'base',
-//     //   description: 'Main base facility',
-//     //   color: '#3b82f6',
-//     // },
-//     // {
-//     //   name: 'Fleet Landing',
-//     //   coordinates: [0, 0], // TODO: Add Landing Coordinates Here
-//     //   type: 'landing',
-//     //   description: 'Primary liberty launch drop-off point',
-//     //   color: '#10b981',
-//     // },
-//     // {
-//     //   name: 'Add Bar Name',
-//     //   coordinates: [0, 0], // TODO: Add Bar Coordinates Here
-//     //   type: 'bar',
-//     //   description: 'Short description',
-//     //   color: '#ef4444',
-//     // },
-//   ];
-
-//   // =============================
-//   // EFFECT: WEATHER + LOCAL TIME (optional)
-//   // Requires env var: NEXT_PUBLIC_OPENWEATHER_API_KEY
-//   // =============================
-//   useEffect(() => {
-//     if (!CONFIG.ENABLE_WEATHER_TIME) return;
-
-//     const fetchWeatherAndTime = async () => {
-//       try {
-//         // TODO: Replace with this port's lat/lon
-//         const [lng, lat] = PORT.center;
-//         const weatherResponse = await fetch(
-//           `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lng}&appid=${process.env.NEXT_PUBLIC_OPENWEATHER_API_KEY}&units=imperial`
-//         );
-//         const weather = await weatherResponse.json();
-
-//         const timeResponse = await fetch(
-//           `https://worldtimeapi.org/api/timezone/${CONFIG.LOCAL_TIMEZONE}`
-//         );
-//         const timeData = await timeResponse.json();
-//         const localTime = new Date(timeData.datetime).toLocaleTimeString('en-US', {
-//           timeZone: CONFIG.LOCAL_TIMEZONE,
-//           hour12: false,
-//           hour: '2-digit',
-//           minute: '2-digit',
-//         });
-
-//         setWeatherData({ temp: Math.round(weather.main.temp).toString(), time: localTime });
-//       } catch (e) {
-//         console.error('Weather/Time fetch error', e);
-//       }
-//     };
-
-//     fetchWeatherAndTime();
-//     const i = setInterval(fetchWeatherAndTime, 600_000); // every 10 min
-//     return () => clearInterval(i);
-//   }, [PORT.center]);
-
-//   // =============================
-//   // EFFECT: MAP INIT + MARKERS
-//   // Requires env var: NEXT_PUBLIC_MAPBOX_TOKEN
-//   // =============================
-//   useEffect(() => {
-//     if (map.current || !mapContainer.current) return;
-//     mapboxgl.accessToken = process.env.NEXT_PUBLIC_MAPBOX_TOKEN || '';
-
-//     map.current = new mapboxgl.Map({
-//       container: mapContainer.current,
-//       style: CONFIG.MAP_STYLE,
-//       center: PORT.center,
-//       zoom: PORT.defaultZoom,
-//     });
-
-//     locations.forEach((location) => {
-//       const popupHTML = `
-//         <div class="p-2">
-//           <h3 class="font-semibold text-gray-900 mb-1">${location.name}</h3>
-//           <p class="text-gray-600 text-sm mb-2">${location.description}</p>
-//           <button
-//             onclick="window.scrollToSection && window.scrollToSection('${
-//               location.type === 'restaurant' || location.type === 'bar' ? 'food' : 'operations'
-//             }')"
-//             class="text-blue-600 hover:text-blue-800 text-sm font-medium"
-//           >
-//             ${location.type === 'restaurant' || location.type === 'bar' ? 'View Food Section →' : 'View Operations →'}
-//           </button>
-//         </div>
-//       `;
-
-//       new mapboxgl.Marker({ color: location.color, scale: 0.9 })
-//         .setLngLat(location.coordinates)
-//         .setPopup(new mapboxgl.Popup({ offset: 25 }).setHTML(popupHTML))
-//         .addTo(map.current!);
-//     });
-//   }, [locations]);
-
-//   // Resize map when returning to Overview tab
-//   useEffect(() => {
-//     if (map.current && activeSection === 'overview') setTimeout(() => map.current?.resize(), 100);
-//   }, [activeSection]);
-
-//   // =============================
-//   // EFFECT: CURRENCY EXCHANGE (optional)
-//   // Shows USD ↔ LOCAL converter
-//   // =============================
-//   useEffect(() => {
-//     if (!CONFIG.ENABLE_CURRENCY_CONVERTER) return;
-
-//     const fetchExchangeRate = async () => {
-//       try {
-//         const response = await fetch('https://api.exchangerate-api.com/v4/latest/USD');
-//         const data = await response.json();
-//         const rate = data.rates?.[CONFIG.DEFAULT_CURRENCY];
-//         if (rate) setExchangeRate(rate);
-//       } catch (e) {
-//         console.error('Exchange rate fetch error', e);
-//         // Fallback: reasonable default if API fails
-//         setExchangeRate(130);
-//       }
-//     };
-
-//     fetchExchangeRate();
-//     const i = setInterval(fetchExchangeRate, 3_600_000); // every hour
-//     return () => clearInterval(i);
-//   }, []);
-
-//   // ===== Converters =====
-//   const convertUsdToLocal = (usd: string) => {
-//     if (!usd || !exchangeRate) return '';
-//     const n = parseFloat(usd);
-//     if (Number.isNaN(n)) return '';
-//     return (n * exchangeRate).toLocaleString('en-US', { maximumFractionDigits: 0 });
-//   };
-//   const convertLocalToUsd = (val: string) => {
-//     if (!val || !exchangeRate) return '';
-//     const n = parseFloat(val.replace(/,/g, ''));
-//     if (Number.isNaN(n)) return '';
-//     return (n / exchangeRate).toFixed(2);
-//   };
-
-//   // =============================
-//   // QUICK STATS — edit labels/values per port
-//   // =============================
-//   const quickStats: QuickStat[] = [
-//     { icon: <Anchor className="w-5 h-5" />, label: 'Port Type', value: PORT.portType },
-//     { icon: <Ship className="w-5 h-5" />, label: 'Vessel Types', value: PORT.vesselTypes },
-//     { icon: <Users className="w-5 h-5" />, label: 'Typical Stay', value: PORT.typicalStay },
-//     ...(CONFIG.ENABLE_WEATHER_TIME
-//       ? [{ icon: <Thermometer className="w-5 h-5" />, label: 'Weather & Time', value: `${weatherData.temp}°F • ${PORT.name} ${weatherData.time}` }]
-//       : []),
-//   ];
-
-//   // =============================
-//   // TODO: CONTENT ARRAYS (cards/carousels)
-//   // Replace items with your local picks. You can remove/keep as many as you like.
-//   // =============================
-//   const localSpots = [
-//     // { id: 1, name: 'INSERT NAME', type: 'Ramen Shop', description: 'INSERT DESCRIPTION', highlights: ['Example A', 'Example B'], priceRange: 'INSERT PRICE', location: 'INSERT AREA' },
-//   ];
-
-//   const tasteOfHome = [
-//     // { id: 1, name: 'INSERT NAME', type: 'American Restaurant', description: 'INSERT DESCRIPTION', highlights: ['Wi-Fi', 'Large portions'], priceRange: '$$', location: 'On Base/Center' },
-//   ];
-
-//   const hangsAndDives = [
-//     // { id: 1, name: 'INSERT NAME', type: 'Sailor Bar', description: 'INSERT DESCRIPTION', highlights: ['Music', 'Pool'], priceRange: '$-$$', location: 'Sailor Town' },
-//   ];
-
-//   const higherEnergy = [
-//     // { id: 1, name: 'INSERT NAME', type: 'Karaoke', description: 'INSERT DESCRIPTION', highlights: ['Karaoke', 'Late night'], priceRange: '$$', location: 'Entertainment District' },
-//   ];
-
-//   // =============================
-//   // SECTION NAVIGATION — don't change
-//   // =============================
-//   const sections: Section[] = [
-//     { id: 'overview', title: 'Overview', icon: <MapPin className="w-5 h-5" /> },
-//     { id: 'operations', title: 'Port Operations', icon: <Ship className="w-5 h-5" /> },
-//     { id: 'food', title: 'Food & Dining', icon: <Utensils className="w-5 h-5" /> },
-//     { id: 'nightlife', title: 'Bars & Nightlife', icon: <Wine className="w-5 h-5" /> },
-//     { id: 'transportation', title: 'Transportation', icon: <Car className="w-5 h-5" /> },
-//     { id: 'safety', title: 'Safety & Tips', icon: <AlertTriangle className="w-5 h-5" /> },
-//   ];
-
-//   // Make popup button able to switch tabs + scroll to top
-//   useEffect(() => {
-//     window.scrollToSection = (sectionId: string) => {
-//       setActiveSection(sectionId);
-//       setTimeout(() => window.scrollTo({ top: 0, behavior: 'smooth' }), 100);
-//     };
-//     return () => { delete window.scrollToSection; };
-//   }, []);
-
-//   // =============================
-//   // RENDER
-//   // =============================
-//   return (
-//     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-800">
-//       {/* ================= HERO + BREADCRUMBS ================= */}
-//       <div className="relative overflow-hidden">
-//         <div className="absolute inset-0 bg-gradient-to-r from-blue-600/20 to-purple-600/20" />
-//         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-//           {/* Breadcrumb */}
-//           <div className="flex items-center text-white/70 text-sm mb-8">
-//             <Link href="/ports" className="hover:text-white transition-colors">Ports</Link>
-//             <ChevronRight className="w-4 h-4 mx-2" />
-//             <Link href={PORT.regionHref} className="hover:text-white transition-colors">{PORT.breadcrumbRegion}</Link>
-//             <ChevronRight className="w-4 h-4 mx-2" />
-//             <Link href={PORT.countryHref} className="hover:text-white transition-colors">{PORT.countryLabel}</Link>
-//             <ChevronRight className="w-4 h-4 mx-2" />
-//             <span className="text-white">{PORT.name}</span>
-//           </div>
-
-//           <div className="grid lg:grid-cols-2 gap-12 items-center">
-//             <div>
-//               <div className="inline-flex items-center bg-blue-500/20 text-blue-300 px-4 py-2 rounded-full text-sm font-medium mb-6">
-//                 <Anchor className="w-4 h-4 mr-2" />
-//                 {PORT.heroBadge}
-//               </div>
-//               <h1 className="text-5xl lg:text-6xl font-bold text-white mb-6">{PORT.name}</h1>
-//               <p className="text-xl text-white/80 leading-relaxed mb-8">{PORT.description}</p>
-
-//               {/* Quick Stats */}
-//               <div className="grid grid-cols-2 gap-4">
-//                 {quickStats.map((stat, i) => (
-//                   <div key={i} className="bg-white/10 backdrop-blur-sm border border-white/20 rounded-xl p-4">
-//                     <div className="flex items-center text-blue-300 mb-2">{stat.icon}<span className="ml-2 text-sm font-medium">{stat.label}</span></div>
-//                     <div className="text-white font-semibold">{stat.value}</div>
-//                   </div>
-//                 ))}
-//               </div>
-//             </div>
-
-//             {/* Section Nav */}
-//             <div className="lg:pl-8">
-//               <div className="bg-white/5 backdrop-blur-lg border border-white/20 rounded-2xl p-6">
-//                 <h3 className="text-white font-semibold mb-4 text-lg">Port Information</h3>
-//                 <nav className="space-y-2">
-//                   {sections.map((s) => (
-//                     <button key={s.id} onClick={() => setActiveSection(s.id)}
-//                       className={`w-full flex items-center p-3 rounded-xl transition-all duration-300 ${
-//                         activeSection === s.id ? 'bg-blue-500/30 text-white border border-blue-400/50' : 'text-white/70 hover:text-white hover:bg-white/10'
-//                       }`}>
-//                       {s.icon}
-//                       <span className="ml-3 font-medium">{s.title}</span>
-//                       <ChevronRight className="w-4 h-4 ml-auto" />
-//                     </button>
-//                   ))}
-//                 </nav>
-//               </div>
-//             </div>
-//           </div>
-//         </div>
-//       </div>
-
-//       {/* ================= CONTENT SECTIONS ================= */}
-//       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-//         <div className="bg-white/5 backdrop-blur-lg border border-white/20 rounded-2xl p-8 lg:p-12">
-
-//           {/* ===== OVERVIEW ===== */}
-//           {activeSection === 'overview' && (
-//             <div className="space-y-8">
-//               <div className="flex items-center mb-8"><MapPin className="w-8 h-8 text-blue-400 mr-4" /><h2 className="text-3xl font-bold text-white">Port Overview</h2></div>
-
-//               {/* Map */}
-//               <div className="bg-gradient-to-br from-blue-500/20 to-purple-500/20 rounded-xl p-6 border border-white/10">
-//                 <h3 className="text-xl font-semibold text-white mb-4">Port Map</h3>
-//                 <div ref={mapContainer} className="w-full h-64 rounded-lg" style={{ minHeight: '300px' }} />
-//               </div>
-
-//               {/* Highlights / Quick Facts */}
-//               <div className="grid md:grid-cols-2 gap-8 mt-2">
-//                 <div className="bg-gradient-to-br from-blue-500/20 to-purple-500/20 rounded-xl p-6 border border-white/10">
-//                   <h3 className="text-xl font-semibold text-white mb-4">Port Highlights</h3>
-//                   <ul className="space-y-3 text-white/80">
-//                     {/* TODO: Replace bullets with this port's highlights */}
-//                     <li className="flex items-start"><div className="w-2 h-2 bg-blue-400 rounded-full mt-2 mr-3" />Insert highlight #1</li>
-//                     <li className="flex items-start"><div className="w-2 h-2 bg-blue-400 rounded-full mt-2 mr-3" />Insert highlight #2</li>
-//                     <li className="flex items-start"><div className="w-2 h-2 bg-blue-400 rounded-full mt-2 mr-3" />Insert highlight #3</li>
-//                   </ul>
-//                 </div>
-//                 <div className="bg-gradient-to-br from-green-500/20 to-teal-500/20 rounded-xl p-6 border border-white/10">
-//                   <h3 className="text-xl font-semibold text-white mb-4">Quick Facts</h3>
-//                   <ul className="space-y-3 text-white/80">
-//                     {/* TODO: Replace bullets with this port's quick facts */}
-//                     <li className="flex items-start"><div className="w-2 h-2 bg-green-400 rounded-full mt-2 mr-3" />Insert fact #1</li>
-//                     <li className="flex items-start"><div className="w-2 h-2 bg-green-400 rounded-full mt-2 mr-3" />Insert fact #2</li>
-//                     <li className="flex items-start"><div className="w-2 h-2 bg-green-400 rounded-full mt-2 mr-3" />Insert fact #3</li>
-//                   </ul>
-//                 </div>
-//               </div>
-
-//               {/* Optional: Currency Converter */}
-//               {CONFIG.ENABLE_CURRENCY_CONVERTER && (
-//                 <div className="bg-gradient-to-br from-yellow-500/20 to-orange-500/20 rounded-xl p-6 border border-white/10">
-//                   <h3 className="text-xl font-semibold text-white mb-4">Currency Converter</h3>
-//                   <div className="grid md:grid-cols-2 gap-6">
-//                     <div>
-//                       <label className="block text-white/80 text-sm font-medium mb-2">USD Amount</label>
-//                       <input type="number" placeholder="100" value={usdAmount}
-//                         onChange={(e) => { setUsdAmount(e.target.value); setLocalAmount(convertUsdToLocal(e.target.value)); }}
-//                         className="w-full bg-white/10 border border-white/20 rounded-lg px-4 py-3 text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-yellow-400" />
-//                     </div>
-//                     <div>
-//                       <label className="block text-white/80 text-sm font-medium mb-2">{CONFIG.DEFAULT_CURRENCY} Amount</label>
-//                       <input type="text" placeholder="13,000" value={localAmount}
-//                         onChange={(e) => { setLocalAmount(e.target.value); setUsdAmount(convertLocalToUsd(e.target.value)); }}
-//                         className="w-full bg-white/10 border border-white/20 rounded-lg px-4 py-3 text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-yellow-400" />
-//                     </div>
-//                   </div>
-//                   <div className="flex justify-between items-center mt-4">
-//                     <p className="text-white/60 text-sm">Current rate: 1 USD = {exchangeRate ? `${CONFIG.DEFAULT_CURRENCY} ${exchangeRate.toFixed(2)}` : '…'}</p>
-//                     <p className="text-white/60 text-sm">Rates update hourly</p>
-//                   </div>
-//                 </div>
-//               )}
-
-//               {/* Optional: Know Before You Go */}
-//               <div className="bg-gradient-to-br from-purple-500/20 to-pink-500/20 rounded-xl p-6 border border-white/10">
-//                 <h3 className="text-xl font-semibold text-white mb-6">Know Before You Go</h3>
-//                 <div className="grid md:grid-cols-2 gap-8">
-//                   {/* TODO: Replace with local packing/weather advice */}
-//                   <div>
-//                     <h4 className="text-lg font-semibold text-white mb-4">Weather & What to Pack</h4>
-//                     <div className="space-y-3 text-white/80">
-//                       <div className="bg-white/10 rounded-lg p-4"><h5 className="font-medium text-white mb-2">Season A</h5><p className="text-sm">Insert advice for Season A.</p></div>
-//                       <div className="bg-white/10 rounded-lg p-4"><h5 className="font-medium text-white mb-2">Season B</h5><p className="text-sm">Insert advice for Season B.</p></div>
-//                       <div className="bg-white/10 rounded-lg p-4"><h5 className="font-medium text-white mb-2">Season C</h5><p className="text-sm">Insert advice for Season C.</p></div>
-//                     </div>
-//                   </div>
-
-//                   {/* TODO: Update or remove eSIM card */}
-//                   <div>
-//                     <h4 className="text-lg font-semibold text-white mb-4">Stay Connected</h4>
-//                     <div className="bg-white/10 rounded-lg p-4 mb-4">
-//                       <p className="text-white/80 text-sm mb-4">Optional blurb about connectivity (eSIM/Wi‑Fi).</p>
-//                       <a href="https://airalo.pxf.io/zxkLzG" target="_blank" rel="noopener noreferrer" className="inline-block bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-medium transition-colors">Get Local eSIM →</a>
-//                     </div>
-//                     <div className="space-y-2">
-//                       <h5 className="font-medium text-white">Recommended Plans:</h5>
-//                       <ul className="space-y-2 text-sm text-white/70">
-//                         <li>• Plan A</li>
-//                         <li>• Plan B</li>
-//                         <li>• Plan C</li>
-//                       </ul>
-//                     </div>
-//                   </div>
-//                 </div>
-//               </div>
-//             </div>
-//           )}
-
-//           {/* ===== OPERATIONS ===== */}
-//           {activeSection === 'operations' && (
-//             <div className="space-y-8">
-//               <div className="flex items-center mb-8"><Ship className="w-8 h-8 text-blue-400 mr-4" /><h2 className="text-3xl font-bold text-white">Port Operations</h2></div>
-
-//               {/* TODO: Replace with port-specific operations notes */}
-//               <div className="bg-gradient-to-br from-blue-500/20 to-indigo-500/20 rounded-xl p-6 border border-white/10">
-//                 <h3 className="text-xl font-semibold text-white mb-4">Typical Operations</h3>
-//                 <p className="text-white/80 mb-4">Insert a short paragraph summarizing operations at this port.</p>
-//                 <div className="grid md:grid-cols-2 gap-6">
-//                   <div>
-//                     <h4 className="font-semibold text-white mb-3">Primary Functions</h4>
-//                     <ul className="space-y-2 text-white/70">
-//                       <li>• Function 1</li>
-//                       <li>• Function 2</li>
-//                       <li>• Function 3</li>
-//                     </ul>
-//                   </div>
-//                   <div>
-//                     <h4 className="font-semibold text-white mb-3">Operation Notes</h4>
-//                     <ul className="space-y-2 text-white/70">
-//                       <li>• Note 1</li>
-//                       <li>• Note 2</li>
-//                       <li>• Note 3</li>
-//                     </ul>
-//                   </div>
-//                 </div>
-//               </div>
-
-//               {/* TODO: Replace with actual anchoring/pier/landing details */}
-//               <div className="bg-gradient-to-br from-purple-500/20 to-pink-500/20 rounded-xl p-6 border border-white/10">
-//                 <h3 className="text-xl font-semibold text-white mb-4">Pier & Anchoring</h3>
-//                 <div className="space-y-6">
-//                   <div className="bg-white/10 rounded-lg p-4">
-//                     <h4 className="font-semibold text-white mb-3">Anchoring Areas</h4>
-//                     <p className="text-white/80 mb-3">Insert anchoring overview.</p>
-//                     <div className="grid md:grid-cols-2 gap-4">
-//                       <div>
-//                         <h5 className="font-medium text-white mb-2">Anchor Details</h5>
-//                         <ul className="space-y-1 text-white/70 text-sm">
-//                           <li>• Detail A</li>
-//                           <li>• Detail B</li>
-//                           <li>• Detail C</li>
-//                         </ul>
-//                       </div>
-//                       <div>
-//                         <h5 className="font-medium text-white mb-2">Launch Operations</h5>
-//                         <ul className="space-y-1 text-white/70 text-sm">
-//                           <li>• Launch note A</li>
-//                           <li>• Launch note B</li>
-//                           <li>• Launch note C</li>
-//                         </ul>
-//                       </div>
-//                     </div>
-//                   </div>
-
-//                   <div className="bg-white/10 rounded-lg p-4">
-//                     <h4 className="font-semibold text-white mb-3">Pier Facilities</h4>
-//                     <div className="grid md:grid-cols-2 gap-4">
-//                       <div className="border-l-4 border-blue-400 pl-4">
-//                         <h5 className="font-semibold text-white mb-2">Fuel Pier</h5>
-//                         <p className="text-white/70 text-sm mb-2">Insert fuel pier details.</p>
-//                         <ul className="space-y-1 text-white/60 text-xs">
-//                           <li>• Capability A</li>
-//                           <li>• Capability B</li>
-//                           <li>• Capability C</li>
-//                         </ul>
-//                       </div>
-//                       <div className="border-l-4 border-green-400 pl-4">
-//                         <h5 className="font-semibold text-white mb-2">Cargo Areas</h5>
-//                         <p className="text-white/70 text-sm mb-2">Insert cargo area details.</p>
-//                         <ul className="space-y-1 text-white/60 text-xs">
-//                           <li>• Capability A</li>
-//                           <li>• Capability B</li>
-//                           <li>• Capability C</li>
-//                         </ul>
-//                       </div>
-//                     </div>
-//                   </div>
-
-//                   <div className="bg-yellow-500/20 rounded-lg border border-yellow-400/30 p-4">
-//                     <h4 className="font-semibold text-yellow-300 mb-3">Liberty Drop-off Points</h4>
-//                     <div className="grid md:grid-cols-2 gap-4">
-//                       <div className="border-l-4 border-blue-400 pl-4">
-//                         <h5 className="font-semibold text-white mb-2">Fleet Landing</h5>
-//                         <p className="text-white/70 text-sm">Insert fleet landing notes.</p>
-//                       </div>
-//                       <div className="border-l-4 border-green-400 pl-4">
-//                         <h5 className="font-semibold text-white mb-2">Flag Landing</h5>
-//                         <p className="text-white/70 text-sm">Insert flag landing notes.</p>
-//                       </div>
-//                     </div>
-//                     <div className="mt-4 p-3 bg-red-500/20 rounded-lg border border-red-400/30">
-//                       <p className="text-red-300 text-sm font-medium">Important: Insert any critical launch schedule reminder here.</p>
-//                     </div>
-//                   </div>
-//                 </div>
-//               </div>
-//             </div>
-//           )}
-
-//           {/* ===== FOOD ===== */}
-//           {activeSection === 'food' && (
-//             <div className="space-y-8">
-//               <div className="flex items-center mb-8"><Utensils className="w-8 h-8 text-blue-400 mr-4" /><h2 className="text-3xl font-bold text-white">Food & Dining</h2></div>
-
-//               {/* Local Food */}
-//               <div className="bg-gradient-to-br from-orange-500/20 to-red-500/20 rounded-xl p-6 border border-white/10">
-//                 <h3 className="text-xl font-semibold text-white mb-4">Local Food & Drink</h3>
-//                 <p className="text-lg text-white/80 leading-relaxed mb-6">Insert a short description of the local food scene.</p>
-//                 {/* TODO: Replace bullets */}
-//                 <div className="grid md:grid-cols-2 gap-6">
-//                   <div className="bg-white/10 rounded-lg p-4">
-//                     <h4 className="font-semibold text-white mb-3">Must-Try Local Specialties</h4>
-//                     <ul className="space-y-2 text-white/80">
-//                       <li className="flex items-start"><div className="w-2 h-2 bg-red-400 rounded-full mt-2 mr-3" />Specialty A</li>
-//                       <li className="flex items-start"><div className="w-2 h-2 bg-red-400 rounded-full mt-2 mr-3" />Specialty B</li>
-//                       <li className="flex items-start"><div className="w-2 h-2 bg-red-400 rounded-full mt-2 mr-3" />Specialty C</li>
-//                     </ul>
-//                   </div>
-//                   <div className="bg-white/10 rounded-lg p-4">
-//                     <h4 className="font-semibold text-white mb-3">Local Drinks to Try</h4>
-//                     <ul className="space-y-2 text-white/80">
-//                       <li className="flex items-start"><div className="w-2 h-2 bg-orange-400 rounded-full mt-2 mr-3" />Drink A</li>
-//                       <li className="flex items-start"><div className="w-2 h-2 bg-orange-400 rounded-full mt-2 mr-3" />Drink B</li>
-//                       <li className="flex items-start"><div className="w-2 h-2 bg-orange-400 rounded-full mt-2 mr-3" />Drink C</li>
-//                     </ul>
-//                   </div>
-//                 </div>
-//               </div>
-
-//               {/* Local Spots Carousel */}
-//               <Carousel title="Local Spots" items={localSpots} index={localSpotsIndex} setIndex={setLocalSpotsIndex} badgeClass="bg-blue-500/30 text-blue-200" dotActiveClass="bg-blue-400" />
-
-//               {/* Taste of Home Carousel */}
-//               <Carousel title="A Taste of Home" items={tasteOfHome} index={tasteOfHomeIndex} setIndex={setTasteOfHomeIndex} badgeClass="bg-green-500/30 text-green-200" dotActiveClass="bg-green-400" />
-//             </div>
-//           )}
-
-//           {/* ===== NIGHTLIFE ===== */}
-//           {activeSection === 'nightlife' && (
-//             <div className="space-y-8">
-//               <div className="flex items-center mb-8"><Wine className="w-8 h-8 text-blue-400 mr-4" /><h2 className="text-3xl font-bold text-white">Bars & Nightlife</h2></div>
-
-//               {/* TODO: Replace key points */}
-//               <div className="bg-gradient-to-br from-red-500/20 to-orange-500/20 rounded-xl p-6 border border-white/10">
-//                 <h3 className="text-xl font-semibold text-white mb-4">Key Points</h3>
-//                 <div className="grid md:grid-cols-2 gap-6">
-//                   <div className="bg-white/10 rounded-lg p-4">
-//                     <h4 className="font-semibold text-white mb-3">Essential Reminders</h4>
-//                     <ul className="space-y-2 text-white/80">
-//                       <li>• Reminder A</li>
-//                       <li>• Reminder B</li>
-//                       <li>• Reminder C</li>
-//                     </ul>
-//                   </div>
-//                   <div className="bg-white/10 rounded-lg p-4">
-//                     <h4 className="font-semibold text-white mb-3">Local Etiquette & Tips</h4>
-//                     <ul className="space-y-2 text-white/80">
-//                       <li>• Tip A</li>
-//                       <li>• Tip B</li>
-//                       <li>• Tip C</li>
-//                     </ul>
-//                   </div>
-//                 </div>
-//               </div>
-
-//               {/* Hangs and Dives */}
-//               <Carousel title="Hangs and Dives" items={hangsAndDives} index={hangsIndex} setIndex={setHangsIndex} badgeClass="bg-amber-500/30 text-amber-200" dotActiveClass="bg-amber-400" />
-
-//               {/* Higher Energy */}
-//               <Carousel title="Higher Energy" items={higherEnergy} index={highEnergyIndex} setIndex={setHighEnergyIndex} badgeClass="bg-purple-500/30 text-purple-200" dotActiveClass="bg-purple-400" />
-//             </div>
-//           )}
-
-//           {/* ===== TRANSPORTATION ===== */}
-//           {activeSection === 'transportation' && (
-//             <div className="space-y-8">
-//               <div className="flex items-center mb-8"><Car className="w-8 h-8 text-blue-400 mr-4" /><h2 className="text-3xl font-bold text-white">Transportation</h2></div>
-
-//               {/* TODO: Replace details for launches / pier-side / taxis / buses / trains */}
-//               <div className="bg-gradient-to-br from-blue-500/20 to-indigo-500/20 rounded-xl p-6 border border-white/10">
-//                 <h3 className="text-xl font-semibold text-white mb-4">🚤 To Town from Berth</h3>
-//                 <div className="grid md:grid-cols-2 gap-6">
-//                   <div className="bg-white/10 rounded-lg p-4">
-//                     <h4 className="font-semibold text-white mb-3">Liberty Launches</h4>
-//                     <ul className="space-y-2 text-white/70 text-sm">
-//                       <li>• Operating Hours: INSERT</li>
-//                       <li>• Transit Time: INSERT</li>
-//                       <li>• Drop-off Points: INSERT</li>
-//                     </ul>
-//                   </div>
-//                   <div className="bg-white/10 rounded-lg p-4">
-//                     <h4 className="font-semibold text-white mb-3">Pier-Side Access</h4>
-//                     <ul className="space-y-2 text-white/70 text-sm">
-//                       <li>• Walking Distance: INSERT</li>
-//                       <li>• Base Facilities: INSERT</li>
-//                       <li>• Town Access: INSERT</li>
-//                     </ul>
-//                   </div>
-//                 </div>
-//                 <div className="mt-6 p-4 bg-red-500/20 rounded-lg border border-red-400/30">
-//                   <h4 className="font-semibold text-red-300 mb-2">⚠️ Critical Reminder</h4>
-//                   <p className="text-white/80 text-sm">Insert an important transportation warning/tip.</p>
-//                 </div>
-//               </div>
-
-//               {/* TODO: Around Town (walking, taxis, buses) */}
-//               <div className="bg-gradient-to-br from-green-500/20 to-teal-500/20 rounded-xl p-6 border border-white/10">
-//                 <h3 className="text-xl font-semibold text-white mb-4">🚗 Around Town</h3>
-//                 <div className="grid md:grid-cols-2 gap-6">
-//                   <div className="bg-white/10 rounded-lg p-4">
-//                     <h4 className="font-semibold text-white mb-3">Walking</h4>
-//                     <ul className="space-y-2 text-white/70 text-sm">
-//                       <li>• Area A</li>
-//                       <li>• Area B</li>
-//                     </ul>
-//                   </div>
-//                   <div className="bg-white/10 rounded-lg p-4">
-//                     <h4 className="font-semibold text-white mb-3">Taxis & Ride Services</h4>
-//                     <ul className="space-y-2 text-white/70 text-sm">
-//                       <li>• Uber/Local Apps</li>
-//                       <li>• Cost Range</li>
-//                       <li>• Payment Notes</li>
-//                     </ul>
-//                   </div>
-//                 </div>
-//                 <div className="bg-white/10 rounded-lg p-4 mt-4">
-//                   <h4 className="font-semibold text-white mb-3">🚌 Public Transportation</h4>
-//                   <div className="grid md:grid-cols-2 gap-4">
-//                     <div>
-//                       <h5 className="font-medium text-white mb-2">Local Buses</h5>
-//                       <ul className="space-y-1 text-white/70 text-xs">
-//                         <li>• Notes</li>
-//                       </ul>
-//                     </div>
-//                     <div>
-//                       <h5 className="font-medium text-white mb-2">Base Shuttle</h5>
-//                       <ul className="space-y-1 text-white/70 text-xs">
-//                         <li>• Notes</li>
-//                       </ul>
-//                     </div>
-//                   </div>
-//                 </div>
-//               </div>
-
-//               {/* TODO: Regional Travel & Airports */}
-//               <div className="bg-gradient-to-br from-purple-500/20 to-pink-500/20 rounded-xl p-6 border border-white/10">
-//                 <h3 className="text-xl font-semibold text-white mb-4">🚆 Regional Travel</h3>
-//                 <p className="text-white/80 mb-6">Insert regional travel overview (nearby cities/attractions).</p>
-//                 <div className="grid md:grid-cols-2 gap-6">
-//                   <div className="bg-white/10 rounded-lg p-4"><h4 className="font-semibold text-white mb-3">Nearby City A</h4><p className="text-white/70 text-sm">Insert travel time and highlights.</p></div>
-//                   <div className="bg-white/10 rounded-lg p-4"><h4 className="font-semibold text-white mb-3">Nearby City B</h4><p className="text-white/70 text-sm">Insert travel time and highlights.</p></div>
-//                 </div>
-//               </div>
-
-//               <div className="bg-gradient-to-br from-orange-500/20 to-red-500/20 rounded-xl p-6 border border-white/10">
-//                 <h3 className="text-xl font-semibold text-white mb-4">✈️ Local Airports</h3>
-//                 <div className="grid md:grid-cols-2 gap-6">
-//                   <div className="bg-white/10 rounded-lg p-4">
-//                     <h4 className="font-semibold text-white mb-3">Primary International Gateway</h4>
-//                     <ul className="space-y-1 text-white/70 text-sm">
-//                       <li>• Distance: INSERT</li>
-//                       <li>• By Train: INSERT</li>
-//                       <li>• By Bus: INSERT</li>
-//                       <li>• By Taxi: INSERT</li>
-//                     </ul>
-//                   </div>
-//                   <div className="bg-white/10 rounded-lg p-4">
-//                     <h4 className="font-semibold text-white mb-3">Crew Change Logistics</h4>
-//                     <ul className="space-y-1 text-white/70 text-sm">
-//                       <li>• Advance Booking: INSERT</li>
-//                       <li>• Best Option: INSERT</li>
-//                       <li>• Luggage Notes: INSERT</li>
-//                     </ul>
-//                   </div>
-//                 </div>
-//               </div>
-//             </div>
-//           )}
-
-//           {/* ===== SAFETY ===== */}
-// {activeSection === 'safety' && (
-//   <div className="space-y-8">
-//     <div className="flex items-center mb-8">
-//       <AlertTriangle className="w-8 h-8 text-blue-400 mr-4" />
-//       <h2 className="text-3xl font-bold text-white">Safety & Tips</h2>
-//     </div>
-
-//     {/* TODO: Replace with common incidents + cultural tips */}
-//     <div className="bg-gradient-to-br from-red-500/20 to-orange-500/20 rounded-xl p-6 border border-white/10">
-//       <h3 className="text-xl font-semibold text-white mb-4">
-//         ⚠️ How People Get in Trouble
-//       </h3>
-//       <p className="text-white/80 mb-6">
-//         Insert an intro sentence here (e.g., “These are the most common liberty
-//         incidents at this port that can ruin your visit or career.”).
-//       </p>
-
-//       <div className="grid md:grid-cols-2 gap-6">
-//         <div className="space-y-4">
-//           <div className="bg-white/10 rounded-lg p-4">
-//             <h4 className="font-semibold text-red-300 mb-3">Issue A</h4>
-//             <p className="text-white/80 text-sm mb-2">Insert details/tips.</p>
-//             <ul className="space-y-1 text-white/70 text-xs">
-//               <li>• Sub-point 1</li>
-//               <li>• Sub-point 2</li>
-//               <li>• Sub-point 3</li>
-//             </ul>
-//           </div>
-
-//           <div className="bg-white/10 rounded-lg p-4">
-//             <h4 className="font-semibold text-red-300 mb-3">Issue B</h4>
-//             <p className="text-white/80 text-sm mb-2">Insert details/tips.</p>
-//             <ul className="space-y-1 text-white/70 text-xs">
-//               <li>• Sub-point 1</li>
-//               <li>• Sub-point 2</li>
-//               <li>• Sub-point 3</li>
-//             </ul>
-//           </div>
-//         </div>
-
-//         <div className="space-y-4">
-//           <div className="bg-white/10 rounded-lg p-4">
-//             <h4 className="font-semibold text-red-300 mb-3">Issue C</h4>
-//             <p className="text-white/80 text-sm mb-2">Insert details/tips.</p>
-//             <ul className="space-y-1 text-white/70 text-xs">
-//               <li>• Sub-point 1</li>
-//               <li>• Sub-point 2</li>
-//               <li>• Sub-point 3</li>
-//             </ul>
-//           </div>
-
-//           <div className="bg-white/10 rounded-lg p-4">
-//             <h4 className="font-semibold text-red-300 mb-3">Issue D</h4>
-//             <p className="text-white/80 text-sm mb-2">Insert details/tips.</p>
-//             <ul className="space-y-1 text-white/70 text-xs">
-//               <li>• Sub-point 1</li>
-//               <li>• Sub-point 2</li>
-//               <li>• Sub-point 3</li>
-//             </ul>
-//           </div>
-//         </div>
-//       </div>
-//     </div>
-
-//     {/* Critical Reminders */}
-//     <div className="bg-gradient-to-br from-yellow-500/20 to-orange-500/20 rounded-xl p-6 border border-white/10">
-//       <h3 className="text-xl font-semibold text-white mb-4">
-//         🛡️ Critical Reminders
-//       </h3>
-//       <p className="text-white/80 mb-6">
-//         Insert an intro sentence here (e.g., “Follow these to stay safe and
-//         avoid career-ending incidents.”).
-//       </p>
-
-//       <div className="grid md:grid-cols-3 gap-6">
-//         <div className="bg-white/10 rounded-lg p-4">
-//           <h4 className="font-semibold text-yellow-300 mb-3">
-//             🕒 Time Management
-//           </h4>
-//           <ul className="space-y-2 text-white/80 text-sm">
-//             <li>• Insert tip</li>
-//             <li>• Insert tip</li>
-//             <li>• Insert tip</li>
-//           </ul>
-//         </div>
-
-//         <div className="bg-white/10 rounded-lg p-4">
-//           <h4 className="font-semibold text-yellow-300 mb-3">
-//             💰 Money Safety
-//           </h4>
-//           <ul className="space-y-2 text-white/80 text-sm">
-//             <li>• Insert tip</li>
-//             <li>• Insert tip</li>
-//             <li>• Insert tip</li>
-//           </ul>
-//         </div>
-
-//         <div className="bg-white/10 rounded-lg p-4">
-//           <h4 className="font-semibold text-yellow-300 mb-3">
-//             🤝 Cultural Respect
-//           </h4>
-//           <ul className="space-y-2 text-white/80 text-sm">
-//             <li>• Insert tip</li>
-//             <li>• Insert tip</li>
-//             <li>• Insert tip</li>
-//           </ul>
-//         </div>
-//       </div>
-
-//       {/* TODO: Replace contact numbers/addresses */}
-//       <div className="mt-6 grid md:grid-cols-2 gap-6">
-//         <div className="bg-blue-500/20 rounded-lg border border-blue-400/30 p-4">
-//           <h4 className="font-semibold text-blue-300 mb-3">
-//             📱 Communication & Documentation
-//           </h4>
-//           <ul className="space-y-2 text-white/80 text-sm">
-//             <li>• Insert tip</li>
-//           </ul>
-//         </div>
-
-//         <div className="bg-purple-500/20 rounded-lg border border-purple-400/30 p-4">
-//           <h4 className="font-semibold text-purple-300 mb-3">
-//             🌡️ Weather & Health
-//           </h4>
-//           <ul className="space-y-2 text-white/80 text-sm">
-//             <li>• Insert tip</li>
-//           </ul>
-//         </div>
-//       </div>
-//     </div>
-
-//     {/* Key Contacts */}
-//     <div className="bg-gradient-to-br from-blue-500/20 to-indigo-500/20 rounded-xl p-6 border border-white/10">
-//       <h3 className="text-xl font-semibold text-white mb-4">📞 Key Contacts</h3>
-//       <p className="text-white/80 mb-6">
-//         Insert guidance text here (e.g., “Save these numbers before going on
-//         liberty.”).
-//       </p>
-
-//       <div className="grid md:grid-cols-2 gap-6">
-//         <div className="space-y-4">
-//           <div className="bg-white/10 rounded-lg p-4">
-//             <h4 className="font-semibold text-blue-300 mb-3">
-//               🚨 Emergency Numbers
-//             </h4>
-//             <div className="space-y-2">
-//               <div className="flex justify-between items-center p-2 bg-red-500/20 rounded border border-red-400/30">
-//                 <span className="text-white font-medium">Police</span>
-//                 <span className="text-red-300 font-bold text-lg">INSERT</span>
-//               </div>
-//               <div className="flex justify-between items-center p-2 bg-red-500/20 rounded border border-red-400/30">
-//                 <span className="text-white font-medium">Fire/Ambulance</span>
-//                 <span className="text-red-300 font-bold text-lg">INSERT</span>
-//               </div>
-//             </div>
-//           </div>
-
-//           <div className="bg-white/10 rounded-lg p-4">
-//             <h4 className="font-semibold text-blue-300 mb-3">
-//               🇺🇸 U.S. Embassy / Consulate
-//             </h4>
-//             <div className="space-y-2 text-white/80 text-sm">
-//               <div>
-//                 <strong>Nearest U.S. Consulate</strong>
-//                 <p className="text-white/70">INSERT ADDRESS</p>
-//                 <p className="text-blue-300">INSERT PHONE</p>
-//               </div>
-//               <div className="mt-3">
-//                 <strong>U.S. Embassy (24/7)</strong>
-//                 <p className="text-blue-300">INSERT PHONE</p>
-//               </div>
-//             </div>
-//           </div>
-//         </div>
-
-//         <div className="space-y-4">
-//           <div className="bg-white/10 rounded-lg p-4">
-//             <h4 className="font-semibold text-blue-300 mb-3">
-//               🏥 Medical Facilities
-//             </h4>
-//             <div className="space-y-3 text-white/80 text-sm">
-//               <div>
-//                 <strong>On-Base Medical</strong>
-//                 <p className="text-white/70">INSERT</p>
-//               </div>
-//               <div>
-//                 <strong>Nearest Hospital</strong>
-//                 <p className="text-white/70">INSERT</p>
-//               </div>
-//             </div>
-//           </div>
-
-//           <div className="bg-white/10 rounded-lg p-4">
-//             <h4 className="font-semibold text-blue-300 mb-3">
-//               🚢 Ship & Base Contacts
-//             </h4>
-//             <div className="space-y-2 text-white/80 text-sm">
-//               <div className="p-2 bg-yellow-500/20 rounded border border-yellow-400/30">
-//                 <strong className="text-yellow-300">Your Ship:</strong>
-//                 <p className="text-white/70">Insert emergency contact routine.</p>
-//               </div>
-//               <div>
-//                 <strong>Base Information:</strong>
-//                 <p className="text-white/70">INSERT</p>
-//               </div>
-//               <div>
-//                 <strong>Shore Patrol:</strong>
-//                 <p className="text-white/70">INSERT</p>
-//               </div>
-//             </div>
-//           </div>
-//         </div>
-//       </div>
-//     </div>
-//   </div>
-// )}
-
-// {/* ================= FOOTER ================= */}
-// <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-//   <div className="text-center text-white/60">
-//     <p className="mb-2">
-//       Information compiled from sailor experiences and port visits
-//     </p>
-//     <p className="text-sm">
-//       Always verify current information with your ship&apos;s port brief
-//     </p>
-//     {/* TODO: Add any port-specific disclaimer if needed */}
-//   </div>
-// </div>
-// </div>
+/*
+===============================================================================
+PORT PAGE TEMPLATE - SECTION 1: SETUP & CONFIGURATION
+===============================================================================
+This template creates a comprehensive port information page for CIVSail.com
+
+INSTRUCTIONS FOR USE:
+1. Copy this entire file to a new port folder: /app/ports/[region]/[country]/[port-name]/page.tsx
+2. Follow the comments marked with "TODO:" to customize for your specific port
+3. Replace ALL PLACEHOLDER DATA with actual port information
+4. Test locally before deploying
+
+REQUIRED SETUP:
+- Mapbox API key in environment variables (NEXT_PUBLIC_MAPBOX_TOKEN)
+- OpenWeatherMap API key in environment variables (NEXT_PUBLIC_OPENWEATHER_API_KEY)
+- Exchange rate API (uses exchangerate-api.com - no key required)
+===============================================================================
+*/
+
+'use client';
+
+// =============================================================================
+// GLOBAL WINDOW INTERFACE - DO NOT MODIFY
+// =============================================================================
+declare global {
+  interface Window {
+    scrollToSection?: (sectionId: string) => void;
+  }
+}
+
+// =============================================================================
+// IMPORTS - DO NOT MODIFY UNLESS ADDING NEW ICONS
+// =============================================================================
+import Link from 'next/link';
+import mapboxgl from 'mapbox-gl';
+import 'mapbox-gl/dist/mapbox-gl.css';
+import { useState, useEffect, useRef } from 'react';
+import {
+  ChevronRight,
+  MapPin,
+  Users,
+  DollarSign,
+  Thermometer,
+  Anchor,
+  Ship,
+  Utensils,
+  Wine,
+  Wifi,
+  Car,
+  AlertTriangle,
+} from 'lucide-react';
+
+// =============================================================================
+// TYPESCRIPT INTERFACES - DO NOT MODIFY
+// =============================================================================
+interface QuickStat {
+  icon: React.ReactNode;
+  label: string;
+  value: string;
+}
+
+interface Section {
+  id: string;
+  title: string;
+  icon: React.ReactNode;
+}
+
+interface SpotData {
+  id: number;
+  name: string;
+  type: string;
+  description: string;
+  highlights: string[];
+  priceRange: string;
+  location: string;
+}
+
+// =============================================================================
+// PORT CONFIGURATION - CUSTOMIZE THIS SECTION
+// =============================================================================
+
+// TODO: Update these coordinates for your port's location
+// Find coordinates using: https://www.latlong.net/
+const PORT_COORDINATES = {
+  LATITUDE: 33.1594,    // TODO: Replace with your port's latitude
+  LONGITUDE: 129.7233,  // TODO: Replace with your port's longitude
+  ZOOM_LEVEL: 14        // TODO: Adjust zoom (12=city, 14=detailed, 16=street level)
+};
+
+// TODO: Update port name and component name
+// Component name should be: [PortName]PortPage (e.g., GuamPortPage, RodmanPortPage)
+export default function SaseboPortPage() {  // TODO: Change "Sasebo" to your port name
+
+// TODO: Update weather city name for API call
+// Use the closest major city if your port is small
+const WEATHER_CITY_NAME = 'Sasebo';  // TODO: Replace with your city name
+
+// TODO: Update timezone for local time display
+// Find timezone strings at: https://worldtimeapi.org/api/timezone
+const TIMEZONE = 'Asia/Tokyo';  // TODO: Replace with your port's timezone
+
+// =============================================================================
+// BREADCRUMB CONFIGURATION - CUSTOMIZE THIS SECTION
+// =============================================================================
+
+// TODO: Update breadcrumb hierarchy for your port
+// Structure: Ports > Region > Country > Port Name
+const BREADCRUMB_CONFIG = {
+  REGION: 'far-east',      // TODO: Update region slug (e.g., 'mediterranean', 'caribbean')
+  REGION_NAME: 'Far East', // TODO: Update region display name
+  COUNTRY: 'japan',        // TODO: Update country slug
+  COUNTRY_NAME: 'Japan',   // TODO: Update country display name
+  PORT_NAME: 'Sasebo'      // TODO: Update port display name
+};
+
+// =============================================================================
+// HERO SECTION CONFIGURATION - CUSTOMIZE THIS SECTION
+// =============================================================================
+
+// TODO: Update hero content for your port
+const HERO_CONFIG = {
+  // TODO: Update badge text (e.g., "Commercial Port", "Naval Base", "Container Terminal")
+  BADGE_TEXT: "Naval Base • 7th Fleet Hub",
+  
+  // TODO: Update main port name (should match folder name)
+  PORT_TITLE: "Sasebo",
+  
+  // TODO: Write 2-3 sentence description highlighting what makes this port special
+  DESCRIPTION: "One of the most efficient loading ports in the world, located in southern Japan. Known for its professional operations, vibrant nightlife, and incredible food scene.",
+  
+  // TODO: Update port type classification
+  PORT_TYPE: "Military • Naval Base",
+  
+  // TODO: Update vessel types that commonly visit
+  VESSEL_TYPES: "T-AKE, T-AO, Navy Vessels",
+  
+  // TODO: Update typical stay duration
+  TYPICAL_STAY: "2-5 days"
+};
+
+// =============================================================================
+// SECTION 2: RESTAURANT & NIGHTLIFE DATA - CUSTOMIZE ALL ARRAYS BELOW
+// =============================================================================
+
+/*
+INSTRUCTIONS FOR DATA ARRAYS:
+- Each array represents a category of places (food, bars, etc.)
+- Add/remove items as needed - no minimum or maximum
+- Keep the same object structure for each item
+- Use consistent ID numbering (1, 2, 3, etc.) within each array
+- Price ranges can be in local currency or USD - be consistent within each array
+- Highlights should be 2-4 key features that make this place special
+*/
+
+// =============================================================================
+// LOCAL SPOTS - Authentic local restaurants and unique dining experiences
+// =============================================================================
+// TODO: Replace with actual local restaurants and food spots
+// Focus on: Authentic cuisine, local favorites, must-try experiences
+// Remove this entire array if port has no notable local food scene
+
+const localSpots: SpotData[] = [
+  // EXAMPLE ENTRY - Copy this format for each restaurant:
+  {
+    id: 1,                                    // TODO: Increment for each entry (1, 2, 3...)
+    name: 'Restaurant Name Here',             // TODO: Replace with actual restaurant name
+    type: 'Cuisine Type',                     // TODO: Replace with type (e.g., 'Ramen Shop', 'Seafood', 'Italian')
+    description: 'Brief description of what makes this place special and worth visiting for sailors.',  // TODO: 1-2 sentences max
+    highlights: ['Key Feature 1', 'Key Feature 2', 'Key Feature 3'],  // TODO: 2-4 standout features
+    priceRange: '¥800-1,500',                 // TODO: Replace with actual price range in local currency
+    location: 'Area Description',             // TODO: Replace with location (e.g., 'Downtown', 'Near Base', '10-min walk')
+  },
+  
+  // TODO: Copy the above structure for each local restaurant
+  // TODO: Remove this comment block when adding real data
+  
+  // REAL DATA EXAMPLES (from Sasebo):
+  {
+    id: 1,
+    name: 'DDD Ramen',
+    type: 'Ramen Shop',
+    description: 'Popular ramen spot with excellent gyoza. Great atmosphere and authentic Japanese flavors.',
+    highlights: ['Tonkotsu Ramen', 'Gyoza', 'Local Favorite'],
+    priceRange: '¥800-1,500',
+    location: 'Off Ginza Street',
+  },
+  {
+    id: 2,
+    name: 'Kunimatsu Coffee',
+    type: 'Coffee Shop',
+    description: 'Must-visit coffee shop owned by sharply dressed Hiro. Look for the sailor statue out front.',
+    highlights: ['Great Coffee', 'Friendly Owner', 'Sailor Statue'],
+    priceRange: '¥300-800',
+    location: 'Near Ginza',
+  },
+  // TODO: Replace above examples with your port's actual local spots
+];
+
+// =============================================================================
+// TASTE OF HOME - American/familiar food options
+// =============================================================================
+// TODO: Replace with actual American/familiar restaurants
+// Focus on: Chain restaurants, American food, familiar brands, comfort food
+// Remove this array if port has no American/familiar dining options
+
+const tasteOfHome: SpotData[] = [
+  // EXAMPLE ENTRY - Copy this format for each restaurant:
+  {
+    id: 1,                                    // TODO: Increment for each entry (1, 2, 3...)
+    name: 'Restaurant Name',                  // TODO: Replace with actual restaurant name
+    type: 'American Restaurant',              // TODO: Replace with type (e.g., 'Fast Food', 'Chain Restaurant', 'American Bar')
+    description: 'Description focusing on familiar American menu items and atmosphere.',  // TODO: Emphasize familiar aspects
+    highlights: ['Familiar Menu', 'English Spoken', 'American Portions'],  // TODO: Focus on comfort/familiarity
+    priceRange: '$10-20',                     // TODO: Use USD for American places, local currency otherwise
+    location: 'Location Description',         // TODO: Location relative to port/base
+  },
+  
+  // TODO: Copy above structure for each American/familiar restaurant
+  // TODO: Remove this comment when adding real data
+  
+  // REAL DATA EXAMPLES (from Sasebo):
+  {
+    id: 1,
+    name: "Chili's",
+    type: 'American Restaurant',
+    description: 'Familiar American chain restaurant on base. Standard menu with American comfort food.',
+    highlights: ['American Menu', 'On Base', 'Familiar Food'],
+    priceRange: '$10-20',
+    location: 'On Base',
+  },
+  {
+    id: 2,
+    name: 'Starbucks',
+    type: 'Coffee Chain',
+    description: 'Located on main street. Popular Wi-Fi spot frequently visited by sailors.',
+    highlights: ['Free Wi-Fi', 'Familiar Coffee', 'Central Location'],
+    priceRange: '$3-8',
+    location: 'Main Street',
+  },
+  // TODO: Replace above examples with your port's actual American/familiar spots
+];
+
+// =============================================================================
+// HANGS AND DIVES - Relaxed bars and conversation spots
+// =============================================================================
+// TODO: Replace with actual low-key bars and relaxed hangout spots
+// Focus on: Conversation-friendly, relaxed atmosphere, good for small groups
+// Remove this array if port has limited bar scene
+
+const hangsAndDives: SpotData[] = [
+  // EXAMPLE ENTRY - Copy this format for each bar:
+  {
+    id: 1,                                    // TODO: Increment for each entry (1, 2, 3...)
+    name: 'Bar Name',                         // TODO: Replace with actual bar name
+    type: 'Bar Type',                         // TODO: Replace with type (e.g., 'Dive Bar', 'Wine Bar', 'Sports Bar')
+    description: 'Description emphasizing relaxed atmosphere and why it\'s good for conversation.',  // TODO: Focus on atmosphere
+    highlights: ['Good Conversation', 'Relaxed Vibe', 'Local Crowd'],  // TODO: Emphasize low-key aspects
+    priceRange: '$3-10 per drink',            // TODO: Replace with actual drink prices
+    location: 'Location Description',         // TODO: Location relative to port
+  },
+  
+  // TODO: Copy above structure for each relaxed bar/hangout
+  // TODO: Remove this comment when adding real data
+  
+  // REAL DATA EXAMPLES (from Sasebo):
+  {
+    id: 1,
+    name: 'G-rock Bar',
+    type: 'Sailor Bar',
+    description: 'Popular sailor hangout in Sailor Town. Good for conversation and meeting other mariners.',
+    highlights: ['Sailor Crowd', 'Good Conversation', 'Regular Hangout'],
+    priceRange: '¥500-1,500',
+    location: 'Sailor Town',
+  },
+  // TODO: Replace above example with your port's actual hang-out spots
+];
+
+// =============================================================================
+// HIGHER ENERGY - High-energy nightlife spots
+// =============================================================================
+// TODO: Replace with actual nightclubs, karaoke, and high-energy venues
+// Focus on: Dancing, karaoke, late-night venues, party atmosphere
+// Remove this array if port has limited nightlife
+
+const higherEnergy: SpotData[] = [
+  // EXAMPLE ENTRY - Copy this format for each venue:
+  {
+    id: 1,                                    // TODO: Increment for each entry (1, 2, 3...)
+    name: 'Venue Name',                       // TODO: Replace with actual venue name
+    type: 'Venue Type',                       // TODO: Replace with type (e.g., 'Nightclub', 'Karaoke', 'Dance Club')
+    description: 'Description emphasizing high-energy atmosphere and entertainment options.',  // TODO: Focus on energy/fun
+    highlights: ['Dancing', 'Late Hours', 'High Energy'],  // TODO: Emphasize party aspects
+    priceRange: '$15-30 cover',               // TODO: Replace with actual cover charges/drink prices
+    location: 'Location Description',         // TODO: Location relative to port
+  },
+  
+  // TODO: Copy above structure for each high-energy venue
+  // TODO: Remove this comment when adding real data
+  
+  // REAL DATA EXAMPLES (from Sasebo):
+  {
+    id: 1,
+    name: 'Snake Alley Karaoke',
+    type: 'Filipino Karaoke',
+    description: 'Literal alley with multiple Filipino karaoke bars. High energy and interactive.',
+    highlights: ['Karaoke', 'Filipino Staff', 'Interactive'],
+    priceRange: '¥800-2,000',
+    location: 'Snake Alley',
+  },
+  // TODO: Replace above example with your port's actual nightlife spots
+];
+
+// =============================================================================
+// DATA VALIDATION CHECKLIST
+// =============================================================================
+/*
+Before deploying, verify:
+□ All TODO comments have been addressed
+□ All placeholder text has been replaced with real data
+□ ID numbers are sequential within each array (1, 2, 3...)
+□ Price ranges are consistent within each array (all USD or all local currency)
+□ Highlights arrays have 2-4 items each
+□ Descriptions are 1-2 sentences and under 150 characters
+□ Location descriptions help sailors find the places
+□ No empty arrays (remove entire array if no data available)
+*/
+
+// =============================================================================
+// SECTION 3: MAP CONFIGURATION AND COORDINATES
+// =============================================================================
+// NOTE: This section must come AFTER the data arrays above because it references them
+
+// =============================================================================
+// ENHANCED DATA INTERFACE - ADD TO YOUR EXISTING SpotData INTERFACE
+// =============================================================================
+// TODO: Update your existing SpotData interface to include these new fields:
+/*
+interface SpotData {
+  id: number;
+  name: string;
+  type: string;
+  description: string;
+  highlights: string[];
+  priceRange: string;
+  location: string;
+  // NEW FIELDS FOR MAP AND POPUPS:
+  coordinates?: [number, number];  // [longitude, latitude] - optional for places without exact coordinates
+  detailedDescription?: string;    // Longer description for popup modal
+  photos?: string[];              // Array of image URLs
+  website?: string;               // Official website URL
+  hours?: string;                 // Operating hours
+  phoneNumber?: string;           // Contact number
+  specialNotes?: string;          // Any special notes (dress code, reservations, etc.)
+}
+*/
+
+// =============================================================================
+// MAP CENTER AND BASE LOCATIONS
+// =============================================================================
+// TODO: Update these coordinates for your port's center point and key facilities
+// Use https://www.latlong.net/ to find exact coordinates
+// Remember: Mapbox uses [longitude, latitude] format (opposite of Google Maps)
+
+const MAP_CONFIG = {
+  // TODO: Center point of your port area
+  CENTER_LONGITUDE: 129.7233,  // TODO: Replace with your port's center longitude
+  CENTER_LATITUDE: 33.1594,    // TODO: Replace with your port's center latitude
+  ZOOM_LEVEL: 14,              // TODO: Adjust zoom level (12=city view, 14=detailed, 16=street level)
+  MAP_STYLE: 'mapbox://styles/mapbox/satellite-streets-v12', // TODO: Change if desired (satellite-streets-v12, streets-v11, outdoors-v11)
+};
+
+// =============================================================================
+// BASE FACILITY LOCATIONS - Key infrastructure points
+// =============================================================================
+// TODO: Add coordinates for key port facilities (berths, gates, terminals, etc.)
+// These appear as special markers on the map and help orient users
+
+const baseFacilities = [
+  // EXAMPLE ENTRIES - Replace with your port's actual facilities:
+  {
+    name: 'Main Port Facility',              // TODO: Replace with actual facility name
+    coordinates: [129.7233, 33.1594] as [number, number], // TODO: Replace with actual coordinates
+    type: 'port',                            // TODO: Use 'port', 'gate', 'terminal', 'berth', 'fuel'
+    description: 'Primary port facility',    // TODO: Brief description of facility
+    color: '#3b82f6',                       // TODO: Choose color (blue: #3b82f6, green: #10b981, red: #ef4444, orange: #f59e0b)
+  },
+  {
+    name: 'Main Gate',                       // TODO: Replace with actual gate name
+    coordinates: [129.71432, 33.16628] as [number, number], // TODO: Replace with actual coordinates
+    type: 'gate',
+    description: 'Primary entry/exit point for personnel',
+    color: '#10b981',
+  },
+  // TODO: Add more facilities as needed (fuel depot, passenger terminal, etc.)
+  // TODO: Remove this comment block when adding real data
+
+  // REAL EXAMPLES (from Sasebo):
+  {
+    name: 'Sasebo Naval Base',
+    coordinates: [129.7233, 33.1594] as [number, number],
+    type: 'base',
+    description: 'Primary port facility',
+    color: '#3b82f6',
+  },
+  {
+    name: 'Fleet Landing',
+    coordinates: [129.71432, 33.16628] as [number, number],
+    type: 'landing',
+    description: 'Primary liberty launch drop-off point',
+    color: '#10b981',
+  },
+  // TODO: Replace examples above with your port's actual facilities
+];
+
+// =============================================================================
+// UPDATED DATA ARRAYS WITH COORDINATES
+// =============================================================================
+// TODO: Go back to your data arrays above and add coordinates to each entry
+// Example of how to update your existing entries:
+
+/*
+BEFORE (your current format):
+{
+  id: 1,
+  name: 'Restaurant Name',
+  type: 'Restaurant Type',
+  description: 'Description...',
+  highlights: ['Feature 1', 'Feature 2'],
+  priceRange: '$10-20',
+  location: 'Downtown',
+},
+
+AFTER (add coordinates and optional fields):
+{
+  id: 1,
+  name: 'Restaurant Name',
+  type: 'Restaurant Type', 
+  description: 'Description...',
+  highlights: ['Feature 1', 'Feature 2'],
+  priceRange: '$10-20',
+  location: 'Downtown',
+  coordinates: [longitude, latitude],              // TODO: Add exact coordinates
+  detailedDescription: 'Extended description...',  // TODO: Optional - longer description for popup
+  photos: ['url1.jpg', 'url2.jpg'],               // TODO: Optional - photo URLs
+  website: 'https://restaurant-website.com',      // TODO: Optional - official website
+  hours: 'Mon-Sat: 11:00-22:00, Sun: Closed',    // TODO: Optional - operating hours
+  phoneNumber: '+1-555-123-4567',                 // TODO: Optional - phone number
+  specialNotes: 'Reservations recommended',       // TODO: Optional - special notes
+},
+*/
+
+// =============================================================================
+// MAP COLOR SCHEME FOR CATEGORIES
+// =============================================================================
+// TODO: Assign colors to different venue types for map markers
+// These colors will be used to differentiate restaurant/bar categories on the map
+
+const MARKER_COLORS = {
+  // Base facilities (defined above)
+  base: '#3b82f6',      // Blue - port facilities
+  gate: '#10b981',      // Green - entry points
+  terminal: '#8b5cf6',  // Purple - terminals
+  fuel: '#f59e0b',      // Orange - fuel facilities
+  
+  // Restaurant/bar categories (from your data arrays)
+  localSpots: '#ef4444',     // Red - local authentic food
+  tasteOfHome: '#f59e0b',    // Orange - American/familiar food  
+  hangsAndDives: '#eab308',  // Yellow - relaxed bars
+  higherEnergy: '#8b5cf6',   // Purple - nightclubs/karaoke
+  
+  // TODO: Add more colors if you have additional categories
+  // Available colors: #3b82f6 (blue), #10b981 (green), #ef4444 (red), 
+  //                  #f59e0b (orange), #eab308 (yellow), #8b5cf6 (purple),
+  //                  #ec4899 (pink), #06b6d4 (cyan)
+};
+
+// =============================================================================
+// COORDINATE GATHERING INSTRUCTIONS
+// =============================================================================
+/*
+HOW TO GET COORDINATES FOR YOUR VENUES:
+
+1. Go to https://www.latlong.net/
+2. Search for the venue name or address
+3. The result shows "Latitude, Longitude" 
+4. For Mapbox, reverse the order to [Longitude, Latitude]
+
+EXAMPLE:
+- LatLong.net shows: "33.1594, 129.7233" 
+- Use in your code as: [129.7233, 33.1594]
+
+ALTERNATIVE METHODS:
+- Right-click location in Google Maps → click coordinates that appear
+- Use GPS coordinates from your phone when visiting the location
+- Use approximate coordinates if exact location is uncertain
+
+ACCURACY TIPS:
+- Exact coordinates are best but not required for every venue
+- For general areas, use approximate coordinates (like "downtown area")
+- If you can't find coordinates, leave the coordinates field undefined
+- The map will still work with some missing coordinate data
+*/
+
+// =============================================================================
+// MAP POPUP CONTENT CONFIGURATION  
+// =============================================================================
+// TODO: Customize popup content for different venue types
+// This determines what information appears when users click map markers
+
+const POPUP_CONFIG = {
+  // TODO: Choose which fields to show in map popups for each category
+  localSpots: {
+    showFields: ['name', 'type', 'description', 'priceRange', 'hours'],
+    buttonText: 'View Food Section →',
+    buttonAction: 'food'  // Which tab to open when clicked
+  },
+  tasteOfHome: {
+    showFields: ['name', 'type', 'description', 'priceRange'],
+    buttonText: 'View Food Section →', 
+    buttonAction: 'food'
+  },
+  hangsAndDives: {
+    showFields: ['name', 'type', 'description', 'priceRange', 'hours'],
+    buttonText: 'View Nightlife →',
+    buttonAction: 'nightlife'
+  },
+  higherEnergy: {
+    showFields: ['name', 'type', 'description', 'priceRange'],
+    buttonText: 'View Nightlife →',
+    buttonAction: 'nightlife'
+  },
+  baseFacilities: {
+    showFields: ['name', 'description'],
+    buttonText: 'View Operations →',
+    buttonAction: 'operations'
+  }
+};
+
+// =============================================================================
+// IMPLEMENTATION NOTES
+// =============================================================================
+/*
+IMPORTANT: This section defines the data structure but the actual map rendering
+happens in the component's useEffect hooks later in the file. 
+
+The map will:
+1. Use MAP_CONFIG to set center point and zoom
+2. Add markers for all baseFacilities 
+3. Add markers for all venues with coordinates from your data arrays
+4. Color-code markers using MARKER_COLORS
+5. Show popups with content defined in POPUP_CONFIG
+
+TESTING YOUR MAP:
+- Start with just a few venues with coordinates
+- Test the map renders correctly
+- Add more venues gradually
+- Verify popup content appears correctly
+- Check that popup buttons navigate to correct sections
+*/
