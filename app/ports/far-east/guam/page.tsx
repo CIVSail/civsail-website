@@ -119,9 +119,9 @@ HOW TO GET COORDINATES:
 */
 
 const PORT_COORDINATES = {
-  LATITUDE: 33.1594,    // REPLACE: Second number from latlong.net
-  LONGITUDE: 129.7233,  // REPLACE: First number from latlong.net  
-  ZOOM_LEVEL: 14        // KEEP: 14 works for most ports (12=city, 16=street)
+  LATITUDE: 13.416970,    // REPLACE: Second number from latlong.net
+  LONGITUDE: 144.664307,  // REPLACE: First number from latlong.net  
+  ZOOM_LEVEL: 10       // KEEP: 14 works for most ports (12=city, 16=street)
 };
 
 // =============================================================================
@@ -136,7 +136,7 @@ EXAMPLES:
 - Norfolk → NorfolkPortPage
 */
 
-export default function SaseboPortPage() { // CHANGE: "Sasebo" to your port
+export default function GuamPortPage() { // CHANGE: "Sasebo" to your port
 
 // =============================================================================
 // STEP 3: WEATHER & TIME - COPY FROM STEP 1
@@ -152,9 +152,9 @@ EXAMPLES:
 */
 
 const WEATHER_CONFIG = {
-  LATITUDE: 33.1594,     // COPY: Same as PORT_COORDINATES.LATITUDE
-  LONGITUDE: 129.7233,   // COPY: Same as PORT_COORDINATES.LONGITUDE
-  TIMEZONE: 'Asia/Tokyo' // REPLACE: Your port's timezone
+  LATITUDE: 13.416970,     // COPY: Same as PORT_COORDINATES.LATITUDE
+  LONGITUDE: 144.664307,   // COPY: Same as PORT_COORDINATES.LONGITUDE
+  TIMEZONE: 'Pacific/Guam' // REPLACE: Your port's timezone
 };;
 
 // =============================================================================
@@ -163,7 +163,7 @@ const WEATHER_CONFIG = {
 
 /*
 WHAT TO DO: Fill in your port's hierarchy for the navigation breadcrumbs
-RESULT: Creates "Ports > Mediterranean > Spain > Rota" style navigation
+RESULT: Creates "Ports > europe > Spain > Rota" style navigation
 
 REGIONS: Use these standard regions (or create your own):
 - 'mediterranean', 'far-east', 'caribbean', 'atlantic', 'pacific'
@@ -176,9 +176,9 @@ COUNTRIES: Use lowercase with hyphens for multi-word countries
 const BREADCRUMB_CONFIG = {
   REGION: 'far-east',           // REPLACE: Your region slug (lowercase, hyphens)
   REGION_NAME: 'Far East',      // REPLACE: Your region display name (Title Case)
-  COUNTRY: 'japan',             // REPLACE: Your country slug (lowercase, hyphens) 
-  COUNTRY_NAME: 'Japan',        // REPLACE: Your country display name (Title Case)
-  PORT_NAME: 'Sasebo'           // REPLACE: Your port display name (Title Case)
+  COUNTRY: 'Guam',             // REPLACE: Your country slug (lowercase, hyphens) 
+  COUNTRY_NAME: 'Guam',        // REPLACE: Your country display name (Title Case)
+  PORT_NAME: 'Guam Naval Base'           // REPLACE: Your port display name (Title Case)
 };
 
 // =============================================================================
@@ -196,14 +196,14 @@ EXAMPLES:
 
 const HERO_CONFIG = {
   BADGE_TEXT: "Naval Base • 7th Fleet Hub",     // REPLACE: Port type (e.g., "Commercial Port", "Container Terminal")
-  PORT_TITLE: "Sasebo",                         // REPLACE: Same as BREADCRUMB_CONFIG.PORT_NAME
+  PORT_TITLE: "Guam",                         // REPLACE: Same as BREADCRUMB_CONFIG.PORT_NAME
   
   // REPLACE: Write your port's compelling description (2-3 sentences max)
-  DESCRIPTION: "One of the most efficient loading ports in the world, located in southern Japan. Known for its professional operations, vibrant nightlife, and incredible food scene.",
+  DESCRIPTION: "Guam is a tropical U.S. territory in the Pacific, ringed by clear blue water and a laid-back island vibe where “island time” runs the show. It’s a common Far East port visit for MSC crews, but beyond the beaches it’s also a critical submarine base and strategic hub for the Navy. Mariners quickly learn Guam blends paradise with purpose — equal parts liberty port and frontline outpost.",
   
   // REPLACE: These appear in the stats boxes on the hero section
   PORT_TYPE: "Military • Naval Base",           // What kind of port? (Military, Commercial, Container, etc.)
-  VESSEL_TYPES: "T-AKE, T-AO, Navy Vessels",   // What ships visit? (Container ships, Navy vessels, Cruise ships, etc.)
+  VESSEL_TYPES: "T-AKE, T-AO, Navy Vessels, CONMAR Vessels",   // What ships visit? (Container ships, Navy vessels, Cruise ships, etc.)
   TYPICAL_STAY: "2-5 days"                     // How long do ships usually stay?
 };
 
@@ -303,21 +303,41 @@ const baseFacilities = [
 
   // EXAMPLE FACILITIES (replace with your port's actual facilities):
   {
-    name: 'Main Terminal Building',
-    coordinates: [129.7233, 33.1594] as [number, number],     // REPLACE with your coordinates
+    name: 'Apra Outer Harbor',
+    coordinates: [144.64819, 13.45280] as [number, number],     // REPLACE with your coordinates 13.45280° N, 144.64819° E
     type: 'base',
-    description: 'Primary port administration and services',   // REPLACE with your description
-    color: '#3b82f6',
+    description: 'Large ship berthing area',   // REPLACE with your description
+    color: '#8b5cf6',
   },
   {
-    name: 'Security Gate Alpha',  
-    coordinates: [129.71432, 33.16628] as [number, number],   // REPLACE with your coordinates
-    type: 'landing',
-    description: 'Main vehicle and pedestrian entry point',   // REPLACE with your description  
+    name: 'Apra Inner Harbor',  
+    coordinates: [144.66759, 13.43265] as [number, number],   // REPLACE with your coordinates 13.43265° N, 144.66759° E
+    type: 'base',
+    description: 'Main berthing area',   // REPLACE with your description  
+    color: '#8b5cf6',
+  },
+  {
+    name: 'Kilo Pier',  
+    coordinates: [144.63039, 13.44607] as [number, number],   // REPLACE with your coordinates 
+    type: 'Ammo Pier',
+    description: 'Ammo Pier',   // REPLACE with your description  
+    color: '#8b5cf6',
+  },
+  {
+    name: 'Gab Gab Beach',  
+    coordinates: [144.64131, 13.44175] as [number, number],   // REPLACE with your coordinates
+    type: 'liberty location',
+    description: 'Beach with grills and swimming area',   // REPLACE with your description  
+    color: '#3b82f6',
+  },
+    {
+    name: 'Naval Base Guam Main Gate',  
+    coordinates: [144.67447, 13.41998] as [number, number],   // REPLACE with your coordinates 13.41998, 144.67447
+    type: 'Gate',
+    description: 'Main Gate',   // REPLACE with your description  
     color: '#10b981',
   },
-  
-  // ADD MORE FACILITIES: Copy the template above for each additional facility
+  // ADD MORE FACILITIES: Copy the template above for each additional facility 13.41998° N, 144.67447° E
 ];
 
 /*
@@ -392,18 +412,43 @@ const localSpots: SpotData[] = [
   // TEMPLATE - Copy this for each local restaurant:
   {
     id: 1,                                          // Always start with 1, then 2, 3, etc.
-    name: 'Your Restaurant Name',                   // REPLACE: Actual restaurant name
-    type: 'Restaurant Type',                        // REPLACE: e.g., "Italian Restaurant", "Seafood"
-    description: 'Brief description highlighting what makes this place special for sailors.',
-    highlights: ['Key Feature 1', 'Key Feature 2', 'Signature Dish', 'Special Atmosphere'],
-    priceRange: '€15-25',                          // REPLACE: Local currency and actual prices
-    location: 'Area near port',                    // REPLACE: "Downtown", "10-min walk", etc.
-    coordinates: [longitude, latitude],             // REPLACE: From latlong.net (longitude first!)
-    detailedDescription: 'More detailed description for the popup. What makes this restaurant worth visiting? What should sailors know about the atmosphere and food?',
-    hours: 'Mon-Sat: 11:00-23:00, Sun: Closed',   // REPLACE: Actual operating hours
-    specialNotes: 'English menu available. Reservations recommended on weekends.', // REPLACE: Important notes
+    name: 'Lorwills Barbeque',                   // REPLACE: Actual restaurant name
+    type: 'Shack',                        // REPLACE: e.g., "Italian Restaurant", "Seafood"
+    description: 'Fillipino food and BBQ.',
+    highlights: ['BBQ', 'Chicken', 'Local', 'Good Value'],
+    priceRange: '$15-30',                          // REPLACE: Local currency and actual prices
+    location: '20-25 min from base in Dededo',                    // REPLACE: "Downtown", "10-min walk", etc.
+    coordinates: [144.84537, 13.51426 ],             // REPLACE: From latlong.net (longitude first!)
+    detailedDescription: 'A small side of the road stand in front of the Guam Home Center that serves Fillipino food and BBQ.',
+    hours: '08:00-21:00, Varies',   // REPLACE: Actual operating hours
+    specialNotes: 'The chicken and beef skewers are fantastic', // REPLACE: Important notes
   },
-
+{
+    id: 2,                                          // Always start with 1, then 2, 3, etc.
+    name: 'Chamorro Village',                   // REPLACE: Actual restaurant name
+    type: 'Community Event',                        // REPLACE: e.g., "Italian Restaurant", "Seafood"
+    description: 'Weekly market with local food and shops.',
+    highlights: ['Local Stalls', 'Souvenirs', 'Good Food', 'Cultural Atmosphere'],
+    priceRange: '$5-50',                          // REPLACE: Local currency and actual prices
+    location: 'Hagatna',                    // REPLACE: "Downtown", "10-min walk", etc.
+    coordinates: [144.75277, 13.47777],             // REPLACE: From latlong.net (longitude first!)
+    detailedDescription: 'Community market with local food and shops. A great place to try local dishes and meet locals.',
+    hours: 'Wednesday Evenings',   // REPLACE: Actual operating hours
+    specialNotes: 'Something everyone should check out at least once', // REPLACE: Important notes
+  },
+  {
+    id: 3,                                          // Always start with 1, then 2, 3, etc.
+    name: 'Gab Gab Beach',                   // REPLACE: Actual restaurant name
+    type: 'Beach',                        // REPLACE: e.g., "Italian Restaurant", "Seafood"
+    description: 'An on base beach with grills and swimming area.',
+    highlights: ['Clear Water', 'Snorkeling', 'Scuba', 'Restrooms'],
+    priceRange: 'Free',                          // REPLACE: Local currency and actual prices
+    location: 'On base by Kilo Pier',                    // REPLACE: "Downtown", "10-min walk", etc.
+    coordinates: [144.64131, 13.44175],             // REPLACE: From latlong.net (longitude first!)
+    detailedDescription: 'A great place to swim and barbeque on base. Bring your own food and drinks.',
+    hours: 'Daylight Hours. Sometimes closed due to ships at Kilo Pier',   // REPLACE: Actual operating hours
+    specialNotes: 'Ships will often host cookouts/parties here', // REPLACE: Important notes
+  },
   // ADD MORE RESTAURANTS: Copy the template above for each local spot
   // DELETE THIS COMMENT when you add real restaurants
 ];
@@ -422,16 +467,29 @@ const tasteOfHome: SpotData[] = [
   // TEMPLATE - Copy this for each familiar restaurant:
   {
     id: 1,
-    name: 'Familiar Restaurant Name',               // REPLACE: e.g., "McDonald's", "Local American Diner"
+    name: 'Mosas Joint',               // REPLACE: e.g., "McDonald's", "Local American Diner"
     type: 'American Restaurant',                    // REPLACE: "Fast Food", "Chain Restaurant", "American Diner"
-    description: 'Familiar food and atmosphere that feels like home.',
-    highlights: ['English Menu', 'Familiar Food', 'American Portions', 'Credit Cards'],
-    priceRange: '$8-15',                           // Use USD for American chains, local currency otherwise
-    location: 'Location description',               // Where is it relative to port?
-    coordinates: [longitude, latitude],             // From latlong.net
-    detailedDescription: 'What makes this feel like home? Familiar menu items, English-speaking staff, American atmosphere?',
-    hours: 'Daily: 10:00-22:00',
-    specialNotes: 'Accepts credit cards. WiFi available.',
+    description: 'Burger joint with familiar American fare.',
+    highlights: ['Burgers', 'Familiar Food', 'American Portions', 'Credit Cards'],
+    priceRange: '$15-25',                           // Use USD for American chains, local currency otherwise
+    location: '10 min from base',               // Where is it relative to port?
+    coordinates: [144.74819, 13.47687],            // From latlong.net
+    detailedDescription: 'A good modern American burger joint with a variety of options. They also have a full bar.',
+    hours: '11:00-21:00',
+    specialNotes: 'A good place to get dinner and return to the ship, or start a night out.',
+  },
+  {
+    id: 2,
+    name: 'NEX Food Court',               // REPLACE: e.g., "McDonald's", "Local American Diner"
+    type: 'Food Court',                    // REPLACE: "Fast Food", "Chain Restaurant", "American Diner"
+    description: 'Familiar food and mall type food court.',
+    highlights: ['Fast Food', 'Familiar Food', 'American Portions'],
+    priceRange: '$10-20',                           // Use USD for American chains, local currency otherwise
+    location: 'Inside the NEX',               // Where is it relative to port?
+    coordinates: [144.66405, 13.41393],             // From latlong.net
+    detailedDescription: 'The NEX food court has a variety of familiar options including Panda Express, Del Taco and other familiar brands.',
+    hours: '09:00-20:00',
+    specialNotes: 'WiFi available.',
   },
 
   // ADD MORE: Copy template for each familiar restaurant
@@ -452,16 +510,55 @@ const hangsAndDives: SpotData[] = [
   // TEMPLATE - Copy for each relaxed bar:
   {
     id: 1,
-    name: 'Bar Name',
-    type: 'Local Pub',                             // "Dive Bar", "Wine Bar", "Local Pub", "Sailor Bar"
+    name: 'Laddas',
+    type: 'Local Dive',                             // "Dive Bar", "Wine Bar", "Local Pub", "Sailor Bar"
+    description: 'Small local bar with some serious pool players.',
+    highlights: ['Good Conversation', 'Local Crowd', 'Reasonable Prices', 'Pool Table'],
+    priceRange: '$3-8 per drink',                  // Local currency, per drink pricing
+    location: '5-10 minutes from base',
+    coordinates: [144.73903, 13.47783],
+    detailedDescription: 'A good old fashioned local dive bbar. You never know who you might meet here.',
+    hours: 'Daily: 15:00-02:00',
+    specialNotes: 'This place has had many names in the past.',
+  },
+  {
+    id: 2,
+    name: 'Beach Bar',
+    type: 'Beach Bar',                             // "Dive Bar", "Wine Bar", "Local Pub", "Sailor Bar"
+    description: 'Relaxed atmosphere perfect for conversation and group.',
+    highlights: ['Great View', 'On Beach', 'More Expensive', 'Sunset Spot'],
+    priceRange: '$7-12 per drink',                  // Local currency, per drink pricing
+    location: 'End of Tumon Bay',
+    coordinates: [144.80388, 13.52430],
+    detailedDescription: 'Fantastic place to watch the sunset on the ocean with some drinks.',
+    hours: 'Daily: 12:00-23:45',
+    specialNotes: 'Need a car or taxi to get here. Remember that for leaving!',
+  },
+  {
+    id: 3,
+    name: 'Shamrocks',
+    type: 'Irish Pub',                             // "Dive Bar", "Wine Bar", "Local Pub", "Sailor Bar"
+    description: 'Traditional Irish pub. Exactly what you would expect.',
+    highlights: ['Good Selection', 'Local Crowd', 'Reasonable Prices', 'Friendly Staff'],
+    priceRange: '$4-8 per drink',                  // Local currency, per drink pricing
+    location: 'Tumon Bay',
+    coordinates: [144.80644, 13.51156],
+    detailedDescription: 'A great place to start or end your night out.',
+    hours: 'Daily: 18:00-02:00',
+    specialNotes: 'Likely to be a mixed crowd of locals and sailors and military.',
+  },
+  {
+    id: 4,
+    name: 'Green Lizard',
+    type: 'Local Bar',                             // "Dive Bar", "Wine Bar", "Local Pub", "Sailor Bar"
     description: 'Relaxed atmosphere perfect for conversation and meeting people.',
-    highlights: ['Good Conversation', 'Local Crowd', 'Reasonable Prices', 'Friendly Staff'],
-    priceRange: '€4-8 per drink',                  // Local currency, per drink pricing
-    location: 'Near port',
-    coordinates: [longitude, latitude],
-    detailedDescription: 'What makes this a good place to hang out? Good for meeting locals or other sailors? Relaxed atmosphere?',
-    hours: 'Daily: 17:00-02:00',
-    specialNotes: 'Cash preferred. Some English spoken.',
+    highlights: ['Multi Level', 'Beer Pong', 'Outdoor Seating',],
+    priceRange: '$€4-8 per drink',                  // Local currency, per drink pricing
+    location: 'Tumon Bay',
+    coordinates: [144.80650, 13.51243],
+    detailedDescription: 'If you call Guam frequently, it is a nice change of pace from the usual bars.',
+    hours: 'Daily: 19:00-02:00',
+    specialNotes: 'Sometimes has live music, DJs or other promotions.',
   },
 
   // LEAVE EMPTY IF: Your port has no relaxed bar scene, use: []
@@ -481,18 +578,43 @@ const higherEnergy: SpotData[] = [
   // TEMPLATE - Copy for each party venue:
   {
     id: 1,
-    name: 'Club Name',
-    type: 'Dance Club',                            // "Nightclub", "Karaoke Bar", "Dance Club"
-    description: 'High-energy venue with dancing and late-night entertainment.',
-    highlights: ['Dancing', 'Late Hours', 'DJ Music', 'Young Crowd'],
-    priceRange: '€10-15 cover + drinks',           // Include cover charges if applicable
-    location: 'Entertainment district',
-    coordinates: [longitude, latitude],
-    detailedDescription: 'What kind of energy and entertainment? Dancing, karaoke, games? What makes it exciting?',
+    name: 'Porkys',
+    type: 'Bar with Music',                            // "Nightclub", "Karaoke Bar", "Dance Club"
+    description: 'High-energy venue with music themes and house rules',
+    highlights: ['Dancing', 'Late Hours', 'DJ Music', 'Pool Table'],
+    priceRange: '$$$',           // Include cover charges if applicable
+    location: 'Tumon Bay',
+    coordinates: [144.80632, 13.51124],
+    detailedDescription: 'Local bar with different music themes each night.',
     hours: 'Thu-Sat: 22:00-05:00',               // Many clubs have limited days
-    specialNotes: 'Cover charge varies by night. Dress code enforced.',
+    specialNotes: 'Ring the bell if you dare',
   },
-
+{
+    id: 2,
+    name: 'Club USA',
+    type: 'Strip Club',                            // "Nightclub", "Karaoke Bar", "Dance Club"
+    description: 'Adult Entertainment',
+    highlights: ['Dancers', 'Expensive', 'Club', 'Be Respectful'],
+    priceRange: '$$$$ cover + drinks',           // Include cover charges if applicable
+    location: 'Tumon Bay',
+    coordinates: [144.80696, 13.51727],
+    detailedDescription: 'Popular Guam strip club. Expect to buy expensive drinks and tip well.',
+    hours:  '19:00-02:30',               // Many clubs have limited days
+    specialNotes: 'One of the local/military/sailor favorites.If you have been to Guam, you have likely heard of this place.',
+  },
+  {
+    id: 3,
+    name: 'Foxys',
+    type: 'Strip Club',                            // "Nightclub", "Karaoke Bar", "Dance Club"
+    description: 'Adult Entertainment',
+    highlights: ['Dancers', 'Expensive', 'Club', 'Act Accodingly'],
+    priceRange: '$$$$ cover + drinks',           // Include cover charges if applicable
+    location: 'Tumon Bay',
+    coordinates: [144.80778, 13.51844],
+    detailedDescription: 'Popular Guam strip club. Expect to buy expensive drinks and tip well.',
+    hours: '19:00-02:00',               // Many clubs have limited days
+    specialNotes: 'One of the local/military/sailor favorites.If you have been to Guam, you have likely heard of this place.',
+  },
   // LEAVE EMPTY IF: Your port has quiet nightlife, use: []
 ];
 
@@ -871,7 +993,7 @@ const quickStats: QuickStat[] = [
 const sections: Section[] = [
   { id: 'overview', title: 'Overview', icon: <MapPin className="w-5 h-5" /> },
   { id: 'operations', title: 'Port Operations', icon: <Ship className="w-5 h-5" /> },
-  { id: 'food', title: 'Food & Dining', icon: <Utensils className="w-5 h-5" /> },
+  { id: 'food', title: 'Food & Attractions', icon: <Utensils className="w-5 h-5" /> },
   { id: 'nightlife', title: 'Bars & Nightlife', icon: <Wine className="w-5 h-5" /> },
   { id: 'transportation', title: 'Transportation', icon: <Car className="w-5 h-5" /> },
   { id: 'safety', title: 'Safety & Tips', icon: <AlertTriangle className="w-5 h-5" /> },
@@ -1274,7 +1396,7 @@ Key concepts for beginners:
         {/* DO NOT MODIFY: Section visibility logic */}
         {activeSection === 'overview' && (
           
-          {/* DO NOT MODIFY: Section spacing container */}
+          /* DO NOT MODIFY: Section spacing container */
           <div className="space-y-8">
             
             {/* DO NOT MODIFY: Section header structure */}
@@ -1326,7 +1448,9 @@ Key concepts for beginners:
               {/* TODO: Replace this entire paragraph with your port's description */}
               <p className="text-lg text-white/80 leading-relaxed">
                 {/* EXAMPLE: "Sasebo, Japan, affectionately known as 'Sas-Vegas'..." */}
-                [PORT NAME] is [LOCATION DESCRIPTION]. [WHAT MAKES IT SPECIAL]. [OPERATIONAL ROLE]. [WHY SAILORS LIKE IT].
+                Hafa Adai! Guam is a tropical U.S. territory in the western Pacific and a critical hub for Navy and MSC operations. 
+                The island blends strategic importance with island-time charm, clear water, warm weather and Chamorro culture. 
+                For mariners, Guam serves as both a vital logistics base and a laid-back port call where you have many of the amenities of mainland US in the Far East.
               </p>
 
               {/* Port Information Cards - Two Column Layout */}
@@ -1349,22 +1473,22 @@ Key concepts for beginners:
                     <li className="flex items-start">
                       <div className="w-2 h-2 bg-blue-400 rounded-full mt-2 mr-3 flex-shrink-0"></div>
                       {/* TODO: Replace with actual highlight */}
-                      Most efficient loading port in the world
+                      World class SCUBA diving and snorkeling
                     </li>
                     <li className="flex items-start">
                       <div className="w-2 h-2 bg-blue-400 rounded-full mt-2 mr-3 flex-shrink-0"></div>
                       {/* TODO: Replace with actual highlight */}
-                      Walking distance to vibrant nightlife
+                      Compact island—most attractions within a short drive
                     </li>
                     <li className="flex items-start">
                       <div className="w-2 h-2 bg-blue-400 rounded-full mt-2 mr-3 flex-shrink-0"></div>
                       {/* TODO: Replace with actual highlight */}
-                      Incredible local cuisine scene
+                      Mix of U.S. conveniences and Chamorro culture
                     </li>
                     <li className="flex items-start">
                       <div className="w-2 h-2 bg-blue-400 rounded-full mt-2 mr-3 flex-shrink-0"></div>
                       {/* TODO: Replace with actual highlight */}
-                      Professional, courteous port workers
+                      Operations are done on "Island Time"
                     </li>
                   </ul>
                 </div>
@@ -1385,95 +1509,72 @@ Key concepts for beginners:
                     <li className="flex items-start">
                       <div className="w-2 h-2 bg-green-400 rounded-full mt-2 mr-3 flex-shrink-0"></div>
                       {/* TODO: Replace with actual fact */}
-                      English widely spoken in town
+                      English widely spoken, Chamorro is the local language
                     </li>
                     <li className="flex items-start">
                       <div className="w-2 h-2 bg-green-400 rounded-full mt-2 mr-3 flex-shrink-0"></div>
                       {/* TODO: Replace with actual fact */}
-                      Shore transport readily available
+                      Base is well equipped with a large NEX and Commissary
                     </li>
                     <li className="flex items-start">
                       <div className="w-2 h-2 bg-green-400 rounded-full mt-2 mr-3 flex-shrink-0"></div>
                       {/* TODO: Replace with actual fact */}
-                      Credit cards accepted most places
+                      Tropical climate year-round, hot and humid with rainy season (Jun–Nov)
                     </li>
                     <li className="flex items-start">
                       <div className="w-2 h-2 bg-green-400 rounded-full mt-2 mr-3 flex-shrink-0"></div>
                       {/* TODO: Replace with actual fact */}
-                      24/7 security and safety
+                      Strong military security and port infrastructure
                     </li>
                   </ul>
                 </div>
               </div>
             </div>
 
-            {/* =================================================================== */}
-            {/* CURRENCY CONVERTER - CUSTOMIZE FOR YOUR PORT'S CURRENCY */}
-            {/* =================================================================== */}
-            {/* 
-            TODO: Update currency names and symbols for your port
-            EXAMPLES: USD↔Euro (Spain), USD↔Yen (Japan), USD↔Pound (UK)
-            SKIP ENTIRELY: If your port is in the US
-            DEPENDENCIES: Requires conversion functions in JavaScript section
-            */}
-            
-            {/* DO NOT MODIFY: Converter card container */}
-            <div className="bg-gradient-to-br from-yellow-500/20 to-orange-500/20 rounded-xl p-6 border border-white/10">
-              <h3 className="text-xl font-semibold text-white mb-4">
-                Currency Converter
-              </h3>
-              
-              {/* DO NOT MODIFY: Input grid layout */}
-              <div className="grid md:grid-cols-2 gap-6">
-                
-                {/* USD Input - DO NOT MODIFY STRUCTURE */}
-                <div>
-                  <label className="block text-white/80 text-sm font-medium mb-2">
-                    USD Amount
-                  </label>
-                  <input
-                    type="number"
-                    placeholder="100"
-                    value={usdAmount}
-                    onChange={(e) => {
-                      setUsdAmount(e.target.value);
-                      setYenAmount(convertUsdToYen(e.target.value));
-                    }}
-                    className="w-full bg-white/10 border border-white/20 rounded-lg px-4 py-3 text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-yellow-400"
-                  />
-                </div>
-                
-                {/* Local Currency Input - CUSTOMIZE LABEL AND FUNCTION NAMES */}
-                <div>
-                  <label className="block text-white/80 text-sm font-medium mb-2">
-                    {/* TODO: Update currency name */}
-                    {/* EXAMPLES: "Euro (€)", "Japanese Yen (¥)", "British Pound (£)" */}
-                    Japanese Yen (¥)
-                  </label>
-                  <input
-                    type="text"
-                    placeholder="13,000"
-                    value={yenAmount}
-                    onChange={(e) => {
-                      setYenAmount(e.target.value);
-                      {/* TODO: Update function name to match your currency */}
-                      {/* EXAMPLES: convertEuroToUsd, convertPoundToUsd, convertYenToUsd */}
-                      setUsdAmount(convertYenToUsd(e.target.value));
-                    }}
-                    className="w-full bg-white/10 border border-white/20 rounded-lg px-4 py-3 text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-yellow-400"
-                  />
-                </div>
-              </div>
-              
-              {/* Exchange Rate Display - DO NOT MODIFY STRUCTURE */}
-              <div className="flex justify-between items-center mt-4">
-                <p className="text-white/60 text-sm">
-                  {/* TODO: Update currency symbol */}
-                  Current rate: 1 USD = ¥{exchangeRate.toFixed(2)}
-                </p>
-                <p className="text-white/60 text-sm">Rates update hourly</p>
-              </div>
-            </div>
+          {/* Currency Information Card - USD Territory */}
+<div className="bg-gradient-to-br from-yellow-500/20 to-orange-500/20 rounded-xl p-6 border border-white/10">
+  <h3 className="text-xl font-semibold text-white mb-4">
+    Currency Information
+  </h3>
+  
+  <div className="flex items-center mb-4">
+    <div className="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center mr-4">
+      <span className="text-2xl">💵</span>
+    </div>
+    <div>
+      <h4 className="text-lg font-semibold text-white">US Dollar (USD)</h4>
+      <p className="text-white/80">Official currency - US Territory</p>
+    </div>
+  </div>
+  
+  <div className="bg-white/10 rounded-lg p-4">
+    <h5 className="font-semibold text-white mb-3">What to Know About Costs</h5>
+    <ul className="space-y-2 text-white/80 text-sm">
+      <li className="flex items-start">
+        <div className="w-2 h-2 bg-yellow-400 rounded-full mt-2 mr-3 flex-shrink-0"></div>
+        <span>Prices are generally 15-25% higher than mainland US due to shipping costs</span>
+      </li>
+      <li className="flex items-start">
+        <div className="w-2 h-2 bg-yellow-400 rounded-full mt-2 mr-3 flex-shrink-0"></div>
+        <span>Credit cards widely accepted at most establishments</span>
+      </li>
+      <li className="flex items-start">
+        <div className="w-2 h-2 bg-yellow-400 rounded-full mt-2 mr-3 flex-shrink-0"></div>
+        <span>ATMs available on base and in town with standard US banking</span>
+      </li>
+      <li className="flex items-start">
+        <div className="w-2 h-2 bg-yellow-400 rounded-full mt-2 mr-3 flex-shrink-0"></div>
+        <span>Tipping customs follow standard US practices (15-20%)</span>
+      </li>
+    </ul>
+  </div>
+  
+  <div className="mt-4 p-3 bg-blue-500/20 rounded-lg border border-blue-400/30">
+    <p className="text-blue-300 text-sm">
+      <strong>Budget Tip:</strong> Expect mainland US prices plus shipping premium. Base commissary and NEX offer more familiar pricing.
+    </p>
+  </div>
+</div>
 
             {/* =================================================================== */}
             {/* KNOW BEFORE YOU GO SECTION - CUSTOMIZE ALL CONTENT */}
@@ -1509,11 +1610,11 @@ Key concepts for beginners:
                     <div className="bg-white/10 rounded-lg p-4">
                       <h5 className="font-medium text-white mb-2">
                         {/* TODO: Update season and months */}
-                        Spring/Fall (Mar-May, Sep-Nov)
+                        Dry Season (Dec-May)
                       </h5>
                       <p className="text-sm">
                         {/* TODO: Update weather description and packing advice */}
-                        Mild temps 60-75°F. Pack layers, light jacket, comfortable walking shoes.
+                        Less humid, 75-85°F. Breeze provides relief. Pack lightweight clothes, light jacket for evening, comfortable walking shoes. Best weather for outdoor activities.
                       </p>
                     </div>
                     
@@ -1521,11 +1622,11 @@ Key concepts for beginners:
                     <div className="bg-white/10 rounded-lg p-4">
                       <h5 className="font-medium text-white mb-2">
                         {/* TODO: Update season and months */}
-                        Summer (Jun-Aug)
+                        Wet Season (Jun-Nov)
                       </h5>
                       <p className="text-sm">
                         {/* TODO: Update weather description and packing advice */}
-                        Hot & humid 75-90°F. Light breathable clothes, umbrella for rain season.
+                        Hot & humid 80-90°F, frequent rain showers. Pack quick-dry clothes, umbrella, rain jacket. Typhoon season peaks Aug-Oct. Check weather before outdoor plans.
                       </p>
                     </div>
                     
@@ -1533,11 +1634,11 @@ Key concepts for beginners:
                     <div className="bg-white/10 rounded-lg p-4">
                       <h5 className="font-medium text-white mb-2">
                         {/* TODO: Update season and months */}
-                        Winter (Dec-Feb)
+                        Year-Round Essentials 
                       </h5>
                       <p className="text-sm">
                         {/* TODO: Update weather description and packing advice */}
-                        Cool 40-60°F. Warm jacket essential, especially for evening activities.
+                        Tropical climate 75-90°F. Always pack: sunscreen, hat, sunglasses, breathable fabrics, and insect repellent.
                       </p>
                     </div>
                   </div>
@@ -1556,12 +1657,13 @@ Key concepts for beginners:
                   <div className="bg-white/10 rounded-lg p-4 mb-4">
                     <p className="text-white/80 text-sm mb-4">
                       {/* TODO: Update with region-specific eSIM pricing */}
-                      Skip expensive roaming charges with a local eSIM. Get data plans starting at $4.50 for Japan coverage.
+                      Despite being a US territory, most mainland US phone plans do NOT work in Guam without expensive international roaming charges. Local SIM cards or eSIMs are your best option for data.
+                      Use code "CIVMAR10" for 10% off your Airalo eSIM purchase!
                     </p>
                     
                     {/* DO NOT MODIFY: eSIM button link */}
                     <a
-                      href="https://airalo.pxf.io/zxkLzG" 
+                      href="https://airalo.pxf.io/QjrLzP" 
                       target="_blank"
                       rel="noopener noreferrer"
                       className="inline-block bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-medium transition-colors"
@@ -1578,9 +1680,9 @@ Key concepts for beginners:
                     </h5>
                     <ul className="space-y-2 text-sm text-white/70">
                       {/* TODO: Update with actual regional eSIM plans and pricing */}
-                      <li>• <strong>Japan 7 Days:</strong> 1GB for $4.50</li>
-                      <li>• <strong>Japan 14 Days:</strong> 3GB for $11.00</li>
-                      <li>• <strong>Asia Regional:</strong> 5GB for $16.00</li>
+                      <li>• <strong>Guam 7 Days:</strong> 4 Days Unlimited for $9.00</li>
+                      <li>• <strong>Guam 14 Days:</strong> 15 Days Unlimited for $31.00</li>
+                      <li>• <strong>Guam:</strong> 30 Days Unlimited for $43.50</li>
                     </ul>
                   </div>
                 </div>
@@ -1661,7 +1763,7 @@ Key for beginners:
         {/* DO NOT MODIFY: Section visibility logic */}
         {activeSection === 'operations' && (
           
-          {/* DO NOT MODIFY: Section spacing container */}
+          /* DO NOT MODIFY: Section spacing container */
           <div className="space-y-8">
             
             {/* DO NOT MODIFY: Section header structure */}
@@ -1687,7 +1789,7 @@ Key for beginners:
               {/* TODO: Replace with your port's operational overview */}
               <p className="text-white/80 mb-4">
                 {/* EXAMPLE: "Sasebo serves as a major naval logistics hub for routine port visits..." */}
-                [PORT NAME] serves as [PORT FUNCTION] for [OPERATION TYPES]. The port specializes in [SPECIALTIES] with [OPERATIONAL CHARACTERISTICS].
+                Guam’s Apra Harbor is divided into the outharbor and inner harbor, each serving different types of ships and missions.
               </p>
               
               {/* DO NOT MODIFY: Two-column grid layout */}
@@ -1704,8 +1806,8 @@ Key for beginners:
                   {/* TODO: Replace with your port's primary functions */}
                   {/* DO NOT MODIFY: List structure and bullet styling */}
                   <ul className="space-y-2 text-white/70">
-                    <li>• {/* TODO: Replace */ "Routine T-AKE and T-AO port visits"}</li>
-                    <li>• {/* TODO: Replace */ "Fuel and supplies loading"}</li>
+                    <li>• {/* TODO: Replace */ "T-AKE and T-AO cargo and fuel operations"}</li>
+                    <li>• {/* TODO: Replace */ "Ammo Operations"}</li>
                     <li>• {/* TODO: Replace */ "Voyage Repair (VR) periods"}</li>
                     <li>• {/* TODO: Replace */ "Navy vessel maintenance support"}</li>
                   </ul>
@@ -1722,10 +1824,10 @@ Key for beginners:
                   {/* TODO: Replace with your port's operational characteristics */}
                   {/* DO NOT MODIFY: List structure and bullet styling */}
                   <ul className="space-y-2 text-white/70">
-                    <li>• {/* TODO: Replace */ "Professional, efficient operations"}</li>
+                    <li>• {/* TODO: Replace */ "Local workers are often on island time"}</li>
                     <li>• {/* TODO: Replace */ "24/7 security and base operations"}</li>
-                    <li>• {/* TODO: Replace */ "Experienced port workers"}</li>
-                    <li>• {/* TODO: Replace */ "Weather rarely impacts operations"}</li>
+                    
+                    <li>• {/* TODO: Replace */ "Pop up storms are common and can impact operations"}</li>
                   </ul>
                 </div>
               </div>
@@ -1996,7 +2098,7 @@ CRITICAL: The carousel components are complex interactive elements - don't chang
         {/* DO NOT MODIFY: Section visibility logic */}
         {activeSection === 'food' && (
           
-          {/* DO NOT MODIFY: Section spacing container */}
+          /* DO NOT MODIFY: Section spacing container */
           <div className="space-y-8">
             
             {/* DO NOT MODIFY: Section header structure */}
@@ -2269,7 +2371,7 @@ CRITICAL: The carousel components are complex interactive elements - don't chang
                   .slice(tasteOfHomeIndex, tasteOfHomeIndex + 4)
                   .map((spot) => (
                     
-                    {/* DO NOT MODIFY: Individual venue card structure */}
+                    /* DO NOT MODIFY: Individual venue card structure */
                     <div
                       key={spot.id}
                       onClick={() => openModal(spot)}
@@ -2420,7 +2522,7 @@ CRITICAL: Like food carousels, these are complex interactive components - don't 
         {/* DO NOT MODIFY: Section visibility logic */}
         {activeSection === 'nightlife' && (
           
-          {/* DO NOT MODIFY: Section spacing container */}
+          /* DO NOT MODIFY: Section spacing container */
           <div className="space-y-8">
             
             {/* DO NOT MODIFY: Section header structure */}
@@ -2565,7 +2667,7 @@ CRITICAL: Like food carousels, these are complex interactive components - don't 
                   .slice(hangsIndex, hangsIndex + 4)
                   .map((spot) => (
                     
-                    {/* DO NOT MODIFY: Individual venue card structure */}
+                    /* DO NOT MODIFY: Individual venue card structure */
                     <div
                       key={spot.id}
                       onClick={() => openModal(spot)}
@@ -2685,7 +2787,7 @@ CRITICAL: Like food carousels, these are complex interactive components - don't 
                   .slice(highEnergyIndex, highEnergyIndex + 4)
                   .map((spot) => (
                     
-                    {/* DO NOT MODIFY: Individual venue card structure */}
+                    /* DO NOT MODIFY: Individual venue card structure */
                     <div
                       key={spot.id}
                       onClick={() => openModal(spot)}
@@ -2833,7 +2935,7 @@ Both sections are primarily text-based - no complex interactive components!
         {/* DO NOT MODIFY: Section visibility logic */}
         {activeSection === 'transportation' && (
           
-          {/* DO NOT MODIFY: Section spacing container */}
+          /* DO NOT MODIFY: Section spacing container */
           <div className="space-y-8">
             
             {/* DO NOT MODIFY: Section header structure */}
@@ -3136,7 +3238,7 @@ Both sections are primarily text-based - no complex interactive components!
         {/* DO NOT MODIFY: Section visibility logic */}
         {activeSection === 'safety' && (
           
-          {/* DO NOT MODIFY: Section spacing container */}
+          /* DO NOT MODIFY: Section spacing container */
           <div className="space-y-8">
             
             {/* DO NOT MODIFY: Section header structure */}
