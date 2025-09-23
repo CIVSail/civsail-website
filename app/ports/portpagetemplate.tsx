@@ -1274,7 +1274,7 @@ Key concepts for beginners:
         {/* DO NOT MODIFY: Section visibility logic */}
         {activeSection === 'overview' && (
           
-          {/* DO NOT MODIFY: Section spacing container */}
+          /* DO NOT MODIFY: Section spacing container */
           <div className="space-y-8">
             
             {/* DO NOT MODIFY: Section header structure */}
@@ -1661,7 +1661,7 @@ Key for beginners:
         {/* DO NOT MODIFY: Section visibility logic */}
         {activeSection === 'operations' && (
           
-          {/* DO NOT MODIFY: Section spacing container */}
+          /* DO NOT MODIFY: Section spacing container */
           <div className="space-y-8">
             
             {/* DO NOT MODIFY: Section header structure */}
@@ -1996,7 +1996,7 @@ CRITICAL: The carousel components are complex interactive elements - don't chang
         {/* DO NOT MODIFY: Section visibility logic */}
         {activeSection === 'food' && (
           
-          {/* DO NOT MODIFY: Section spacing container */}
+          /* DO NOT MODIFY: Section spacing container */
           <div className="space-y-8">
             
             {/* DO NOT MODIFY: Section header structure */}
@@ -2269,7 +2269,7 @@ CRITICAL: The carousel components are complex interactive elements - don't chang
                   .slice(tasteOfHomeIndex, tasteOfHomeIndex + 4)
                   .map((spot) => (
                     
-                    {/* DO NOT MODIFY: Individual venue card structure */}
+                    /* DO NOT MODIFY: Individual venue card structure */
                     <div
                       key={spot.id}
                       onClick={() => openModal(spot)}
@@ -2420,7 +2420,7 @@ CRITICAL: Like food carousels, these are complex interactive components - don't 
         {/* DO NOT MODIFY: Section visibility logic */}
         {activeSection === 'nightlife' && (
           
-          {/* DO NOT MODIFY: Section spacing container */}
+          /* DO NOT MODIFY: Section spacing container */
           <div className="space-y-8">
             
             {/* DO NOT MODIFY: Section header structure */}
@@ -2559,13 +2559,13 @@ CRITICAL: Like food carousels, these are complex interactive components - don't 
                 </div>
               </div>
 
-              {/* DO NOT MODIFY: Venue cards grid - automatically populated from hangsAndDives array */}
+              /* DO NOT MODIFY: Venue cards grid - automatically populated from hangsAndDives array */
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                 {hangsAndDives
                   .slice(hangsIndex, hangsIndex + 4)
                   .map((spot) => (
                     
-                    {/* DO NOT MODIFY: Individual venue card structure */}
+                    /* DO NOT MODIFY: Individual venue card structure */
                     <div
                       key={spot.id}
                       onClick={() => openModal(spot)}
@@ -2655,7 +2655,6 @@ CRITICAL: Like food carousels, these are complex interactive components - don't 
                 </h3>
                 
                 {/* DO NOT MODIFY: Navigation arrow buttons */}
-                <div className="flex space-x-2">
                   <button
                     onClick={() =>
                       setHighEnergyIndex(Math.max(0, highEnergyIndex - 4))
@@ -2685,7 +2684,7 @@ CRITICAL: Like food carousels, these are complex interactive components - don't 
                   .slice(highEnergyIndex, highEnergyIndex + 4)
                   .map((spot) => (
                     
-                    {/* DO NOT MODIFY: Individual venue card structure */}
+                    /* DO NOT MODIFY: Individual venue card structure */
                     <div
                       key={spot.id}
                       onClick={() => openModal(spot)}
@@ -2833,7 +2832,7 @@ Both sections are primarily text-based - no complex interactive components!
         {/* DO NOT MODIFY: Section visibility logic */}
         {activeSection === 'transportation' && (
           
-          {/* DO NOT MODIFY: Section spacing container */}
+          /* DO NOT MODIFY: Section spacing container */
           <div className="space-y-8">
             
             {/* DO NOT MODIFY: Section header structure */}
@@ -3136,7 +3135,7 @@ Both sections are primarily text-based - no complex interactive components!
         {/* DO NOT MODIFY: Section visibility logic */}
         {activeSection === 'safety' && (
           
-          {/* DO NOT MODIFY: Section spacing container */}
+          /* DO NOT MODIFY: Section spacing container */
           <div className="space-y-8">
             
             {/* DO NOT MODIFY: Section header structure */}

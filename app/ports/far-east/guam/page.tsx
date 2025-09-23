@@ -1669,7 +1669,7 @@ Key concepts for beginners:
                       className="inline-block bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-medium transition-colors"
                     >
                       {/* TODO: Update region name */}
-                      Get Japan eSIM →
+                      Get Guam eSIM →
                     </a>
                   </div>
 
@@ -2781,7 +2781,7 @@ CRITICAL: Like food carousels, these are complex interactive components - don't 
                 </div>
               </div>
 
-              {/* DO NOT MODIFY: Venue cards grid - automatically populated from higherEnergy array */}
+              /* DO NOT MODIFY: Venue cards grid - automatically populated from higherEnergy array */
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                 {higherEnergy
                   .slice(highEnergyIndex, highEnergyIndex + 4)
