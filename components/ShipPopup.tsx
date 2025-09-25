@@ -22,7 +22,7 @@ export default function ShipPopup({ isOpen, onClose, shipName, shipHull }: ShipP
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Format ship name for API search (try both full USNS format and just name)
+  // Format search terms for better API results
   const searchTerms = [
     `USNS ${shipName}`,
     shipName,
