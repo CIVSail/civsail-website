@@ -10,6 +10,7 @@ import {
   MapPin,
   Home,
 } from 'lucide-react';
+import ShipPopup from '@/components/ShipPopup'; // Add this import
 
 interface QuickStat {
   icon: React.ReactNode;
@@ -25,6 +26,18 @@ interface Section {
 
 export default function TAKEShipPage() {
   const [activeSection, setActiveSection] = useState('overview');
+  // Add these new state variables for the popup
+  const [selectedShip, setSelectedShip] = useState<{
+    name: string;
+    hull: string;
+  } | null>(null);
+  const [isPopupOpen, setIsPopupOpen] = useState(false);
+
+  // Add this function to handle ship clicks
+  const handleShipClick = (shipName: string, hull: string) => {
+    setSelectedShip({ name: shipName, hull });
+    setIsPopupOpen(true);
+  };
 
   const quickStats: QuickStat[] = [
     {
@@ -74,6 +87,16 @@ export default function TAKEShipPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-900 via-slate-800 to-blue-800">
+      {/* Add the popup component */}
+      {selectedShip && (
+        <ShipPopup
+          isOpen={isPopupOpen}
+          onClose={() => setIsPopupOpen(false)}
+          shipName={selectedShip.name}
+          shipHull={selectedShip.hull}
+        />
+      )}
+
       {/* Hero Section */}
       <div className="relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-r from-blue-600/20 to-indigo-600/20" />
@@ -944,7 +967,7 @@ export default function TAKEShipPage() {
             </div>
           )}
 
-          {/* Life Aboard Section - PLACEHOLDER */}
+          {/* Life Aboard Section */}
           {activeSection === 'life-aboard' && (
             <div className="space-y-8">
               <div className="flex items-center mb-8">
@@ -952,13 +975,628 @@ export default function TAKEShipPage() {
                 <h2 className="text-3xl font-bold text-white">Life Aboard</h2>
               </div>
 
-              <div className="text-center text-white/60">
-                <p>Life Aboard section - content coming soon</p>
+              {/* Introduction */}
+              <div className="bg-gradient-to-br from-blue-500/20 to-indigo-500/20 rounded-xl p-6 border border-white/10">
+                <h3 className="text-xl font-semibold text-white mb-4">
+                  T-AKE Living Overview
+                </h3>
+                <p className="text-white/80 mb-6">
+                  T-AKE vessels have a single house located on the aft end of
+                  the ship. Comprised of 8 decks, T-AKEs are considered
+                  comfortable vessels that have several amenities that increase
+                  crewmember quality of life.
+                </p>
+
+                <div className="grid md:grid-cols-3 gap-4">
+                  <div className="bg-white/10 rounded-lg p-4">
+                    <h4 className="font-medium text-white mb-2">
+                      🏠 No Open Berthing
+                    </h4>
+                    <p className="text-white/70 text-sm">
+                      All positions get individual or shared staterooms
+                    </p>
+                  </div>
+                  <div className="bg-white/10 rounded-lg p-4">
+                    <h4 className="font-medium text-white mb-2">
+                      🧺 Deck Amenities
+                    </h4>
+                    <p className="text-white/70 text-sm">
+                      Washers, dryers, and lounges on each level
+                    </p>
+                  </div>
+                  <div className="bg-white/10 rounded-lg p-4">
+                    <h4 className="font-medium text-white mb-2">
+                      🛗 Elevators
+                    </h4>
+                    <p className="text-white/70 text-sm">
+                      Personnel elevators from engine room to bridge
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Staterooms and Berthing Areas */}
+              <div className="bg-gradient-to-br from-green-500/20 to-teal-500/20 rounded-xl p-6 border border-white/10">
+                <h3 className="text-xl font-semibold text-white mb-6 flex items-center">
+                  <span className="text-2xl mr-3">🛏️</span>
+                  Staterooms and Berthing Areas
+                </h3>
+
+                {/* Officer Staterooms */}
+                <div className="mb-8">
+                  <h4 className="text-lg font-semibold text-green-300 mb-4 flex items-center">
+                    <span className="text-xl mr-2">👔</span>
+                    Officer Staterooms
+                  </h4>
+
+                  <div className="grid lg:grid-cols-2 gap-6">
+                    <div>
+                      <div className="bg-white/10 rounded-lg p-4 mb-4">
+                        <h5 className="font-medium text-white mb-3">
+                          MSC Officers (06 Level)
+                        </h5>
+                        <ul className="text-white/80 text-sm space-y-1">
+                          <li>
+                            • Individual staterooms with private bathrooms
+                          </li>
+                          <li>• Full beds (not bunks)</li>
+                          <li>• Some rooms equipped with computers</li>
+                          <li>
+                            • Captain & Chief Engineer have office/stateroom
+                            combo
+                          </li>
+                        </ul>
+                      </div>
+
+                      <div className="bg-white/10 rounded-lg p-4">
+                        <h5 className="font-medium text-white mb-3">
+                          Military Officers & CPOs (05 Level)
+                        </h5>
+                        <ul className="text-white/80 text-sm space-y-1">
+                          <li>
+                            • Individual staterooms with private bathrooms
+                          </li>
+                          <li>• Own shower, sink, and toilet</li>
+                          <li>• CPOs: port and starboard side rooms</li>
+                          <li>
+                            • Officers/AirDet: forward rooms (door separated)
+                          </li>
+                        </ul>
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-3">
+                      <div className="rounded-lg aspect-square overflow-hidden">
+                        <img
+                          src="/images/ships/msc/t-ake/staterooms/T-AKE Officer Room 1 -CHD copy.JPG"
+                          alt="T-AKE Officer Room"
+                          className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
+                          onError={(e) => {
+                            e.currentTarget.src =
+                              '/images/global/Coming_Soon_Graphic.png';
+                          }}
+                        />
+                      </div>
+                      <div className="rounded-lg aspect-square overflow-hidden">
+                        <img
+                          src="/images/ships/msc/t-ake/staterooms/T-AKE Officer Room 2 -CHD.JPG"
+                          alt="T-AKE Officer Room 2"
+                          className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
+                          onError={(e) => {
+                            e.currentTarget.src =
+                              '/images/global/Coming_Soon_Graphic.png';
+                          }}
+                        />
+                      </div>
+                      <div className="rounded-lg aspect-square overflow-hidden">
+                        <img
+                          src="/images/ships/msc/t-ake/staterooms/T-AKE Officers Room 1.JPG"
+                          alt="T-AKE Officers Room"
+                          className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
+                          onError={(e) => {
+                            e.currentTarget.src =
+                              '/images/global/Coming_Soon_Graphic.png';
+                          }}
+                        />
+                      </div>
+                      <div className="rounded-lg aspect-square overflow-hidden">
+                        <img
+                          src="/images/ships/msc/t-ake/staterooms/T-AKE Officers Room 2.JPG"
+                          alt="T-AKE Officers Room 2"
+                          className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
+                          onError={(e) => {
+                            e.currentTarget.src =
+                              '/images/global/Coming_Soon_Graphic.png';
+                          }}
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Non-Officer Staterooms */}
+                <div className="mb-8">
+                  <h4 className="text-lg font-semibold text-green-300 mb-4 flex items-center">
+                    <span className="text-xl mr-2">⚓</span>
+                    Non-Officer Staterooms
+                  </h4>
+
+                  <div className="grid lg:grid-cols-2 gap-6">
+                    <div>
+                      <div className="bg-white/10 rounded-lg p-4 mb-4">
+                        <h5 className="font-medium text-white mb-3">
+                          Unlicensed Crew (03 & 04 Levels)
+                        </h5>
+                        <ul className="text-white/80 text-sm space-y-1">
+                          <li>• Individual staterooms</li>
+                          <li>• Shared bathroom with adjoining room</li>
+                          <li>• Standard crew accommodations</li>
+                          <li>• More privacy than lower decks</li>
+                        </ul>
+                      </div>
+
+                      <div className="bg-white/10 rounded-lg p-4">
+                        <h5 className="font-medium text-white mb-3">
+                          Enlisted Military & Cadets (02 Level)
+                        </h5>
+                        <ul className="text-white/80 text-sm space-y-1">
+                          <li>• Designed for two people to share</li>
+                          <li>• Bunk beds with individual storage</li>
+                          <li>• Shared bathroom between rooms</li>
+                          <li>
+                            • Often single occupancy if excess berthing space
+                          </li>
+                        </ul>
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-3">
+                      <div className="rounded-lg aspect-square overflow-hidden">
+                        <img
+                          src="/images/global/Coming_Soon_Graphic.png"
+                          alt="T-AKE Crew Stateroom - Photo Coming Soon"
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
+                      <div className="rounded-lg aspect-square overflow-hidden">
+                        <img
+                          src="/images/global/Coming_Soon_Graphic.png"
+                          alt="T-AKE Enlisted Berthing - Photo Coming Soon"
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
+                      <div className="rounded-lg aspect-square overflow-hidden">
+                        <img
+                          src="/images/global/Coming_Soon_Graphic.png"
+                          alt="T-AKE Shared Bathroom - Photo Coming Soon"
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
+                      <div className="rounded-lg aspect-square overflow-hidden">
+                        <img
+                          src="/images/global/Coming_Soon_Graphic.png"
+                          alt="T-AKE Bunk Beds - Photo Coming Soon"
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Galley and Mess Decks */}
+              <div className="bg-gradient-to-br from-cyan-500/20 to-blue-500/20 rounded-xl p-6 border border-white/10">
+                <h3 className="text-xl font-semibold text-white mb-6 flex items-center">
+                  <span className="text-2xl mr-3">🍽️</span>
+                  Galley and Mess Decks
+                </h3>
+
+                {/* Officers Mess */}
+                <div className="mb-8">
+                  <h4 className="text-lg font-semibold text-cyan-300 mb-4 flex items-center">
+                    <span className="text-xl mr-2">👔</span>
+                    Officers Mess
+                  </h4>
+
+                  <div className="grid lg:grid-cols-2 gap-6">
+                    <div>
+                      <div className="bg-white/10 rounded-lg p-4">
+                        <ul className="text-white/80 text-sm space-y-2">
+                          <li>• Separate dining area for officers</li>
+                          <li>• More formal dining environment</li>
+                          <li>• Same food as crew mess</li>
+                          <li>• Goes through same serving line</li>
+                        </ul>
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-3">
+                      <div className="rounded-lg aspect-square overflow-hidden">
+                        <img
+                          src="/images/global/Coming_Soon_Graphic.png"
+                          alt="T-AKE Officers Mess - Photo Coming Soon"
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
+                      <div className="rounded-lg aspect-square overflow-hidden">
+                        <img
+                          src="/images/global/Coming_Soon_Graphic.png"
+                          alt="T-AKE Officer Dining - Photo Coming Soon"
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Crew Mess */}
+                <div className="mb-8">
+                  <h4 className="text-lg font-semibold text-cyan-300 mb-4 flex items-center">
+                    <span className="text-xl mr-2">⚓</span>
+                    Crew Mess
+                  </h4>
+
+                  <div className="grid lg:grid-cols-2 gap-6">
+                    <div>
+                      <div className="bg-white/10 rounded-lg p-4 mb-4">
+                        <h5 className="font-medium text-white mb-3">
+                          Main Crew Mess
+                        </h5>
+                        <ul className="text-white/80 text-sm space-y-1">
+                          <li>• Primary dining area for crew</li>
+                          <li>• Larger capacity than officers mess</li>
+                          <li>• Casual dining environment</li>
+                        </ul>
+                      </div>
+
+                      <div className="bg-white/10 rounded-lg p-4 mb-4">
+                        <h5 className="font-medium text-white mb-3">
+                          CPO Mess
+                        </h5>
+                        <ul className="text-white/80 text-sm space-y-1">
+                          <li>• Separate area for Chief Petty Officers</li>
+                          <li>• Mid-level between officers and crew</li>
+                        </ul>
+                      </div>
+
+                      <div className="bg-white/10 rounded-lg p-4">
+                        <h5 className="font-medium text-white mb-3">
+                          "Dirty" Mess
+                        </h5>
+                        <ul className="text-white/80 text-sm space-y-1">
+                          <li>• For workers coming off dirty jobs</li>
+                          <li>• Night lunch storage area</li>
+                          <li>
+                            • Don't touch wrapped plates - they're for night
+                            watch!
+                          </li>
+                        </ul>
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-3">
+                      <div className="rounded-lg aspect-square overflow-hidden">
+                        <img
+                          src="/images/ships/msc/t-ake/mess_decks/T-AKE Crew Mess- CHD 2.JPG"
+                          alt="T-AKE Crew Mess"
+                          className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
+                          onError={(e) => {
+                            e.currentTarget.src =
+                              '/images/global/Coming_Soon_Graphic.png';
+                          }}
+                        />
+                      </div>
+                      <div className="rounded-lg aspect-square overflow-hidden">
+                        <img
+                          src="/images/global/Coming_Soon_Graphic.png"
+                          alt="T-AKE Serving Line - Photo Coming Soon"
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
+                      <div className="rounded-lg aspect-square overflow-hidden">
+                        <img
+                          src="/images/global/Coming_Soon_Graphic.png"
+                          alt="T-AKE CPO Mess - Photo Coming Soon"
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
+                      <div className="rounded-lg aspect-square overflow-hidden">
+                        <img
+                          src="/images/global/Coming_Soon_Graphic.png"
+                          alt="T-AKE Sandwich Line - Photo Coming Soon"
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="p-4 bg-cyan-500/20 rounded-lg border border-cyan-400/30">
+                  <p className="text-cyan-300 text-sm">
+                    <strong>Note:</strong> Despite separate mess decks, everyone
+                    goes through the same serving line and receives the same
+                    food. T-AKEs also have a "sandwich line" that varies in use
+                    depending on the ship.
+                  </p>
+                </div>
+              </div>
+
+              {/* Gyms */}
+              <div className="bg-gradient-to-br from-emerald-500/20 to-green-500/20 rounded-xl p-6 border border-white/10">
+                <h3 className="text-xl font-semibold text-white mb-6 flex items-center">
+                  <span className="text-2xl mr-3">🏋️</span>
+                  Gyms
+                </h3>
+
+                <div className="grid lg:grid-cols-2 gap-6">
+                  <div className="space-y-4">
+                    <div className="bg-white/10 rounded-lg p-4">
+                      <h4 className="font-medium text-emerald-300 mb-3 flex items-center">
+                        <span className="mr-2">🏃</span>
+                        04 Level - Cardio Gym
+                      </h4>
+                      <ul className="text-white/80 text-sm space-y-1">
+                        <li>
+                          • Cardio machines (treadmills, bikes, ellipticals)
+                        </li>
+                        <li>• Various fitness equipment</li>
+                        <li>• Primary cardio workout space</li>
+                        <li>• Equipment varies by ship</li>
+                      </ul>
+                    </div>
+
+                    <div className="bg-white/10 rounded-lg p-4">
+                      <h4 className="font-medium text-emerald-300 mb-3 flex items-center">
+                        <span className="mr-2">💪</span>
+                        06 Level - Weight Gym
+                      </h4>
+                      <ul className="text-white/80 text-sm space-y-1">
+                        <li>• Dumbbells up to 100 pounds</li>
+                        <li>• Weightlifting machines</li>
+                        <li>• Primary strength training area</li>
+                        <li>• Setup varies from ship to ship</li>
+                      </ul>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="rounded-lg aspect-square overflow-hidden">
+                      <img
+                        src="/images/ships/msc/t-ake/gyms/T-AKE Gym 1 -CHD.JPG"
+                        alt="T-AKE Cardio Gym"
+                        className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
+                        onError={(e) => {
+                          e.currentTarget.src =
+                            '/images/global/Coming_Soon_Graphic.png';
+                        }}
+                      />
+                    </div>
+                    <div className="rounded-lg aspect-square overflow-hidden">
+                      <img
+                        src="/images/global/Coming_Soon_Graphic.png"
+                        alt="T-AKE Weight Gym - Photo Coming Soon"
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                    <div className="rounded-lg aspect-square overflow-hidden">
+                      <img
+                        src="/images/global/Coming_Soon_Graphic.png"
+                        alt="T-AKE Cardio Equipment - Photo Coming Soon"
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                    <div className="rounded-lg aspect-square overflow-hidden">
+                      <img
+                        src="/images/global/Coming_Soon_Graphic.png"
+                        alt="T-AKE Weight Equipment - Photo Coming Soon"
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Lounges and Common Areas */}
+              <div className="bg-gradient-to-br from-violet-500/20 to-purple-500/20 rounded-xl p-6 border border-white/10">
+                <h3 className="text-xl font-semibold text-white mb-6 flex items-center">
+                  <span className="text-2xl mr-3">🛋️</span>
+                  Lounges and Common Areas
+                </h3>
+
+                <div className="grid lg:grid-cols-2 gap-6">
+                  <div>
+                    <div className="bg-white/10 rounded-lg p-4 mb-4">
+                      <h4 className="font-medium text-violet-300 mb-3">
+                        Deck Lounges
+                      </h4>
+                      <ul className="text-white/80 text-sm space-y-1">
+                        <li>• One lounge per deck with staterooms</li>
+                        <li>• Computers for internet access</li>
+                        <li>• Card tables and seating areas</li>
+                        <li>• Television and coffee maker</li>
+                        <li>• Sink for convenience</li>
+                      </ul>
+                    </div>
+
+                    <div className="bg-white/10 rounded-lg p-4 mb-4">
+                      <h4 className="font-medium text-violet-300 mb-3">
+                        Library (02 Level)
+                      </h4>
+                      <ul className="text-white/80 text-sm space-y-1">
+                        <li>• Books and reading materials</li>
+                        <li>• Multiple computers</li>
+                        <li>• Quiet space for reading/study</li>
+                      </ul>
+                    </div>
+
+                    <div className="bg-white/10 rounded-lg p-4">
+                      <h4 className="font-medium text-violet-300 mb-3">
+                        Ship Store (02 Level)
+                      </h4>
+                      <ul className="text-white/80 text-sm space-y-1">
+                        <li>• Usage varies greatly by ship</li>
+                        <li>• Stock depends on schedule and operator</li>
+                        <li>• Basic supplies and snacks when operational</li>
+                      </ul>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="rounded-lg aspect-square overflow-hidden">
+                      <img
+                        src="/images/ships/msc/t-ake/lounges/T-AKE Crew Lounge 1 -CHD.JPG"
+                        alt="T-AKE Crew Lounge"
+                        className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
+                        onError={(e) => {
+                          e.currentTarget.src =
+                            '/images/global/Coming_Soon_Graphic.png';
+                        }}
+                      />
+                    </div>
+                    <div className="rounded-lg aspect-square overflow-hidden">
+                      <img
+                        src="/images/ships/msc/t-ake/lounges/T-AKE Crew Lounge 2-CHD .JPG"
+                        alt="T-AKE Crew Lounge 2"
+                        className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
+                        onError={(e) => {
+                          e.currentTarget.src =
+                            '/images/global/Coming_Soon_Graphic.png';
+                        }}
+                      />
+                    </div>
+                    <div className="rounded-lg aspect-square overflow-hidden">
+                      <img
+                        src="/images/ships/msc/t-ake/lounges/T-AKE Library 2-CHD.JPG"
+                        alt="T-AKE Library"
+                        className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
+                        onError={(e) => {
+                          e.currentTarget.src =
+                            '/images/global/Coming_Soon_Graphic.png';
+                        }}
+                      />
+                    </div>
+                    <div className="rounded-lg aspect-square overflow-hidden">
+                      <img
+                        src="/images/ships/msc/t-ake/lounges/T-AKE Library-CHD.JPG"
+                        alt="T-AKE Library Computer Area"
+                        className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
+                        onError={(e) => {
+                          e.currentTarget.src =
+                            '/images/global/Coming_Soon_Graphic.png';
+                        }}
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Other - T-AKE Specific */}
+              <div className="bg-gradient-to-br from-slate-600/20 to-gray-600/20 rounded-xl p-6 border border-white/10">
+                <h3 className="text-xl font-semibold text-white mb-6 flex items-center">
+                  <span className="text-2xl mr-3">🏢</span>
+                  Other - T-AKE Specific Areas
+                </h3>
+
+                <div className="grid lg:grid-cols-2 gap-6">
+                  <div>
+                    <div className="bg-white/10 rounded-lg p-4 mb-4">
+                      <h4 className="font-medium text-slate-300 mb-3">
+                        Offices & Workspaces
+                      </h4>
+                      <ul className="text-white/80 text-sm space-y-1">
+                        <li>
+                          • <strong>01 Level:</strong> Chief Steward, Cargo
+                          offices (forward)
+                        </li>
+                        <li>
+                          • <strong>02 Level:</strong> Medical, Supply, Purser,
+                          Chief Mate
+                        </li>
+                        <li>
+                          • <strong>06 Level:</strong> Captain & Chief Engineer
+                          (with staterooms)
+                        </li>
+                        <li>
+                          • <strong>07 Level:</strong> Bridge, Radio, LAN Admin,
+                          Navigator
+                        </li>
+                      </ul>
+                    </div>
+
+                    <div className="bg-white/10 rounded-lg p-4">
+                      <h4 className="font-medium text-slate-300 mb-3">
+                        Special Features
+                      </h4>
+                      <ul className="text-white/80 text-sm space-y-1">
+                        <li>• Barber shop (some AKEs, usually 02 level)</li>
+                        <li>• Medical office with treatment capabilities</li>
+                        <li>• Multiple office spaces for department heads</li>
+                        <li>• Laundry facilities on each deck</li>
+                      </ul>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="rounded-lg aspect-square overflow-hidden">
+                      <img
+                        src="/images/global/Coming_Soon_Graphic.png"
+                        alt="T-AKE Bridge - Photo Coming Soon"
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                    <div className="rounded-lg aspect-square overflow-hidden">
+                      <img
+                        src="/images/global/Coming_Soon_Graphic.png"
+                        alt="T-AKE Medical Office - Photo Coming Soon"
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                    <div className="rounded-lg aspect-square overflow-hidden">
+                      <img
+                        src="/images/global/Coming_Soon_Graphic.png"
+                        alt="T-AKE Barber Shop - Photo Coming Soon"
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                    <div className="rounded-lg aspect-square overflow-hidden">
+                      <img
+                        src="/images/global/Coming_Soon_Graphic.png"
+                        alt="T-AKE Office Space - Photo Coming Soon"
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Photo Submission Call-to-Action */}
+              <div className="bg-gradient-to-br from-yellow-500/20 to-orange-500/20 rounded-xl p-6 border border-yellow-400/30">
+                <h3 className="text-xl font-semibold text-white mb-4 flex items-center">
+                  <span className="text-2xl mr-3">📸</span>
+                  Help Us Complete This Section!
+                </h3>
+                <p className="text-white/80 mb-4">
+                  We're working to make this the most accurate and comprehensive
+                  resource for T-AKE life aboard. If you have photos of T-AKE
+                  staterooms, mess decks, gyms, or other areas that we're
+                  missing, we'd love to include them.
+                </p>
+                <div className="flex flex-col sm:flex-row gap-4">
+                  <a
+                    href="mailto:support@civsail.com?subject=T-AKE Photos Submission"
+                    className="bg-yellow-600 hover:bg-yellow-700 text-white px-6 py-3 rounded-lg font-medium text-center transition-colors"
+                  >
+                    Submit Photos
+                  </a>
+                  <div className="text-yellow-300 text-sm flex items-center">
+                    <span>📧 support@civsail.com</span>
+                  </div>
+                </div>
               </div>
             </div>
           )}
 
-          {/* Ships & Ports Section */}
+          {/* Ships & Ports Section - UPDATED with click handlers */}
           {activeSection === 'ships-ports' && (
             <div className="space-y-8">
               <div className="flex items-center mb-8">
@@ -1010,7 +1648,7 @@ export default function TAKEShipPage() {
 
               {/* Individual Ships */}
               <div className="space-y-6">
-                {/* East Coast Ships */}
+                {/* East Coast Ships - UPDATED with click handlers */}
                 <div className="bg-gradient-to-br from-green-500/20 to-teal-500/20 rounded-xl p-6 border border-white/10">
                   <h3 className="text-xl font-semibold text-white mb-6 flex items-center">
                     <span className="text-2xl mr-3">🇺🇸</span>
@@ -1047,17 +1685,18 @@ export default function TAKEShipPage() {
                     ].map((ship) => (
                       <div
                         key={ship.hull}
-                        className="bg-white/10 rounded-lg p-4 border border-white/20 hover:bg-white/15 transition-colors"
+                        className="bg-white/10 rounded-lg p-4 border border-white/20 hover:bg-white/15 transition-colors cursor-pointer group"
+                        onClick={() => handleShipClick(ship.name, ship.hull)}
                       >
                         <div className="flex items-center justify-between mb-2">
-                          <span className="font-medium text-white text-sm">
+                          <span className="font-medium text-white text-sm group-hover:text-blue-300 transition-colors">
                             USNS {ship.name}
                           </span>
                           <span className="text-green-300 text-xs font-mono">
                             {ship.hull}
                           </span>
                         </div>
-                        <div className="text-white/60 text-xs">
+                        <div className="text-white/60 text-xs mb-2">
                           {ship.special}
                         </div>
                         {ship.special.includes('Preposition') && (
@@ -1065,6 +1704,9 @@ export default function TAKEShipPage() {
                             Special Mission
                           </div>
                         )}
+                        <div className="mt-2 text-xs text-blue-300 opacity-0 group-hover:opacity-100 transition-opacity">
+                          Click for news & photos →
+                        </div>
                       </div>
                     ))}
                   </div>
@@ -1121,7 +1763,7 @@ export default function TAKEShipPage() {
                   </div>
                 </div>
 
-                {/* West Coast Ships */}
+                {/* West Coast Ships - UPDATED with click handlers */}
                 <div className="bg-gradient-to-br from-purple-500/20 to-pink-500/20 rounded-xl p-6 border border-white/10">
                   <h3 className="text-xl font-semibold text-white mb-6 flex items-center">
                     <span className="text-2xl mr-3">🌊</span>
@@ -1142,18 +1784,22 @@ export default function TAKEShipPage() {
                     ].map((ship) => (
                       <div
                         key={ship.hull}
-                        className="bg-white/10 rounded-lg p-4 border border-white/20 hover:bg-white/15 transition-colors"
+                        className="bg-white/10 rounded-lg p-4 border border-white/20 hover:bg-white/15 transition-colors cursor-pointer group"
+                        onClick={() => handleShipClick(ship.name, ship.hull)}
                       >
                         <div className="flex items-center justify-between mb-2">
-                          <span className="font-medium text-white text-sm">
+                          <span className="font-medium text-white text-sm group-hover:text-blue-300 transition-colors">
                             USNS {ship.name}
                           </span>
                           <span className="text-purple-300 text-xs font-mono">
                             {ship.hull}
                           </span>
                         </div>
-                        <div className="text-white/60 text-xs">
+                        <div className="text-white/60 text-xs mb-2">
                           San Diego Homeport
+                        </div>
+                        <div className="text-xs text-blue-300 opacity-0 group-hover:opacity-100 transition-opacity">
+                          Click for news & photos →
                         </div>
                       </div>
                     ))}
