@@ -72,45 +72,64 @@ export default function SaseboPortPage() {
   const [highEnergyIndex, setHighEnergyIndex] = useState(0);
   const [selectedVenue, setSelectedVenue] = useState<SpotData | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  // --- Config for Sasebo ---
+  const WEATHER_CONFIG = {
+    LATITUDE: 33.1594,
+    LONGITUDE: 129.7233,
+    TIMEZONE: 'Asia/Tokyo',
+  };
+
   // Weather useEffect
+  // Weather + Time (no external time API)
   useEffect(() => {
-    const fetchWeatherAndTime = async () => {
+    // Compute local time for Sasebo without any API
+    const computeLocalTime = () =>
+      new Date().toLocaleTimeString('en-US', {
+        timeZone: WEATHER_CONFIG.TIMEZONE,
+        hour12: false,
+        hour: '2-digit',
+        minute: '2-digit',
+      });
+
+    const fetchWeather = async () => {
       try {
-        // Fetch weather for Sasebo coordinates
-        const weatherResponse = await fetch(
-          `https://api.openweathermap.org/data/2.5/weather?lat=33.1594&lon=129.7233&appid=${process.env.NEXT_PUBLIC_OPENWEATHER_API_KEY}&units=imperial`
+        const res = await fetch(
+          `https://api.openweathermap.org/data/2.5/weather?lat=${WEATHER_CONFIG.LATITUDE}&lon=${WEATHER_CONFIG.LONGITUDE}&appid=${process.env.NEXT_PUBLIC_OPENWEATHER_API_KEY}&units=imperial`
         );
-        const weather = await weatherResponse.json();
+        if (!res.ok) throw new Error(`Weather fetch failed: ${res.status}`);
+        const data = await res.json();
 
-        // Fetch time for Japan
-        const timeResponse = await fetch(
-          'https://worldtimeapi.org/api/timezone/Asia/Tokyo'
-        );
-        const timeData = await timeResponse.json();
-        const localTime = new Date(timeData.datetime).toLocaleTimeString(
-          'en-US',
-          {
-            timeZone: 'Asia/Tokyo',
-            hour12: false,
-            hour: '2-digit',
-            minute: '2-digit',
-          }
-        );
+        const temp =
+          typeof data?.main?.temp === 'number'
+            ? Math.round(data.main.temp).toString()
+            : '—';
 
-        setWeatherData({
-          temp: Math.round(weather.main.temp).toString(),
-          time: localTime,
-        });
-      } catch (error) {
-        console.error('Error fetching weather/time:', error);
+        setWeatherData({ temp, time: computeLocalTime() });
+      } catch (err) {
+        console.error('Error fetching weather:', err);
+        // Show time anyway; keep a reasonable temp fallback
+        setWeatherData({ temp: '75', time: computeLocalTime() });
       }
     };
 
-    fetchWeatherAndTime();
-    // Refresh every 10 minutes
-    const interval = setInterval(fetchWeatherAndTime, 600000);
-    return () => clearInterval(interval);
+    // Initial paint
+    setWeatherData((prev) => ({ ...prev, time: computeLocalTime() }));
+    fetchWeather();
+
+    // Tick the clock every minute so it stays current
+    const timeInterval = setInterval(() => {
+      setWeatherData((prev) => ({ ...prev, time: computeLocalTime() }));
+    }, 60_000);
+
+    // Refresh weather every 10 minutes
+    const weatherInterval = setInterval(fetchWeather, 600_000);
+
+    return () => {
+      clearInterval(timeInterval);
+      clearInterval(weatherInterval);
+    };
   }, []);
+
   // Modal functions
   const openModal = (venue: SpotData) => {
     setSelectedVenue(venue);

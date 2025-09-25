@@ -19,14 +19,20 @@ export async function GET(request: NextRequest) {
   const limit = parseInt(searchParams.get('limit') || '5');
 
   if (!search) {
-    return NextResponse.json({ error: 'Search parameter is required' }, { status: 400 });
+    return NextResponse.json(
+      { error: 'Search parameter is required' },
+      { status: 400 }
+    );
   }
 
   // Get API key from environment variables
   const apiKey = process.env.DVIDS_API_KEY;
   if (!apiKey) {
     console.error('DVIDS_API_KEY environment variable is not set');
-    return NextResponse.json({ error: 'API configuration error' }, { status: 500 });
+    return NextResponse.json(
+      { error: 'API configuration error' },
+      { status: 500 }
+    );
   }
 
   try {
@@ -56,25 +62,26 @@ export async function GET(request: NextRequest) {
       const response = await fetch(searchUrl.toString(), {
         method: 'GET',
         headers: {
-          'Accept': 'application/json',
-          'User-Agent': 'CIVSail-News-Fetcher/1.0'
-        }
+          Accept: 'application/json',
+          'User-Agent': 'CIVSail-News-Fetcher/1.0',
+        },
       });
 
       if (response.ok) {
         const data: DVIDSSearchResponse = await response.json();
-        
+
         if (data.results && data.results.length > 0) {
           // Add articles, avoiding duplicates
-          const newArticles = data.results.filter(article => 
-            !allArticles.some(existing => existing.id === article.id)
+          const newArticles = data.results.filter(
+            (article) =>
+              !allArticles.some((existing) => existing.id === article.id)
           );
           allArticles.push(...newArticles);
         }
       }
 
       // Add small delay between requests
-      await new Promise(resolve => setTimeout(resolve, 100));
+      await new Promise((resolve) => setTimeout(resolve, 100));
     }
 
     // If no results, try some broader terms
@@ -103,7 +110,10 @@ export async function GET(request: NextRequest) {
             const data: DVIDSSearchResponse = await response.json();
             if (data.results && data.results.length > 0) {
               const newArticles = data.results
-                .filter(article => !allArticles.some(existing => existing.id === article.id))
+                .filter(
+                  (article) =>
+                    !allArticles.some((existing) => existing.id === article.id)
+                )
                 .slice(0, 2); // Just take 2 from each broader search
               allArticles.push(...newArticles);
             }
@@ -112,38 +122,41 @@ export async function GET(request: NextRequest) {
           console.log(`Error searching broader term "${term}":`, error);
         }
 
-        await new Promise(resolve => setTimeout(resolve, 100));
+        await new Promise((resolve) => setTimeout(resolve, 100));
       }
     }
 
     // Sort by date and limit results
     const sortedArticles = allArticles
-      .sort((a, b) => new Date(b.publish_date).getTime() - new Date(a.publish_date).getTime())
+      .sort(
+        (a, b) =>
+          new Date(b.publish_date).getTime() -
+          new Date(a.publish_date).getTime()
+      )
       .slice(0, limit);
 
     // Transform the data for the frontend
-    const articles = sortedArticles.map(article => ({
+    const articles = sortedArticles.map((article) => ({
       id: article.id,
       title: article.title || 'Untitled Article',
       date: article.publish_date || new Date().toISOString(),
       url: article.url || `https://www.dvidshub.net/news/${article.id}`,
-      description: article.description || 'No description available'
+      description: article.description || 'No description available',
     }));
 
     return NextResponse.json({
       articles,
       searchTerm: search,
-      total: articles.length
+      total: articles.length,
     });
-
   } catch (error) {
     console.error('Error fetching DVIDS news:', error);
     return NextResponse.json(
-      { 
+      {
         error: 'Failed to fetch news articles',
         articles: [],
         searchTerm: search,
-        total: 0
+        total: 0,
       },
       { status: 500 }
     );
