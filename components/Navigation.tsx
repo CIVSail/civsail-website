@@ -1,11 +1,31 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
+import { createClient } from '@/lib/supabase/client';
+import { User } from '@supabase/supabase-js';
 
 export default function Navigation() {
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
+  const [user, setUser] = useState<User | null>(null);
+  const supabase = createClient();
+
+  useEffect(() => {
+    // Get initial session
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setUser(session?.user ?? null);
+    });
+
+    // Listen for auth changes
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ?? null);
+    });
+
+    return () => subscription.unsubscribe();
+  }, [supabase]);
 
   const handleDropdownToggle = (dropdownName: string) => {
     setActiveDropdown(activeDropdown === dropdownName ? null : dropdownName);
@@ -113,13 +133,22 @@ export default function Navigation() {
                   </a>
                 </div>
 
-                {/* Single Auth Button */}
-                <Link
-                  href="/login"
-                  className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg transition-colors font-medium"
-                >
-                  Sign In
-                </Link>
+                {/* Auth Button - Dynamic based on login state */}
+                {user ? (
+                  <Link
+                    href="/dashboard"
+                    className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg transition-colors font-medium"
+                  >
+                    Dashboard
+                  </Link>
+                ) : (
+                  <Link
+                    href="/login"
+                    className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg transition-colors font-medium"
+                  >
+                    Sign In
+                  </Link>
+                )}
               </div>
             </div>
           </div>

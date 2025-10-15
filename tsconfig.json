@@ -1,27 +1,207 @@
 {
+  // ============================================================================
+  // COMPILER OPTIONS - How TypeScript processes your code
+  // ============================================================================
   "compilerOptions": {
+    
+    // ------------------------------------------------------------------------
+    // CODE GENERATION: What kind of JavaScript to output
+    // ------------------------------------------------------------------------
+    
     "target": "ES2017",
+    // Converts your TypeScript to JavaScript using ES2017 syntax
+    // ES2017 = Modern JavaScript that works in all browsers from 2017+
+    // Includes features like: async/await, Object.entries, string padding
+    // Why ES2017? Balance of modern features + broad browser support
+    
     "lib": ["dom", "dom.iterable", "esnext"],
-    "allowJs": true,
-    "skipLibCheck": true,
-    "strict": true,
-    "noEmit": true,
-    "esModuleInterop": true,
-    "module": "esnext",
-    "moduleResolution": "bundler",
-    "resolveJsonModule": true,
-    "isolatedModules": true,
+    // Tells TypeScript what built-in APIs exist in your environment
+    // - "dom": Browser APIs (document, window, fetch, localStorage)
+    // - "dom.iterable": Lets you loop over NodeList, HTMLCollection
+    // - "esnext": Latest JavaScript features (even if not in ES2017)
+    // Example: Without "dom", TypeScript would error on `document.getElementById()`
+    
     "jsx": "preserve",
+    // How to handle JSX (the HTML-looking code in React)
+    // "preserve" = Keep JSX as-is, let Next.js convert it later
+    // Other options: "react" (convert to React.createElement), "react-jsx"
+    // Why preserve? Next.js has its own optimized JSX transformer
+    
+    // ------------------------------------------------------------------------
+    // FILE HANDLING: What files TypeScript should process
+    // ------------------------------------------------------------------------
+    
+    "allowJs": true,
+    // Allow importing regular .js files into .ts/.tsx files
+    // Useful when migrating from JavaScript to TypeScript gradually
+    // Example: import OldComponent from './old-file.js' ✅ (works)
+    
+    "skipLibCheck": true,
+    // Don't type-check files in node_modules (3rd party libraries)
+    // Speeds up builds significantly (from 30s to 5s on large projects)
+    // You trust npm packages to have correct types
+    
+    "resolveJsonModule": true,
+    // Allow importing .json files as JavaScript objects
+    // Example: import config from './config.json'
+    // The JSON is validated and gets autocomplete!
+    
+    "isolatedModules": true,
+    // Each file must be compilable on its own (no cross-file dependencies)
+    // Required by Next.js and Vercel's fast refresh feature
+    // Prevents: `export { SomeType }` where SomeType is only used as a type
+    
+    // ------------------------------------------------------------------------
+    // MODULE SYSTEM: How imports/exports work
+    // ------------------------------------------------------------------------
+    
+    "module": "esnext",
+    // Use the latest JavaScript module system (import/export)
+    // "esnext" = import { thing } from 'package' (not require())
+    
+    "moduleResolution": "bundler",
+    // How TypeScript finds imported files
+    // "bundler" = Use Next.js/Webpack rules for resolving paths
+    // Handles: import Button from '@/components/Button' (your @ alias)
+    
+    "esModuleInterop": true,
+    // Makes old CommonJS packages (require/module.exports) work with import
+    // Example: import React from 'react' instead of import * as React
+    // Fixes compatibility with 90% of npm packages
+    
+    // ------------------------------------------------------------------------
+    // TYPE CHECKING STRICTNESS: How picky TypeScript should be
+    // ------------------------------------------------------------------------
+    
+    "strict": true,
+    // MASTER SWITCH: Enables ALL strictness flags below
+    // Same as turning on: strictNullChecks, strictFunctionTypes, etc.
+    // Catches the most bugs, but requires more typing (pun intended)
+    
+    // What "strict" does behind the scenes:
+    // - "strictNullChecks": Can't use null/undefined without checking first
+    //   Example: user.email → Error if user might be null
+    // - "strictFunctionTypes": Function parameters must match exactly
+    // - "noImplicitAny": Must declare types, can't use "any" accidentally
+    // - "noImplicitThis": Must specify what "this" refers to in functions
+    
+    // ------------------------------------------------------------------------
+    // BUILD OPTIMIZATION: Make compilation faster
+    // ------------------------------------------------------------------------
+    
+    "noEmit": true,
+    // Don't output .js files (Next.js handles compilation, not tsc)
+    // TypeScript is only used for error checking, not building
+    
     "incremental": true,
+    // Cache previous compilation results
+    // Only re-check files that changed (saves 80% of build time)
+    // Creates .tsbuildinfo file (you can ignore/gitignore this)
+    
+    // ------------------------------------------------------------------------
+    // NEXT.JS INTEGRATION: Framework-specific settings
+    // ------------------------------------------------------------------------
+    
     "plugins": [
       {
         "name": "next"
+        // Enables Next.js-specific TypeScript features:
+        // - Auto-types for getStaticProps, getServerSideProps
+        // - Route parameter types: /ships/[id] gets type { id: string }
+        // - Image component prop validation
       }
     ],
+    
+    // ------------------------------------------------------------------------
+    // PATH ALIASES: Import shortcuts (the part we just debugged!)
+    // ------------------------------------------------------------------------
+    
     "paths": {
-      "@/*": ["./*"]
+      "@/*": ["./src/*", "./*"]
+      // Creates a shortcut: @ = project root
+      // TypeScript checks BOTH locations in order:
+      // 
+      // When you write:     import Navigation from '@/components/Navigation'
+      // TypeScript checks:
+      //   1. ./src/components/Navigation  (NEW auth code location)
+      //   2. ./components/Navigation       (YOUR existing components)
+      //
+      // Real examples from your project:
+      // - @/components/Navigation    → finds: components/Navigation.tsx
+      // - @/lib/supabase/client      → finds: src/lib/supabase/client.ts
+      // - @/types/database           → finds: src/types/database.ts
+      //
+      // WHY THIS HELPS:
+      // Before: import Button from '../../../../components/Button'  😵
+      // After:  import Button from '@/components/Button'             ✅
+      //
+      // The @/ is arbitrary - could be ~/ or $/ - but @ is convention
     }
   },
-  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
-  "exclude": ["node_modules", ".next", "templates"]
+  
+  // ============================================================================
+  // FILE SELECTION: What TypeScript should check
+  // ============================================================================
+  
+  "include": [
+    // Array of file patterns to type-check
+    
+    "next-env.d.ts",
+    // Next.js auto-generated type definitions
+    // Adds types for: Image, Link, routing, etc.
+    
+    "**/*.ts",
+    // All .ts files in any folder (** = recursive)
+    
+    "**/*.tsx",
+    // All .tsx files (React components with TypeScript)
+    
+    ".next/types/**/*.ts"
+    // Auto-generated types from Next.js during build
+    // Example: Route parameter types, API route types
+  ],
+  
+  // ============================================================================
+  // FILE EXCLUSION: What TypeScript should ignore
+  // ============================================================================
+  
+  "exclude": [
+    // Don't waste time checking these folders
+    
+    "node_modules",
+    // 3rd party packages (already have their own types)
+    // Skipping this saves 90% of compilation time
+    
+    ".next",
+    // Build output folder (generated code, not source)
+    
+    "templates"
+    // Your custom folder - maybe example code or archived files?
+    // Add any other folders you don't want checked here
+  ]
+  
+  // ============================================================================
+  // DEBUGGING TIPS
+  // ============================================================================
+  // 
+  // 1. See what files TypeScript is checking:
+  //    Run: npx tsc --listFiles | head -20
+  //
+  // 2. Check if a path alias works:
+  //    Run: npx tsc --traceResolution | grep "@/components"
+  //
+  // 3. Find strict mode violations:
+  //    Turn off "strict": false temporarily, then re-enable one by one:
+  //    "strictNullChecks": true,  // Check this first (most common)
+  //    "strictFunctionTypes": true,
+  //    "noImplicitAny": true,
+  //
+  // 4. Fix "Cannot find module" errors:
+  //    - Check the path exists
+  //    - Restart TS Server: Cmd+Shift+P → "TypeScript: Restart TS Server"
+  //    - Clear cache: rm -rf .next && npm run dev
+  //
+  // 5. See TypeScript version:
+  //    Run: npx tsc --version
+  //    (Next.js bundles its own, usually 5.x)
 }

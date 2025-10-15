@@ -1,18 +1,1 @@
 @import 'tailwindcss';
-
-/* Custom navy colors for CIVSail */
-.text-navy-900 {
-  color: #0f172a;
-}
-
-.bg-navy-900 {
-  background-color: #0f172a;
-}
-
-.font-serif {
-  font-family: Georgia, 'Times New Roman', serif;
-}
-
-html {
-  scroll-behavior: smooth;
-}
