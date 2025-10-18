@@ -72,3 +72,11 @@ export interface NMCVerification {
   last_checked_at: string | null;
   has_discrepancy: boolean;
 }
+// Expiration tracking types
+export type ExpirationStatus = 'expired' | 'urgent' | 'warning' | 'valid';
+
+export interface ExpirationInfo {
+  status: ExpirationStatus;
+  daysRemaining: number;
+  message: string;
+}

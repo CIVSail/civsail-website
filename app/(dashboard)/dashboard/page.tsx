@@ -189,7 +189,7 @@ export default function DashboardPage() {
                   : 'border-transparent text-gray-500 hover:text-gray-700'
               }`}
             >
-              📋 Information
+              Information
             </button>
             <button
               onClick={() => setActiveTab('documents')}
@@ -199,7 +199,7 @@ export default function DashboardPage() {
                   : 'border-transparent text-gray-500 hover:text-gray-700'
               }`}
             >
-              📁 Documents
+              Documents
             </button>
             <button
               onClick={() => setActiveTab('settings')}
@@ -209,7 +209,7 @@ export default function DashboardPage() {
                   : 'border-transparent text-gray-500 hover:text-gray-700'
               }`}
             >
-              ⚙️ Settings
+              Settings
             </button>
           </div>
         </div>
@@ -389,7 +389,7 @@ export default function DashboardPage() {
                   onClick={() => router.push('/reset-profile')}
                   className="w-full text-left px-4 py-3 bg-gray-50 hover:bg-gray-100 rounded-lg transition-colors text-gray-700"
                 >
-                  🔄 Reset Profile (Testing)
+                  Reset Profile (Testing)
                 </button>
               </div>
             </div>
