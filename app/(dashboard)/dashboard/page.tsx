@@ -126,15 +126,6 @@ export default function DashboardPage() {
     await loadFiles();
   }
 
-  async function getFileUrl(type: 'mmc' | 'sea_service', fileName: string) {
-    if (!profile) return '#';
-    const path = `${type}/${profile.user_id}/${fileName}`;
-    const { data } = await supabase.storage
-      .from('documents')
-      .createSignedUrl(path, 3600);
-    return data?.signedUrl || '#';
-  }
-
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
@@ -144,6 +135,11 @@ export default function DashboardPage() {
         </div>
       </div>
     );
+  }
+
+  // Safety check: profile should always exist here, but TypeScript needs confirmation
+  if (!profile) {
+    return null;
   }
 
   return (
@@ -336,7 +332,8 @@ export default function DashboardPage() {
               uploading={uploadingTo === 'mmc'}
               onUpload={(files) => handleFileUpload('mmc', files)}
               onDelete={(name) => handleDeleteFile('mmc', name)}
-              getFileUrl={(name) => getFileUrl('mmc', name)}
+              userId={profile.user_id}
+              supabase={supabase}
             />
             <DocumentSection
               title="Sea Service Letters"
@@ -345,7 +342,8 @@ export default function DashboardPage() {
               uploading={uploadingTo === 'sea_service'}
               onUpload={(files) => handleFileUpload('sea_service', files)}
               onDelete={(name) => handleDeleteFile('sea_service', name)}
-              getFileUrl={(name) => getFileUrl('sea_service', name)}
+              userId={profile.user_id}
+              supabase={supabase}
             />
           </div>
         )}
@@ -591,23 +589,54 @@ function DocumentSection({
   uploading,
   onUpload,
   onDelete,
-  getFileUrl,
+  userId,
+  supabase,
 }: {
   title: string;
   files: any[];
-  type: string;
+  type: 'mmc' | 'sea_service';
   uploading: boolean;
   onUpload: (files: FileList | null) => void;
   onDelete: (name: string) => void;
-  getFileUrl: (name: string) => Promise<string>;
+  userId: string;
+  supabase: any;
 }) {
   const [downloadingFile, setDownloadingFile] = useState<string | null>(null);
 
+  // Download file using blob method (works on mobile Safari)
   const handleDownload = async (fileName: string) => {
-    setDownloadingFile(fileName);
-    const url = await getFileUrl(fileName);
-    window.open(url, '_blank');
-    setDownloadingFile(null);
+    try {
+      setDownloadingFile(fileName);
+      
+      // Build the storage path
+      const path = `${type}/${userId}/${fileName}`;
+      
+      // Download the file as a blob
+      const { data, error } = await supabase
+        .storage
+        .from('documents')
+        .download(path);
+
+      if (error) throw error;
+
+      // Create a blob URL and trigger download
+      const url = URL.createObjectURL(data);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = fileName; // Forces download with original filename
+      document.body.appendChild(a);
+      a.click();
+      
+      // Cleanup
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      
+    } catch (error) {
+      console.error('Download failed:', error);
+      alert('Failed to download file. Please try again.');
+    } finally {
+      setDownloadingFile(null);
+    }
   };
 
   return (
@@ -653,7 +682,7 @@ function DocumentSection({
                   disabled={downloadingFile === file.name}
                   className="px-3 py-1 text-blue-600 hover:text-blue-800 text-sm font-medium disabled:opacity-50"
                 >
-                  {downloadingFile === file.name ? 'Opening...' : 'Download'}
+                  {downloadingFile === file.name ? 'Downloading...' : 'Download'}
                 </button>
                 <button
                   onClick={() => onDelete(file.name)}
