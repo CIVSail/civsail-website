@@ -6,8 +6,9 @@ import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import type { Profile } from '@/types/database';
 import { calculateExpiration } from '@/lib/utils/dates';
+import CredentialsTab from '@/components/dashboard/CredentialsTab';
 
-type TabType = 'info' | 'documents' | 'settings';
+type TabType = 'info' | 'credentials' | 'documents' | 'settings';
 
 export default function DashboardPage() {
   const [profile, setProfile] = useState<Profile | null>(null);
@@ -187,30 +188,42 @@ export default function DashboardPage() {
             >
               Information
             </button>
-            <button
-              onClick={() => setActiveTab('documents')}
-              className={`pb-4 px-2 font-medium transition-colors border-b-2 ${
-                activeTab === 'documents'
-                  ? 'border-blue-600 text-blue-600'
-                  : 'border-transparent text-gray-500 hover:text-gray-700'
-              }`}
-            >
-              Documents
-            </button>
-            <button
-              onClick={() => setActiveTab('settings')}
-              className={`pb-4 px-2 font-medium transition-colors border-b-2 ${
-                activeTab === 'settings'
-                  ? 'border-blue-600 text-blue-600'
-                  : 'border-transparent text-gray-500 hover:text-gray-700'
-              }`}
-            >
-              Settings
-            </button>
-          </div>
-        </div>
-      </div>
 
+            <button
+      onClick={() => setActiveTab('credentials')}
+      className={`pb-4 px-2 font-medium transition-colors border-b-2 ${
+        activeTab === 'credentials'
+          ? 'border-blue-600 text-blue-600'
+          : 'border-transparent text-gray-500 hover:text-gray-700'
+      }`}
+    >
+      Credentials
+    </button>
+    
+    <button
+      onClick={() => setActiveTab('documents')}
+      className={`pb-4 px-2 font-medium transition-colors border-b-2 ${
+        activeTab === 'documents'
+          ? 'border-blue-600 text-blue-600'
+          : 'border-transparent text-gray-500 hover:text-gray-700'
+      }`}
+    >
+      Documents
+    </button>
+    
+    <button
+      onClick={() => setActiveTab('settings')}
+      className={`pb-4 px-2 font-medium transition-colors border-b-2 ${
+        activeTab === 'settings'
+          ? 'border-blue-600 text-blue-600'
+          : 'border-transparent text-gray-500 hover:text-gray-700'
+      }`}
+    >
+      Settings
+    </button>
+  </div>
+</div>
+</div>
       {/* Content */}
       <div className="max-w-6xl mx-auto px-4 py-8">
         {saveMessage && (
@@ -218,6 +231,7 @@ export default function DashboardPage() {
             <p className="text-sm text-green-700">{saveMessage}</p>
           </div>
         )}
+       
 
         {/* Info Tab */}
         {activeTab === 'info' && (
@@ -321,7 +335,13 @@ export default function DashboardPage() {
             </div>
           </div>
         )}
-
+{/* Credentials Tab */}
+{activeTab === 'credentials' && (
+  <CredentialsTab 
+    userId={profile!.user_id} 
+    nmcVerifiedAt={profile?.nmc_verified_at}
+  />
+)}
         {/* Documents Tab */}
         {activeTab === 'documents' && (
           <div className="space-y-6">
