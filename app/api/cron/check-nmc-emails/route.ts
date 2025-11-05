@@ -98,6 +98,20 @@ export async function GET(request: NextRequest) {
           timedOutCount++;
           continue;
         }
+      } else if (verification.verification_type === 'email') {
+        // Email verifications: check every time (user manually requested)
+        shouldCheck = true;
+        
+        // Timeout after 30 days (email might be older)
+        if (ageInMinutes > 43200) { // 30 days
+          await supabase
+            .from('nmc_verifications')
+            .update({ status: 'timeout' })
+            .eq('id', verification.id);
+          
+          timedOutCount++;
+          continue;
+        }
       } else {
         // Relaxed checking for re-verification
         if (ageInMinutes < 120)
@@ -130,6 +144,9 @@ export async function GET(request: NextRequest) {
       // Look for matching email
       for (const messageId of messageIds) {
         const email = await getEmailContent(messageId);
+
+        console.log(`[NMC Cron] Checking email for ref: ${verification.ref_number}`);
+        console.log(`[NMC Cron] Email body preview: ${email.body.substring(0, 200)}`);
 
         // Check if email matches this verification (by ref number)
         if (email.body.includes(`RefNum: ${verification.ref_number}`)) {
