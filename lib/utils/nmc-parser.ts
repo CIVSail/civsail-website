@@ -177,7 +177,184 @@ const NMC_CREDENTIAL_MAP: Record<string, CredentialClassification> = {
     level: 'rating',
     shortName: 'RFPNW',
   },
-  
+  // ADD THESE TO NMC_CREDENTIAL_MAP in lib/utils/nmc-parser.ts
+// Insert after the existing entries, organized by section
+
+// ========================================
+// NATIONAL - DECK OFFICERS (Additional)
+// ========================================
+'National - Deck Officer - Radar Observer (Unlimited)': {
+  system: 'national',
+  department: 'deck',
+  type: 'endorsement',
+  rank: 0,
+  level: 'junior_officer',
+  shortName: 'Radar Observer',
+},
+
+// ========================================
+// NATIONAL - DECK ENDORSEMENTS
+// ========================================
+'National - Tank Vessel-PIC Limited to Dangerous Liquid (DL) Cargoes': {
+  system: 'national',
+  department: 'deck',
+  type: 'endorsement',
+  rank: 0,
+  level: 'rating',
+  shortName: 'Tank Vessel-PIC DL',
+},
+
+// ========================================
+// NATIONAL - ENGINE OFFICERS (Additional)
+// ========================================
+'National - Engineer Officer - Third Assistant Engineer Of Steam and Gas Turbine Propelled Vessels.': {
+  system: 'national',
+  department: 'engine',
+  type: 'license',
+  rank: 5,
+  level: 'junior_officer',
+  shortName: '3rd Engineer Steam/Gas',
+},
+'National - Engineer Officer - First Assistant Engineer Of Motor Propelled Vessels.': {
+  system: 'national',
+  department: 'engine',
+  type: 'license',
+  rank: 7,
+  level: 'senior_officer',
+  shortName: '1st Engineer Motor',
+},
+'National - Engineer Officer - Chief Engineer Of Motor Propelled Vessels.': {
+  system: 'national',
+  department: 'engine',
+  type: 'license',
+  rank: 10,
+  level: 'senior_officer',
+  shortName: 'Chief Engineer Motor',
+},
+
+// ========================================
+// STCW - RATING COMPETENCIES (Additional)
+// ========================================
+'STCW - Able Seafarer - Deck.': {
+  system: 'stcw',
+  department: 'deck',
+  type: 'competency',
+  rank: 0,
+  level: 'rating',
+  shortName: 'Able Seafarer - Deck',
+},
+'STCW - Able Seafarer - Engine.': {
+  system: 'stcw',
+  department: 'engine',
+  type: 'competency',
+  rank: 0,
+  level: 'rating',
+  shortName: 'Able Seafarer - Engine',
+},
+
+// ========================================
+// STCW - ADVANCED TRAINING (Additional)
+// ========================================
+'STCW - Advanced Chemical Tanker Cargo Operation.': {
+  system: 'stcw',
+  department: 'deck',
+  type: 'advanced_training',
+  rank: 0,
+  level: 'rating',
+  shortName: 'Advanced Chemical Tanker',
+},
+'STCW - Advanced Oil Tanker Cargo Operation.': {
+  system: 'stcw',
+  department: 'deck',
+  type: 'advanced_training',
+  rank: 0,
+  level: 'rating',
+  shortName: 'Advanced Oil Tanker',
+},
+'STCW - Medical First-Aid Provider.': {
+  system: 'stcw',
+  department: 'all',
+  type: 'advanced_training',
+  rank: 0,
+  level: 'rating',
+  shortName: 'Medical First-Aid Provider',
+},
+'STCW - Proficiency in fast rescue boats.': {
+  system: 'stcw',
+  department: 'deck',
+  type: 'advanced_training',
+  rank: 0,
+  level: 'rating',
+  shortName: 'Fast Rescue Boats',
+},
+'STCW - Proficiency in survival craft and rescue boats other than fast rescue boats (PSC).': {
+  system: 'stcw',
+  department: 'deck',
+  type: 'advanced_training',
+  rank: 0,
+  level: 'rating',
+  shortName: 'PSC',
+},
+
+// ========================================
+// STCW - SECURITY
+// ========================================
+'STCW - Security Awareness.': {
+  system: 'stcw',
+  department: 'all',
+  type: 'basic_safety',
+  rank: 0,
+  level: 'entry',
+  shortName: 'Security Awareness',
+},
+'STCW - Vessel Personnel With Designated Security Duties.': {
+  system: 'stcw',
+  department: 'all',
+  type: 'advanced_training',
+  rank: 0,
+  level: 'rating',
+  shortName: 'Designated Security Duties',
+},
+'STCW - Vessel Security Officer.': {
+  system: 'stcw',
+  department: 'all',
+  type: 'advanced_training',
+  rank: 0,
+  level: 'rating',
+  shortName: 'Vessel Security Officer',
+},
+
+// ========================================
+// STCW - COMMUNICATIONS
+// ========================================
+'STCW - GMDSS Operator.': {
+  system: 'stcw',
+  department: 'deck',
+  type: 'endorsement',
+  rank: 0,
+  level: 'rating',
+  shortName: 'GMDSS Operator',
+},
+
+// ========================================
+// STCW - OFFICER COMPETENCIES (Additional)
+// ========================================
+'STCW - Chief Engineer. Not valid on steam or gas-turbine propelled vessels.': {
+  system: 'stcw',
+  department: 'engine',
+  type: 'competency',
+  rank: 0,
+  level: 'senior_officer',
+  shortName: 'Chief Engineer STCW',
+},
+'STCW - Second Engineer Officer. Not valid on steam or gas-turbine propelled vessels.': {
+  system: 'stcw',
+  department: 'engine',
+  type: 'competency',
+  rank: 0,
+  level: 'senior_officer',
+  shortName: 'Second Engineer STCW',
+},
   // Add more as needed...
 };
 
