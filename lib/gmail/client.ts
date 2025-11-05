@@ -30,7 +30,7 @@ export async function searchNMCEmails(): Promise<string[]> {
   try {
     const response = await gmail.users.messages.list({
       userId: 'me',
-      q: 'from:SMB-NationalMaritimeCenter-DoNotReply@uscg.mil newer_than:7d',
+      q: 'from:SMB-NationalMaritimeCenter-DoNotReply@uscg.mil newer_than:30d',
       maxResults: 50
     });
     
