@@ -174,20 +174,47 @@ export async function GET(request: NextRequest) {
               .eq('user_id', verification.user_id);
 
             // Store credentials
+            // ✅ FIXED CODE:
             for (const cred of parsed.credentials) {
+              // Only save credentials we successfully classified
+              if (!cred.classification) {
+                console.warn('Skipping unknown credential:', cred.rawText);
+                continue;
+              }
+
               await supabase.from('credentials').upsert(
                 {
                   user_id: verification.user_id,
-                  credential_type: cred.type,
-                  endorsement_name: cred.name,
-                  department: cred.department,
+
+                  // Use classification fields (these exist!)
+                  credential_type: cred.classification.type,
+                  endorsement_name: cred.classification.shortName,
+                  department: cred.classification.department,
+                  endorsement_system: cred.classification.system, // 'national' or 'stcw'
+
+                  // Store original text for audit trail
+                  raw_nmc_text: cred.rawText,
+
+                  // Metadata
+                  rank: cred.classification.rank,
+                  qualification_level: cred.classification.level,
                   verified_by_nmc: true,
-                  verified_at: new Date().toISOString(),
+                  needs_review: cred.needsReview,
+                  source_verification_id: verification.id,
                 },
                 {
-                  onConflict: 'user_id,endorsement_name',
+                  onConflict: 'user_id,endorsement_name', // Don't create duplicates
                 }
               );
+            }
+
+            // Log unknown credentials for later classification
+            if (parsed.unknownCredentials.length > 0) {
+              console.log(
+                'Found unknown credentials:',
+                parsed.unknownCredentials
+              );
+              // TODO: Store these in a review queue table later
             }
 
             // Mark verification as completed
