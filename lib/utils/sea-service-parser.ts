@@ -115,7 +115,8 @@ function extractMSCServicePeriods(textUpper: string, textOriginal: string): Pars
     const rowText = textUpper.substring(rowStart, rowEnd);
 
     // Extract position (Billet)
-    const positionMatch = rowText.match(/(?:JR\s+)?(?:SUPPLY\s+OFFICER|ABLE\s+SEAMAN|ORDINARY\s+SEAMAN|THIRD\s+MATE|SECOND\s+MATE|CHIEF\s+MATE|MASTER|ENGINEER|WIPER|OILER|QMED|STEWARD)/);
+    // ✅ UPDATED: Added DECK MIDSHIPMAN, ENGINE MIDSHIPMAN, DECK CADET, ENGINE CADET, MIDSHIPMAN, CADET
+    const positionMatch = rowText.match(/(?:JR\s+)?(?:DECK\s+MIDSHIPMAN|ENGINE\s+MIDSHIPMAN|DECK\s+CADET|ENGINE\s+CADET|MIDSHIPMAN|CADET|SUPPLY\s+OFFICER|ABLE\s+SEAMAN|ORDINARY\s+SEAMAN|THIRD\s+MATE|SECOND\s+MATE|CHIEF\s+MATE|MASTER|ENGINEER|WIPER|OILER|QMED|STEWARD)/);
     const position = positionMatch ? positionMatch[0].trim() : 'Unknown Position';
 
     // Extract days served
@@ -380,7 +381,8 @@ export function inferDepartment(position: string | null): 'deck' | 'engine' | 's
   const pos = position.toUpperCase();
 
   // Deck positions
-  if (pos.match(/MATE|MASTER|CAPTAIN|DECK|AB|ABLE|ORDINARY|BOSUN|QUARTERMASTER|SUPPLY\s+OFFICER/)) {
+  // ✅ UPDATED: Added MIDSHIPMAN and CADET as deck positions
+  if (pos.match(/MIDSHIPMAN|CADET|MATE|MASTER|CAPTAIN|DECK|AB|ABLE|ORDINARY|BOSUN|QUARTERMASTER|SUPPLY\s+OFFICER/)) {
     return 'deck';
   }
 
