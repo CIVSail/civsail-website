@@ -233,7 +233,7 @@ export default function DashboardPage() {
           department: firstPeriod.department,
           grt: firstPeriod.grt,
           route: firstPeriod.route,
-          propulsion: firstPeriod.propulsion,
+          propulsion_type: firstPeriod.propulsion,
           watchkeeping_days: firstPeriod.watchkeeping_days || 0,
           supervised: firstPeriod.supervised || false,
           officer_on_watch: firstPeriod.officer_on_watch || false,
@@ -568,7 +568,7 @@ function SeaServiceTab({
   // Calculate summary statistics
   const totalDays = periods.reduce((sum, p) => sum + (p.days_served || 0), 0);
   const deckDays = periods
-    .filter(p => p.department === 'Deck')
+    .filter(p => p.department === 'deck')
     .reduce((sum, p) => sum + (p.days_served || 0), 0);
   const mostRecentPeriod = periods[0]; // Already sorted by sign_on_date desc
   const needsReview = periods.filter(p => p.needs_manual_review).length;
