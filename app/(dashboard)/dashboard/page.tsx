@@ -7,41 +7,28 @@ import Image from 'next/image';
 import type { Profile } from '@/types/database';
 import { calculateExpiration } from '@/lib/utils/dates';
 import CredentialsTab from '@/components/dashboard/CredentialsTab';
-import SeaServiceOCRModal from '@/components/dashboard/SeaServiceOCRModal';
+import SeaServiceEntryModal from '@/components/dashboard/SeaServiceEntryModal';
+import PDFRejectionModal from '@/components/dashboard/PDFRejectionModal';
+import type { SeaServicePeriod } from '@/types/sea-service';
 
-// NEW: Add 'seaService' to tab types
+// Tab types
 type TabType = 'info' | 'credentials' | 'documents' | 'seaService' | 'settings';
 
-// NEW: Type for OCR results from the API
+// Type for OCR results from the API
 interface OCRResult {
   success: boolean;
-  servicePeriods: {
+  isPDF?: boolean;
+  fileName?: string;
+  servicePeriods?: {
     extracted: number;
     inserted: number;
     duplicates: number;
   };
-  periods: any[];
-  needsReview: boolean;
+  periods?: any[];
+  needsReview?: boolean;
   error?: string;
-}
-
-// NEW: Type for sea service data from database
-interface SeaServicePeriod {
-  id: string;
-  vessel_name: string;
-  sign_on_date: string;
-  sign_off_date: string;
-  days_served: number;
-  position_held: string;
-  tonnage: number | null;
-  tonnage_category: string | null;
-  propulsion: string | null;
-  department: string | null;
-  route: string | null;
-  creditable_for_routes: string[] | null;
-  needs_manual_review: boolean;
-  verified: boolean;
-  created_at: string;
+  message?: string;
+  ocrConfidence?: number;
 }
 
 export default function DashboardPage() {
@@ -59,20 +46,23 @@ export default function DashboardPage() {
   const [seaServiceFiles, setSeaServiceFiles] = useState<any[]>([]);
   const [uploadingTo, setUploadingTo] = useState<string | null>(null);
 
-  // NEW: OCR modal state
-  const [ocrResult, setOcrResult] = useState<OCRResult | null>(null);
-  const [showOcrModal, setShowOcrModal] = useState(false);
-
-  // NEW: Sea service data state
-  const [seaServicePeriods, setSeaServicePeriods] = useState<
-    SeaServicePeriod[]
-  >([]);
+  // Sea service data state
+  const [seaServicePeriods, setSeaServicePeriods] = useState<SeaServicePeriod[]>([]);
   const [loadingSeaService, setLoadingSeaService] = useState(false);
+
+  // Entry modal states
+  const [showSeaServiceEntry, setShowSeaServiceEntry] = useState(false);
+  const [entryMode, setEntryMode] = useState<'review' | 'manual'>('manual');
+  const [reviewData, setReviewData] = useState<Partial<SeaServicePeriod> | undefined>();
+
+  // PDF rejection modal state
+  const [showPDFRejection, setShowPDFRejection] = useState(false);
+  const [rejectedPDFName, setRejectedPDFName] = useState('');
 
   useEffect(() => {
     loadProfile();
     loadFiles();
-    loadSeaServiceData(); // NEW: Load sea service periods on mount
+    loadSeaServiceData();
   }, []);
 
   async function loadProfile() {
@@ -123,7 +113,7 @@ export default function DashboardPage() {
     setSeaServiceFiles(seaList || []);
   }
 
-  // NEW: Load sea service periods from database
+  // Load sea service periods from database
   async function loadSeaServiceData() {
     const {
       data: { user },
@@ -166,7 +156,7 @@ export default function DashboardPage() {
     setEditing(null);
   }
 
-  // UPDATED: Modified to process sea service files with OCR
+  // Modified to process sea service files with OCR
   async function handleFileUpload(
     type: 'mmc' | 'sea_service',
     files: FileList | null
@@ -188,7 +178,7 @@ export default function DashboardPage() {
           continue;
         }
 
-        // NEW: If this is a sea service file, trigger OCR processing
+        // If this is a sea service file, trigger OCR processing
         if (type === 'sea_service') {
           await processSeaServiceOCR(file, path);
         }
@@ -203,7 +193,7 @@ export default function DashboardPage() {
     }
   }
 
-  // NEW: Process uploaded sea service file with OCR
+  // UPDATED: Process uploaded sea service file with OCR
   async function processSeaServiceOCR(file: File, storagePath: string) {
     try {
       // Create FormData to send file to API
@@ -217,37 +207,78 @@ export default function DashboardPage() {
         body: formData,
       });
 
-      if (!response.ok) {
-        throw new Error('OCR processing failed');
-      }
-
       const result: OCRResult = await response.json();
 
-      // Show the modal with results
-      setOcrResult(result);
-      setShowOcrModal(true);
+      // Check if it's a PDF rejection
+      if (result.isPDF) {
+        setRejectedPDFName(file.name);
+        setShowPDFRejection(true);
+        return; // Exit early - PDF modal will handle next steps
+      }
+
+      if (!result.success) {
+        throw new Error(result.error || 'OCR processing failed');
+      }
+
+      // If we got periods, show them for review
+      if (result.periods && result.periods.length > 0) {
+        // Open entry modal with first period data for review
+        const firstPeriod = result.periods[0];
+        
+        setReviewData({
+          vessel_name: firstPeriod.vessel_name,
+          sign_on_date: firstPeriod.sign_on_date,
+          sign_off_date: firstPeriod.sign_off_date,
+          position_held: firstPeriod.position_held,
+          department: firstPeriod.department,
+          grt: firstPeriod.grt,
+          route: firstPeriod.route,
+          propulsion: firstPeriod.propulsion,
+          watchkeeping_days: firstPeriod.watchkeeping_days || 0,
+          supervised: firstPeriod.supervised || false,
+          officer_on_watch: firstPeriod.officer_on_watch || false,
+          ocr_confidence: result.ocrConfidence,
+        });
+        setEntryMode('review');
+        setShowSeaServiceEntry(true);
+      }
 
       // Reload sea service data to show new periods
       await loadSeaServiceData();
+
+      // Show success message if periods were inserted
+      if (result.servicePeriods && result.servicePeriods.inserted > 0) {
+        alert(`✅ Successfully added ${result.servicePeriods.inserted} service period(s)!`);
+      } else if (result.servicePeriods && result.servicePeriods.duplicates > 0) {
+        alert('ℹ️ All periods were already in your ledger (duplicates skipped).');
+      }
+
     } catch (error) {
       console.error('OCR processing error:', error);
-      // Show error in modal
-      setOcrResult({
-        success: false,
-        error:
-          'Failed to process document. Please try again or enter data manually.',
-        servicePeriods: { extracted: 0, inserted: 0, duplicates: 0 },
-        periods: [],
-        needsReview: false,
-      });
-      setShowOcrModal(true);
+      alert('Failed to process document. Please try manual entry.');
     }
   }
 
-  // NEW: Handle closing OCR modal
-  function handleOcrModalClose() {
-    setShowOcrModal(false);
-    setOcrResult(null);
+  // Handler for manual entry button
+  function handleManualEntry() {
+    setReviewData(undefined);
+    setEntryMode('manual');
+    setShowSeaServiceEntry(true);
+  }
+
+  // Handler when sea service entry is saved
+  function handleSeaServiceSaved() {
+    loadSeaServiceData(); // Reload ledger
+    setShowSeaServiceEntry(false);
+  }
+
+  // Handler for PDF re-upload
+  function handleReupload() {
+    // Trigger the file input click
+    const fileInput = document.querySelector('input[type="file"][accept*="image"]') as HTMLInputElement;
+    if (fileInput) {
+      fileInput.click();
+    }
   }
 
   async function handleDeleteFile(
@@ -273,21 +304,13 @@ export default function DashboardPage() {
     );
   }
 
+  // Safety check: profile should always exist here, but TypeScript needs confirmation
   if (!profile) {
     return null;
   }
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* OCR Modal */}
-      {showOcrModal && ocrResult && (
-        <SeaServiceOCRModal
-          result={ocrResult}
-          onClose={handleOcrModalClose}
-          onConfirm={handleOcrModalClose}
-        />
-      )}
-
       {/* Header */}
       <div className="bg-white border-b border-gray-200">
         <div className="max-w-6xl mx-auto px-4 py-6">
@@ -320,57 +343,53 @@ export default function DashboardPage() {
 
         {/* Tabs */}
         <div className="max-w-6xl mx-auto px-4">
-          <div className="flex space-x-8 border-b border-gray-200 overflow-x-auto">
+          <div className="flex space-x-8 border-b border-gray-200">
             <button
               onClick={() => setActiveTab('info')}
-              className={`pb-4 px-2 font-medium transition-colors border-b-2 whitespace-nowrap ${
+              className={`pb-4 px-2 font-medium transition-colors border-b-2 ${
                 activeTab === 'info'
-                  ? 'border-blue-600 text-blue-600'
-                  : 'border-transparent text-gray-500 hover:text-gray-700'
+                  ? 'text-blue-600 border-blue-600'
+                  : 'text-gray-600 border-transparent hover:text-gray-900'
               }`}
             >
-              Information
+              Personal Info
             </button>
-
             <button
               onClick={() => setActiveTab('credentials')}
-              className={`pb-4 px-2 font-medium transition-colors border-b-2 whitespace-nowrap ${
+              className={`pb-4 px-2 font-medium transition-colors border-b-2 ${
                 activeTab === 'credentials'
-                  ? 'border-blue-600 text-blue-600'
-                  : 'border-transparent text-gray-500 hover:text-gray-700'
+                  ? 'text-blue-600 border-blue-600'
+                  : 'text-gray-600 border-transparent hover:text-gray-900'
               }`}
             >
               Credentials
             </button>
-
             <button
               onClick={() => setActiveTab('seaService')}
-              className={`pb-4 px-2 font-medium transition-colors border-b-2 whitespace-nowrap ${
+              className={`pb-4 px-2 font-medium transition-colors border-b-2 ${
                 activeTab === 'seaService'
-                  ? 'border-blue-600 text-blue-600'
-                  : 'border-transparent text-gray-500 hover:text-gray-700'
+                  ? 'text-blue-600 border-blue-600'
+                  : 'text-gray-600 border-transparent hover:text-gray-900'
               }`}
             >
               Sea Service
             </button>
-
             <button
               onClick={() => setActiveTab('documents')}
-              className={`pb-4 px-2 font-medium transition-colors border-b-2 whitespace-nowrap ${
+              className={`pb-4 px-2 font-medium transition-colors border-b-2 ${
                 activeTab === 'documents'
-                  ? 'border-blue-600 text-blue-600'
-                  : 'border-transparent text-gray-500 hover:text-gray-700'
+                  ? 'text-blue-600 border-blue-600'
+                  : 'text-gray-600 border-transparent hover:text-gray-900'
               }`}
             >
               Documents
             </button>
-
             <button
               onClick={() => setActiveTab('settings')}
-              className={`pb-4 px-2 font-medium transition-colors border-b-2 whitespace-nowrap ${
+              className={`pb-4 px-2 font-medium transition-colors border-b-2 ${
                 activeTab === 'settings'
-                  ? 'border-blue-600 text-blue-600'
-                  : 'border-transparent text-gray-500 hover:text-gray-700'
+                  ? 'text-blue-600 border-blue-600'
+                  : 'text-gray-600 border-transparent hover:text-gray-900'
               }`}
             >
               Settings
@@ -379,67 +398,39 @@ export default function DashboardPage() {
         </div>
       </div>
 
-      {/* Main Content */}
+      {/* Tab Content */}
       <div className="max-w-6xl mx-auto px-4 py-8">
-        {saveMessage && (
-          <div className="mb-4 p-3 bg-green-50 border border-green-200 rounded-lg text-center">
-            <p className="text-sm text-green-700">{saveMessage}</p>
-          </div>
-        )}
-
-        {/* Info Tab */}
+        {/* Personal Info Tab */}
         {activeTab === 'info' && (
           <div className="space-y-6">
-            {/* Profile Information */}
             <div className="bg-white rounded-2xl shadow-lg p-6">
-              <h2 className="text-xl font-semibold text-gray-900 mb-4">
-                Profile Information
-              </h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <ProfileField
-                  label="Full Name"
-                  value={profile?.full_name || ''}
-                  editing={editing === 'full_name'}
-                  onEdit={() => setEditing('full_name')}
-                  onSave={(value) => handleUpdateField('full_name', value)}
-                  onCancel={() => setEditing(null)}
-                />
-                <ProfileField
-                  label="Phone"
-                  value={profile?.phone || ''}
-                  editing={editing === 'phone'}
-                  onEdit={() => setEditing('phone')}
-                  onSave={(value) => handleUpdateField('phone', value)}
-                  onCancel={() => setEditing(null)}
-                />
-                <ProfileField
-                  label="Email"
-                  value={profile?.email || ''}
-                  editing={editing === 'email'}
-                  onEdit={() => setEditing('email')}
-                  onSave={(value) => handleUpdateField('email', value)}
-                  onCancel={() => setEditing(null)}
-                />
-                <ProfileField
-                  label="MMC Reference Number"
-                  value={profile?.ref_number || ''}
-                  editing={editing === 'ref_number'}
-                  onEdit={() => setEditing('ref_number')}
-                  onSave={(value) => handleUpdateField('ref_number', value)}
-                  onCancel={() => setEditing(null)}
-                />
+              <h2 className="text-2xl font-semibold mb-6">Contact Information</h2>
+              <div className="space-y-4">
+                <div className="p-4 bg-gray-50 rounded-lg">
+                  <p className="font-medium text-gray-900">Full Name</p>
+                  <p className="text-sm text-gray-600 mt-1">{profile.full_name}</p>
+                </div>
+                <div className="p-4 bg-gray-50 rounded-lg">
+                  <p className="font-medium text-gray-900">Email</p>
+                  <p className="text-sm text-gray-600 mt-1">{profile.email}</p>
+                </div>
+                <div className="p-4 bg-gray-50 rounded-lg">
+                  <p className="font-medium text-gray-900">Phone</p>
+                  <p className="text-sm text-gray-600 mt-1">{profile.phone || 'Not set'}</p>
+                </div>
+                <div className="p-4 bg-gray-50 rounded-lg">
+                  <p className="font-medium text-gray-900">Reference Number</p>
+                  <p className="text-sm text-gray-600 mt-1">{profile.ref_number || 'Not set'}</p>
+                </div>
               </div>
             </div>
 
-            {/* Credential Expirations */}
             <div className="bg-white rounded-2xl shadow-lg p-6">
-              <h2 className="text-xl font-semibold text-gray-900 mb-4">
-                Credential Expirations
-              </h2>
+              <h2 className="text-2xl font-semibold mb-6">Credential Expirations</h2>
               <div className="space-y-3">
                 <CredentialRow
-                  label="MMC"
-                  date={profile?.mmc_exp || null}
+                  label="MMC Expiration"
+                  date={profile.mmc_exp}
                   editing={editing === 'mmc_exp'}
                   onEdit={() => setEditing('mmc_exp')}
                   onSave={(value) => handleUpdateField('mmc_exp', value)}
@@ -447,7 +438,7 @@ export default function DashboardPage() {
                 />
                 <CredentialRow
                   label="Medical Certificate"
-                  date={profile?.medical_exp || null}
+                  date={profile.medical_exp}
                   editing={editing === 'medical_exp'}
                   onEdit={() => setEditing('medical_exp')}
                   onSave={(value) => handleUpdateField('medical_exp', value)}
@@ -455,7 +446,7 @@ export default function DashboardPage() {
                 />
                 <CredentialRow
                   label="Passport"
-                  date={profile?.passport_exp || null}
+                  date={profile.passport_exp}
                   editing={editing === 'passport_exp'}
                   onEdit={() => setEditing('passport_exp')}
                   onSave={(value) => handleUpdateField('passport_exp', value)}
@@ -463,7 +454,7 @@ export default function DashboardPage() {
                 />
                 <CredentialRow
                   label="TWIC"
-                  date={profile?.twic_exp || null}
+                  date={profile.twic_exp}
                   editing={editing === 'twic_exp'}
                   onEdit={() => setEditing('twic_exp')}
                   onSave={(value) => handleUpdateField('twic_exp', value)}
@@ -471,7 +462,7 @@ export default function DashboardPage() {
                 />
                 <CredentialRow
                   label="Driver's License"
-                  date={profile?.license_exp || null}
+                  date={profile.license_exp}
                   editing={editing === 'license_exp'}
                   onEdit={() => setEditing('license_exp')}
                   onSave={(value) => handleUpdateField('license_exp', value)}
@@ -482,13 +473,13 @@ export default function DashboardPage() {
           </div>
         )}
 
-        {/* Credentials Tab - NMC Credentials from Email Parsing */}
-        {activeTab === 'credentials' && (
-          <CredentialsTab
-            userId={profile.user_id}
-            nmcVerifiedAt={profile.nmc_verified_at}
-          />
-        )}
+        {/* Credentials Tab */}
+{activeTab === 'credentials' && (
+  <CredentialsTab 
+    userId={profile.user_id}
+    nmcVerifiedAt={profile.nmc_verified_at}
+  />
+)}
 
         {/* Sea Service Tab */}
         {activeTab === 'seaService' && (
@@ -496,6 +487,7 @@ export default function DashboardPage() {
             periods={seaServicePeriods}
             loading={loadingSeaService}
             onRefresh={loadSeaServiceData}
+            onAddManual={handleManualEntry}
           />
         )}
 
@@ -514,7 +506,6 @@ export default function DashboardPage() {
             />
             <DocumentSection
               title="Sea Service Letters"
-              description="Upload your Sea Service Letters (SSL) for automatic OCR processing"
               files={seaServiceFiles}
               type="sea_service"
               uploading={uploadingTo === 'sea_service'}
@@ -528,308 +519,102 @@ export default function DashboardPage() {
 
         {/* Settings Tab */}
         {activeTab === 'settings' && (
-          <div className="space-y-6">
-            <div className="bg-white rounded-2xl shadow-lg p-6">
-              <h2 className="text-xl font-semibold text-gray-900 mb-4">
-                Notification Preferences
-              </h2>
-              <div className="space-y-4">
-                <label className="flex items-center space-x-3">
-                  <input
-                    type="checkbox"
-                    checked={profile?.alert_email ?? true}
-                    onChange={(e) =>
-                      handleUpdateField('alert_email', e.target.checked)
-                    }
-                    className="w-5 h-5 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
-                  />
-                  <span className="text-gray-700">
-                    Send email alerts for expiring credentials
-                  </span>
-                </label>
-              </div>
-            </div>
-
-            <div className="bg-white rounded-2xl shadow-lg p-6">
-              <h2 className="text-xl font-semibold text-gray-900 mb-4">
-                Account Actions
-              </h2>
-              <div className="space-y-3">
-                <button
-                  onClick={() => router.push('/onboarding')}
-                  className="w-full text-left px-4 py-3 bg-gray-50 hover:bg-gray-100 rounded-lg transition-colors"
-                >
-                  ← Back to Onboarding
-                </button>
-                <button
-                  onClick={() => router.push('/reset-profile')}
-                  className="w-full text-left px-4 py-3 bg-gray-50 hover:bg-gray-100 rounded-lg transition-colors"
-                >
-                  🔄 Reset Profile Data
-                </button>
-              </div>
-            </div>
+          <div className="bg-white rounded-2xl shadow-lg p-6">
+            <h2 className="text-2xl font-semibold mb-6">Account Settings</h2>
+            <p className="text-gray-600">Settings panel coming soon...</p>
           </div>
         )}
       </div>
-    </div>
-  );
-}
 
-// Component: Profile Field with Edit
-function ProfileField({
-  label,
-  value,
-  editing,
-  onEdit,
-  onSave,
-  onCancel,
-}: {
-  label: string;
-  value: string;
-  editing: boolean;
-  onEdit: () => void;
-  onSave: (value: string) => void;
-  onCancel: () => void;
-}) {
-  const [localValue, setLocalValue] = useState(value);
+      {/* Modals */}
+      <SeaServiceEntryModal
+        isOpen={showSeaServiceEntry}
+        onClose={() => setShowSeaServiceEntry(false)}
+        onSave={handleSeaServiceSaved}
+        mode={entryMode}
+        initialData={reviewData}
+      />
 
-  useEffect(() => {
-    setLocalValue(value);
-  }, [value]);
+      <PDFRejectionModal
+        isOpen={showPDFRejection}
+        fileName={rejectedPDFName}
+        onClose={() => setShowPDFRejection(false)}
+        onManualEntry={handleManualEntry}
+        onReupload={handleReupload}
+      />
 
-  if (editing) {
-    return (
-      <div>
-        <p className="text-sm text-gray-500 mb-1">{label}</p>
-        <div className="flex space-x-2">
-          <input
-            type="text"
-            value={localValue}
-            onChange={(e) => setLocalValue(e.target.value)}
-            className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-            autoFocus
-          />
-          <button
-            onClick={() => onSave(localValue)}
-            className="px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
-          >
-            ✓
-          </button>
-          <button
-            onClick={onCancel}
-            className="px-3 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300"
-          >
-            ✕
-          </button>
-        </div>
-      </div>
-    );
-  }
-
-  return (
-    <div>
-      <p className="text-sm text-gray-500 mb-1">{label}</p>
-      <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-        <p className="font-medium text-gray-900">{value || 'Not set'}</p>
-        <button
-          onClick={onEdit}
-          className="text-blue-600 hover:text-blue-800 text-sm font-medium"
-        >
-          Edit
-        </button>
-      </div>
-    </div>
-  );
-}
-
-// Component: Document Section
-function DocumentSection({
-  title,
-  description,
-  files,
-  type,
-  uploading,
-  onUpload,
-  onDelete,
-  userId,
-  supabase,
-}: {
-  title: string;
-  description?: string;
-  files: any[];
-  type: 'mmc' | 'sea_service';
-  uploading: boolean;
-  onUpload: (files: FileList | null) => void;
-  onDelete: (name: string) => void;
-  userId: string;
-  supabase: any;
-}) {
-  const [downloadingFile, setDownloadingFile] = useState<string | null>(null);
-
-  const handleDownload = async (fileName: string) => {
-    try {
-      setDownloadingFile(fileName);
-      const path = `${type}/${userId}/${fileName}`;
-      const { data, error } = await supabase.storage
-        .from('documents')
-        .download(path);
-
-      if (error) throw error;
-
-      const url = URL.createObjectURL(data);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = fileName;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
-    } catch (error) {
-      console.error('Download failed:', error);
-      alert('Failed to download file. Please try again.');
-    } finally {
-      setDownloadingFile(null);
-    }
-  };
-
-  return (
-    <div className="bg-white rounded-2xl shadow-lg p-6">
-      <div className="flex items-center justify-between mb-4">
-        <div>
-          <h2 className="text-xl font-semibold text-gray-900">{title}</h2>
-          {description && (
-            <p className="text-sm text-gray-500 mt-1">{description}</p>
-          )}
-        </div>
-        <label className="cursor-pointer px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium">
-          {uploading ? 'Uploading...' : '+ Upload'}
-          <input
-            type="file"
-            className="hidden"
-            multiple={type === 'sea_service'}
-            accept="image/*,application/pdf"
-            onChange={(e) => onUpload(e.target.files)}
-            disabled={uploading}
-          />
-        </label>
-      </div>
-
-      {files.length === 0 ? (
-        <p className="text-gray-500 text-center py-8">
-          No documents uploaded yet
-        </p>
-      ) : (
-        <div className="space-y-2">
-          {files.map((file) => (
-            <div
-              key={file.name}
-              className="flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
-            >
-              <div className="flex items-center space-x-3">
-                <span className="text-2xl">📄</span>
-                <div>
-                  <p className="font-medium text-gray-900">{file.name}</p>
-                  <p className="text-xs text-gray-500">
-                    {new Date(file.created_at).toLocaleDateString()}
-                  </p>
-                </div>
-              </div>
-              <div className="flex items-center space-x-2">
-                <button
-                  onClick={() => handleDownload(file.name)}
-                  disabled={downloadingFile === file.name}
-                  className="px-3 py-1 text-blue-600 hover:text-blue-800 text-sm font-medium disabled:opacity-50"
-                >
-                  {downloadingFile === file.name
-                    ? 'Downloading...'
-                    : 'Download'}
-                </button>
-                <button
-                  onClick={() => onDelete(file.name)}
-                  className="px-3 py-1 text-red-600 hover:text-red-800 text-sm font-medium"
-                >
-                  Delete
-                </button>
-              </div>
-            </div>
-          ))}
+      {/* Save message toast */}
+      {saveMessage && (
+        <div className="fixed bottom-4 right-4 bg-white px-6 py-3 rounded-lg shadow-lg border border-gray-200">
+          {saveMessage}
         </div>
       )}
     </div>
   );
 }
 
-// NEW: Sea Service Tab Component
+// Sea Service Tab Component
 function SeaServiceTab({
   periods,
   loading,
   onRefresh,
+  onAddManual,
 }: {
   periods: SeaServicePeriod[];
   loading: boolean;
   onRefresh: () => void;
+  onAddManual: () => void;
 }) {
-  // Calculate total days and most recent service
+  // Calculate summary statistics
   const totalDays = periods.reduce((sum, p) => sum + (p.days_served || 0), 0);
+  const deckDays = periods
+    .filter(p => p.department === 'Deck')
+    .reduce((sum, p) => sum + (p.days_served || 0), 0);
   const mostRecentPeriod = periods[0]; // Already sorted by sign_on_date desc
-
-  // Count periods needing review
-  const needsReview = periods.filter((p) => p.needs_manual_review).length;
+  const needsReview = periods.filter(p => p.needs_manual_review).length;
 
   if (loading) {
     return (
-      <div className="bg-white rounded-2xl shadow-lg p-12 text-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-        <p className="text-gray-600">Loading sea service data...</p>
-      </div>
-    );
-  }
-
-  if (periods.length === 0) {
-    return (
-      <div className="bg-white rounded-2xl shadow-lg p-12 text-center">
-        <span className="text-6xl mb-4 block">⚓</span>
-        <h3 className="text-xl font-semibold text-gray-900 mb-2">
-          No Sea Service Records Yet
-        </h3>
-        <p className="text-gray-600 mb-6">
-          Upload your Sea Service Letters in the Documents tab to get started
-        </p>
-        <button
-          onClick={onRefresh}
-          className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
-        >
-          Refresh
-        </button>
+      <div className="flex items-center justify-center py-12">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
       </div>
     );
   }
 
   return (
     <div className="space-y-6">
-      {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      {/* Summary Stats */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         {/* Total Days */}
         <div className="bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl shadow-lg p-6 text-white">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-blue-100 text-sm font-medium">
-                Total Sea Service
-              </p>
+              <p className="text-blue-100 text-sm font-medium">Total Sea Days</p>
               <p className="text-4xl font-bold mt-2">{totalDays}</p>
-              <p className="text-blue-100 text-sm mt-1">days</p>
+              <p className="text-blue-100 text-sm mt-1">days served</p>
             </div>
             <span className="text-5xl opacity-20">⚓</span>
           </div>
         </div>
 
-        {/* Most Recent Service */}
+        {/* Deck Days */}
+        <div className="bg-gradient-to-br from-green-500 to-green-600 rounded-2xl shadow-lg p-6 text-white">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-green-100 text-sm font-medium">Deck Days</p>
+              <p className="text-4xl font-bold mt-2">{deckDays}</p>
+              <p className="text-green-100 text-sm mt-1">deck department</p>
+            </div>
+            <span className="text-5xl opacity-20">🧭</span>
+          </div>
+        </div>
+
+        {/* Most Recent */}
         <div className="bg-gradient-to-br from-teal-500 to-teal-600 rounded-2xl shadow-lg p-6 text-white">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-teal-100 text-sm font-medium">Last Sign-Off</p>
-              <p className="text-2xl font-bold mt-2">
+              <p className="text-teal-100 text-sm font-medium">Most Recent</p>
+              <p className="text-xl font-bold mt-2">
                 {mostRecentPeriod
                   ? new Date(mostRecentPeriod.sign_off_date).toLocaleDateString(
                       'en-US',
@@ -841,7 +626,7 @@ function SeaServiceTab({
                   : 'N/A'}
               </p>
               <p className="text-teal-100 text-sm mt-1">
-                {mostRecentPeriod?.vessel_name}
+                {mostRecentPeriod?.vessel_name || 'No records'}
               </p>
             </div>
             <span className="text-5xl opacity-20">🚢</span>
@@ -867,24 +652,48 @@ function SeaServiceTab({
           <h2 className="text-xl font-semibold text-gray-900">
             Service History
           </h2>
-          <button
-            onClick={onRefresh}
-            className="px-4 py-2 text-sm text-blue-600 hover:text-blue-800 font-medium"
-          >
-            🔄 Refresh
-          </button>
+          <div className="flex items-center space-x-3">
+            <button
+              onClick={onAddManual}
+              className="px-4 py-2 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium transition-colors"
+            >
+              ✏️ Add Manual Entry
+            </button>
+            <button
+              onClick={onRefresh}
+              className="px-4 py-2 text-sm text-blue-600 hover:text-blue-800 font-medium"
+            >
+              🔄 Refresh
+            </button>
+          </div>
         </div>
 
-        <div className="space-y-4">
-          {periods.map((period, index) => (
-            <ServicePeriodCard
-              key={period.id}
-              period={period}
-              index={index}
-              totalCount={periods.length}
-            />
-          ))}
-        </div>
+        {periods.length === 0 ? (
+          <div className="text-center py-12">
+            <span className="text-6xl mb-4 block">📋</span>
+            <h3 className="text-lg font-semibold text-gray-900 mb-2">No Sea Service Records</h3>
+            <p className="text-gray-600 mb-6">
+              Upload a sea service letter or add an entry manually to get started.
+            </p>
+            <button
+              onClick={onAddManual}
+              className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium"
+            >
+              Add Your First Entry
+            </button>
+          </div>
+        ) : (
+          <div className="space-y-4">
+            {periods.map((period, index) => (
+              <ServicePeriodCard
+                key={period.id}
+                period={period}
+                index={index}
+                totalCount={periods.length}
+              />
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );
@@ -926,8 +735,8 @@ function ServicePeriodCard({
         </div>
         <div className="text-right">
           <p className="text-sm text-gray-500">Period {totalCount - index}</p>
-          {period.tonnage && (
-            <p className="text-xs text-gray-500">{period.tonnage} GT</p>
+          {period.grt && (
+            <p className="text-xs text-gray-500">{period.grt} GT</p>
           )}
         </div>
       </div>
@@ -974,9 +783,9 @@ function ServicePeriodCard({
             {period.route}
           </span>
         )}
-        {period.tonnage_category && (
+        {period.grt && period.grt >= 1600 && (
           <span className="px-2 py-1 bg-white text-gray-700 text-xs rounded border border-gray-300">
-            {period.tonnage_category.replace(/_/g, ' ').toUpperCase()}
+            ≥1600 GRT
           </span>
         )}
       </div>
@@ -985,6 +794,124 @@ function ServicePeriodCard({
       {period.needs_manual_review && (
         <div className="mt-3 p-2 bg-amber-100 rounded text-sm text-amber-800">
           ⚠️ This period needs manual review due to missing or unclear data
+        </div>
+      )}
+    </div>
+  );
+}
+
+// Component: Document Section
+function DocumentSection({
+  title,
+  files,
+  type,
+  uploading,
+  onUpload,
+  onDelete,
+  userId,
+  supabase,
+}: {
+  title: string;
+  files: any[];
+  type: 'mmc' | 'sea_service';
+  uploading: boolean;
+  onUpload: (files: FileList | null) => void;
+  onDelete: (name: string) => void;
+  userId: string;
+  supabase: any;
+}) {
+  const [downloadingFile, setDownloadingFile] = useState<string | null>(null);
+
+  // Download file using blob method (works on mobile Safari)
+  const handleDownload = async (fileName: string) => {
+    try {
+      setDownloadingFile(fileName);
+      
+      // Build the storage path
+      const path = `${type}/${userId}/${fileName}`;
+      
+      // Download the file as a blob
+      const { data, error } = await supabase
+        .storage
+        .from('documents')
+        .download(path);
+
+      if (error) throw error;
+
+      // Create a blob URL and trigger download
+      const url = URL.createObjectURL(data);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = fileName;
+      document.body.appendChild(a);
+      a.click();
+      
+      // Cleanup
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      
+    } catch (error) {
+      console.error('Download failed:', error);
+      alert('Failed to download file. Please try again.');
+    } finally {
+      setDownloadingFile(null);
+    }
+  };
+
+  return (
+    <div className="bg-white rounded-2xl shadow-lg p-6">
+      <div className="flex items-center justify-between mb-4">
+        <h2 className="text-xl font-semibold text-gray-900">{title}</h2>
+        <label className="cursor-pointer px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium">
+          {uploading ? 'Uploading...' : '+ Upload'}
+          <input
+            type="file"
+            className="hidden"
+            multiple={type === 'sea_service'}
+            accept="image/*,application/pdf"
+            onChange={(e) => onUpload(e.target.files)}
+            disabled={uploading}
+          />
+        </label>
+      </div>
+
+      {files.length === 0 ? (
+        <p className="text-gray-500 text-center py-8">No files uploaded yet</p>
+      ) : (
+        <div className="space-y-2">
+          {files.map((file) => (
+            <div
+              key={file.name}
+              className="flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
+            >
+              <div className="flex items-center space-x-3 flex-1 min-w-0">
+                <span className="text-2xl">📄</span>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium text-gray-900 truncate">
+                    {file.name}
+                  </p>
+                  <p className="text-xs text-gray-500">
+                    {new Date(file.created_at).toLocaleDateString()}
+                  </p>
+                </div>
+              </div>
+              <div className="flex items-center space-x-2">
+                <button
+                  onClick={() => handleDownload(file.name)}
+                  disabled={downloadingFile === file.name}
+                  className="px-3 py-1 text-sm text-blue-600 hover:text-blue-800 font-medium disabled:opacity-50"
+                >
+                  {downloadingFile === file.name ? 'Downloading...' : 'Download'}
+                </button>
+                <button
+                  onClick={() => onDelete(file.name)}
+                  className="px-3 py-1 text-sm text-red-600 hover:text-red-800 font-medium"
+                >
+                  Delete
+                </button>
+              </div>
+            </div>
+          ))}
         </div>
       )}
     </div>
