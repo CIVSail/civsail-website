@@ -47,13 +47,17 @@ export default function DashboardPage() {
   const [uploadingTo, setUploadingTo] = useState<string | null>(null);
 
   // Sea service data state
-  const [seaServicePeriods, setSeaServicePeriods] = useState<SeaServicePeriod[]>([]);
+  const [seaServicePeriods, setSeaServicePeriods] = useState<
+    SeaServicePeriod[]
+  >([]);
   const [loadingSeaService, setLoadingSeaService] = useState(false);
 
   // Entry modal states
   const [showSeaServiceEntry, setShowSeaServiceEntry] = useState(false);
   const [entryMode, setEntryMode] = useState<'review' | 'manual'>('manual');
-  const [reviewData, setReviewData] = useState<Partial<SeaServicePeriod> | undefined>();
+  const [reviewData, setReviewData] = useState<
+    Partial<SeaServicePeriod> | undefined
+  >();
 
   // PDF rejection modal state
   const [showPDFRejection, setShowPDFRejection] = useState(false);
@@ -224,7 +228,7 @@ export default function DashboardPage() {
       if (result.periods && result.periods.length > 0) {
         // Open entry modal with first period data for review
         const firstPeriod = result.periods[0];
-        
+
         setReviewData({
           vessel_name: firstPeriod.vessel_name,
           sign_on_date: firstPeriod.sign_on_date,
@@ -248,11 +252,17 @@ export default function DashboardPage() {
 
       // Show success message if periods were inserted
       if (result.servicePeriods && result.servicePeriods.inserted > 0) {
-        alert(`✅ Successfully added ${result.servicePeriods.inserted} service period(s)!`);
-      } else if (result.servicePeriods && result.servicePeriods.duplicates > 0) {
-        alert('ℹ️ All periods were already in your ledger (duplicates skipped).');
+        alert(
+          `✅ Successfully added ${result.servicePeriods.inserted} service period(s)!`
+        );
+      } else if (
+        result.servicePeriods &&
+        result.servicePeriods.duplicates > 0
+      ) {
+        alert(
+          'ℹ️ All periods were already in your ledger (duplicates skipped).'
+        );
       }
-
     } catch (error) {
       console.error('OCR processing error:', error);
       alert('Failed to process document. Please try manual entry.');
@@ -275,7 +285,9 @@ export default function DashboardPage() {
   // Handler for PDF re-upload
   function handleReupload() {
     // Trigger the file input click
-    const fileInput = document.querySelector('input[type="file"][accept*="image"]') as HTMLInputElement;
+    const fileInput = document.querySelector(
+      'input[type="file"][accept*="image"]'
+    ) as HTMLInputElement;
     if (fileInput) {
       fileInput.click();
     }
@@ -404,11 +416,15 @@ export default function DashboardPage() {
         {activeTab === 'info' && (
           <div className="space-y-6">
             <div className="bg-white rounded-2xl shadow-lg p-6">
-              <h2 className="text-2xl font-semibold mb-6">Contact Information</h2>
+              <h2 className="text-2xl font-semibold mb-6">
+                Contact Information
+              </h2>
               <div className="space-y-4">
                 <div className="p-4 bg-gray-50 rounded-lg">
                   <p className="font-medium text-gray-900">Full Name</p>
-                  <p className="text-sm text-gray-600 mt-1">{profile.full_name}</p>
+                  <p className="text-sm text-gray-600 mt-1">
+                    {profile.full_name}
+                  </p>
                 </div>
                 <div className="p-4 bg-gray-50 rounded-lg">
                   <p className="font-medium text-gray-900">Email</p>
@@ -416,17 +432,23 @@ export default function DashboardPage() {
                 </div>
                 <div className="p-4 bg-gray-50 rounded-lg">
                   <p className="font-medium text-gray-900">Phone</p>
-                  <p className="text-sm text-gray-600 mt-1">{profile.phone || 'Not set'}</p>
+                  <p className="text-sm text-gray-600 mt-1">
+                    {profile.phone || 'Not set'}
+                  </p>
                 </div>
                 <div className="p-4 bg-gray-50 rounded-lg">
                   <p className="font-medium text-gray-900">Reference Number</p>
-                  <p className="text-sm text-gray-600 mt-1">{profile.ref_number || 'Not set'}</p>
+                  <p className="text-sm text-gray-600 mt-1">
+                    {profile.ref_number || 'Not set'}
+                  </p>
                 </div>
               </div>
             </div>
 
             <div className="bg-white rounded-2xl shadow-lg p-6">
-              <h2 className="text-2xl font-semibold mb-6">Credential Expirations</h2>
+              <h2 className="text-2xl font-semibold mb-6">
+                Credential Expirations
+              </h2>
               <div className="space-y-3">
                 <CredentialRow
                   label="MMC Expiration"
@@ -474,12 +496,12 @@ export default function DashboardPage() {
         )}
 
         {/* Credentials Tab */}
-{activeTab === 'credentials' && (
-  <CredentialsTab 
-    userId={profile.user_id}
-    nmcVerifiedAt={profile.nmc_verified_at}
-  />
-)}
+        {activeTab === 'credentials' && (
+          <CredentialsTab
+            userId={profile.user_id}
+            nmcVerifiedAt={profile.nmc_verified_at}
+          />
+        )}
 
         {/* Sea Service Tab */}
         {activeTab === 'seaService' && (
@@ -568,10 +590,10 @@ function SeaServiceTab({
   // Calculate summary statistics
   const totalDays = periods.reduce((sum, p) => sum + (p.days_served || 0), 0);
   const deckDays = periods
-    .filter(p => p.department === 'deck')
+    .filter((p) => p.department === 'deck')
     .reduce((sum, p) => sum + (p.days_served || 0), 0);
   const mostRecentPeriod = periods[0]; // Already sorted by sign_on_date desc
-  const needsReview = periods.filter(p => p.needs_manual_review).length;
+  const needsReview = periods.filter((p) => p.needs_manual_review).length;
 
   if (loading) {
     return (
@@ -589,7 +611,9 @@ function SeaServiceTab({
         <div className="bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl shadow-lg p-6 text-white">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-blue-100 text-sm font-medium">Total Sea Days</p>
+              <p className="text-blue-100 text-sm font-medium">
+                Total Sea Days
+              </p>
               <p className="text-4xl font-bold mt-2">{totalDays}</p>
               <p className="text-blue-100 text-sm mt-1">days served</p>
             </div>
@@ -671,9 +695,12 @@ function SeaServiceTab({
         {periods.length === 0 ? (
           <div className="text-center py-12">
             <span className="text-6xl mb-4 block">📋</span>
-            <h3 className="text-lg font-semibold text-gray-900 mb-2">No Sea Service Records</h3>
+            <h3 className="text-lg font-semibold text-gray-900 mb-2">
+              No Sea Service Records
+            </h3>
             <p className="text-gray-600 mb-6">
-              Upload a sea service letter or add an entry manually to get started.
+              Upload a sea service letter or add an entry manually to get
+              started.
             </p>
             <button
               onClick={onAddManual}
@@ -826,13 +853,12 @@ function DocumentSection({
   const handleDownload = async (fileName: string) => {
     try {
       setDownloadingFile(fileName);
-      
+
       // Build the storage path
       const path = `${type}/${userId}/${fileName}`;
-      
+
       // Download the file as a blob
-      const { data, error } = await supabase
-        .storage
+      const { data, error } = await supabase.storage
         .from('documents')
         .download(path);
 
@@ -845,11 +871,10 @@ function DocumentSection({
       a.download = fileName;
       document.body.appendChild(a);
       a.click();
-      
+
       // Cleanup
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
-      
     } catch (error) {
       console.error('Download failed:', error);
       alert('Failed to download file. Please try again.');
@@ -901,7 +926,9 @@ function DocumentSection({
                   disabled={downloadingFile === file.name}
                   className="px-3 py-1 text-sm text-blue-600 hover:text-blue-800 font-medium disabled:opacity-50"
                 >
-                  {downloadingFile === file.name ? 'Downloading...' : 'Download'}
+                  {downloadingFile === file.name
+                    ? 'Downloading...'
+                    : 'Download'}
                 </button>
                 <button
                   onClick={() => onDelete(file.name)}
