@@ -209,7 +209,7 @@ export default function Navigation() {
                         Credentials, Training and Renewal
                       </Link>
                       <Link
-                        href="/guides/careers"
+                        href="/guides/careers-and-sectors"
                         className="block px-3 py-2 text-gray-700 hover:text-blue-600 hover:bg-blue-50 rounded-md transition-colors"
                       >
                         Careers and Sectors
