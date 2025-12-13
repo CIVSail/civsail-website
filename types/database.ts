@@ -41,6 +41,12 @@ export interface Profile {
   alert_sms: boolean;
 
   created_at: string;
+
+  industry_entry_route: 'hawsepiper' | 'academy' | 'military' | null;
+  academy_name: string | null;
+  academy_program: string | null;
+  military_branch: string | null;
+  sea_days_per_year: number;
 }
 
 export interface Credential {
