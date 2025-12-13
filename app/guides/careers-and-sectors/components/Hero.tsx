@@ -32,15 +32,15 @@ export function Hero() {
           </p>
         </motion.div>
 
-        {/* Split concept preview */}
+        {/* Split concept preview - FIXED: removed gap that was causing the line */}
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.2, ease: 'easeOut' }}
-          className="grid md:grid-cols-2 gap-6 md:gap-8 max-w-5xl mx-auto"
+          className="grid md:grid-cols-2 gap-0 max-w-5xl mx-auto rounded-xl overflow-hidden border border-white/10"
         >
           {/* Left: Careers */}
-          <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-xl p-6 md:p-8 hover:bg-white/10 transition-colors">
+          <div className="bg-white/5 backdrop-blur-sm border-r border-white/10 p-6 md:p-8 hover:bg-white/10 transition-colors">
             <div className="text-sm uppercase tracking-widest text-blue-200 mb-3 font-semibold">
               Question One
             </div>
@@ -48,8 +48,8 @@ export function Hero() {
               What You Do
             </h2>
             <p className="text-blue-100 mb-6 leading-relaxed">
-              Your job onboard. Officer or unlicensed. Deck or engine. Each
-              has different credentials and upgrade paths.
+              Your job onboard. Officer or unlicensed. Deck or engine. Each has
+              different credentials and upgrade paths.
             </p>
             <div className="space-y-2 text-sm text-blue-200 opacity-75">
               <div>• Deck Officer</div>
@@ -60,7 +60,7 @@ export function Hero() {
           </div>
 
           {/* Right: Sectors */}
-          <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-xl p-6 md:p-8 hover:bg-white/10 transition-colors">
+          <div className="bg-white/5 backdrop-blur-sm p-6 md:p-8 hover:bg-white/10 transition-colors">
             <div className="text-sm uppercase tracking-widest text-blue-200 mb-3 font-semibold">
               Question Two
             </div>
@@ -68,8 +68,8 @@ export function Hero() {
               Where You Sail
             </h2>
             <p className="text-blue-100 mb-6 leading-relaxed">
-              The maritime industry you work in. Same license, totally
-              different lifestyle depending on where you go.
+              The maritime industry you work in. Same license, totally different
+              lifestyle depending on where you go.
             </p>
             <div className="space-y-2 text-sm text-blue-200 opacity-75">
               <div>• Government</div>

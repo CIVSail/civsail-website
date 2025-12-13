@@ -17,7 +17,7 @@ type CareerPairProps = {
   index: number; // For stagger animation
 };
 
-// Stagger animation variants
+// Stagger animation variants - Fixed type issues
 const containerVariants = {
   hidden: { opacity: 0 },
   visible: {
@@ -35,7 +35,7 @@ const tileVariants = {
     y: 0,
     transition: {
       duration: 0.6,
-      ease: [0.22, 1, 0.36, 1],
+      ease: "easeOut" as const,
     },
   },
 };

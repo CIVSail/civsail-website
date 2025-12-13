@@ -1,7 +1,7 @@
 'use client';
 
 import { ReactNode, useEffect, useRef, useState } from 'react';
-import { motion, useAnimation, Variants } from 'framer-motion';
+import { motion, useAnimation } from 'framer-motion';
 
 /**
  * ScrollReveal - Reusable wrapper for scroll-triggered animations
@@ -19,8 +19,8 @@ type ScrollRevealProps = {
   className?: string;
 };
 
-// Animation variants for different reveal styles
-const variants: Record<string, Variants> = {
+// Animation variants for different reveal styles - Fixed type issues
+const variants = {
   fadeUp: {
     hidden: { opacity: 0, y: 40 },
     visible: {
@@ -28,7 +28,7 @@ const variants: Record<string, Variants> = {
       y: 0,
       transition: {
         duration: 0.6,
-        ease: [0.22, 1, 0.36, 1], // Custom easing for smooth deceleration
+        ease: "easeOut" as const,
       },
     },
   },
@@ -38,7 +38,7 @@ const variants: Record<string, Variants> = {
       opacity: 1,
       transition: {
         duration: 0.8,
-        ease: 'easeOut',
+        ease: "easeOut" as const,
       },
     },
   },
@@ -49,7 +49,7 @@ const variants: Record<string, Variants> = {
       x: 0,
       transition: {
         duration: 0.6,
-        ease: [0.22, 1, 0.36, 1],
+        ease: "easeOut" as const,
       },
     },
   },
@@ -60,7 +60,7 @@ const variants: Record<string, Variants> = {
       x: 0,
       transition: {
         duration: 0.6,
-        ease: [0.22, 1, 0.36, 1],
+        ease: "easeOut" as const,
       },
     },
   },

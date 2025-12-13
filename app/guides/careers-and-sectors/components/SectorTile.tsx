@@ -7,21 +7,25 @@ import { SectorTile as SectorTileType } from '../data/sectors';
 
 /**
  * SectorTile - Individual sector card with unique visual identity
- * 
+ *
  * Each sector has its own color scheme and layout size
  * to create visual variety in the masonry grid
  */
 
 type SectorTileProps = {
   sector: SectorTileType;
-  waveIndex: number;    // Which wave this belongs to (for animation)
-  indexInWave: number;  // Position within wave (for stagger)
+  waveIndex: number; // Which wave this belongs to (for animation)
+  indexInWave: number; // Position within wave (for stagger)
 };
 
-export function SectorTile({ sector, waveIndex, indexInWave }: SectorTileProps) {
+export function SectorTile({
+  sector,
+  waveIndex,
+  indexInWave,
+}: SectorTileProps) {
   const [isHovered, setIsHovered] = useState(false);
 
-  // Animation variants - tiles reveal in horizontal waves
+  // Animation variants - tiles reveal in horizontal waves - Fixed type issues
   const tileVariants = {
     hidden: { opacity: 0, y: 30 },
     visible: {
@@ -30,7 +34,7 @@ export function SectorTile({ sector, waveIndex, indexInWave }: SectorTileProps) 
       transition: {
         delay: waveIndex * 0.15 + indexInWave * 0.05, // Wave stagger + tile stagger
         duration: 0.5,
-        ease: 'easeOut',
+        ease: 'easeOut' as const,
       },
     },
   };
