@@ -5,9 +5,11 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { createClient } from '@/lib/supabase/client';
 import { User } from '@supabase/supabase-js';
+import MobileNav from './MobileNav';
 
 export default function Navigation() {
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [user, setUser] = useState<User | null>(null);
   const supabase = createClient();
 
@@ -170,13 +172,13 @@ export default function Navigation() {
               About Us
             </Link>
 
-            {/* Guides Dropdown */}
+            {/* Maritime 101 Mega Menu */}
             <div className="relative">
               <button
                 className="text-gray-700 hover:text-blue-600 transition-colors flex items-center font-medium"
-                onMouseEnter={() => handleDropdownToggle('guides')}
+                onMouseEnter={() => handleDropdownToggle('maritime101')}
               >
-                Guides
+                Maritime 101
                 <svg
                   className="ml-1 h-4 w-4"
                   fill="none"
@@ -192,37 +194,90 @@ export default function Navigation() {
                 </svg>
               </button>
 
-              {activeDropdown === 'guides' && (
-                <div className="absolute top-full left-1/2 transform -translate-x-1/2 mt-2 w-80 bg-white rounded-lg shadow-xl border border-gray-200 py-6">
-                  <div className="px-6">
-                    <div className="space-y-2">
-                      <Link
-                        href="/guides/maritime-101"
-                        className="block px-3 py-2 text-gray-700 hover:text-blue-600 hover:bg-blue-50 rounded-md transition-colors"
-                      >
-                        Maritime 101
-                      </Link>
-                      <Link
-                        href="/guides/credentials-training-renewal" // ← change this to match your folder
-                        className="block px-3 py-2 text-gray-700 hover:text-blue-600 hover:bg-blue-50 rounded-md transition-colors"
-                      >
-                        Credentials, Training and Renewal
-                      </Link>
-                      <Link
-                        href="/guides/careers-and-sectors"
-                        className="block px-3 py-2 text-gray-700 hover:text-blue-600 hover:bg-blue-50 rounded-md transition-colors"
-                      >
-                        Careers and Sectors
-                      </Link>
+              {activeDropdown === 'maritime101' && (
+                <div className="absolute top-full left-1/2 transform -translate-x-1/2 mt-2 w-[700px] bg-white rounded-lg shadow-xl border border-gray-200 py-6 px-6">
+                  <div className="grid grid-cols-3 gap-6">
+                    
+                    {/* Column 1: Start Here */}
+                    <div>
+                      <h3 className="text-gray-700 font-semibold mb-3 text-xs uppercase tracking-wide">
+                        Start Here
+                      </h3>
+                      <div className="space-y-2">
+                        <Link
+                          href="/maritime-101/what-is-merchant-marine"
+                          className="block text-gray-700 hover:text-blue-600 transition-colors text-sm py-1"
+                        >
+                          What is the Merchant Marine?
+                        </Link>
+                      </div>
+                    </div>
+
+                    {/* Column 2: Career Paths */}
+                    <div>
+                      <h3 className="text-gray-700 font-semibold mb-3 text-xs uppercase tracking-wide">
+                        Career Paths
+                      </h3>
+                      <div className="space-y-2">
+                        <Link
+                          href="/maritime-101/careers-and-sectors"
+                          className="block text-gray-700 hover:text-blue-600 transition-colors text-sm py-1"
+                        >
+                          Careers & Sectors
+                        </Link>
+
+                        <Link
+                          href="/maritime-101/life-at-sea"
+                          className="block text-gray-700 hover:text-blue-600 transition-colors text-sm py-1"
+                        >
+                          Life at Sea
+                        </Link>
+                      </div>
+                    </div>
+
+                    {/* Column 3: Getting Started */}
+                    <div>
+                      <h3 className="text-gray-700 font-semibold mb-3 text-xs uppercase tracking-wide">
+                        Getting Started
+                      </h3>
+                      <div className="space-y-2">
+                        <Link
+                          href="/maritime-101/training-and-entry"
+                          className="block text-gray-700 hover:text-blue-600 transition-colors text-sm py-1"
+                        >
+                          Training & Career Entry
+                        </Link>
+
+                        <Link
+                          href="/maritime-101/credentials"
+                          className="block text-gray-700 hover:text-blue-600 transition-colors text-sm py-1"
+                        >
+                          Credentials & Licensing
+                        </Link>
+                      </div>
                     </div>
                   </div>
 
-                  <div className="border-t border-gray-100 mt-4 pt-4 px-6">
+                  {/* Bottom CTA */}
+                  <div className="border-t border-gray-200 mt-4 pt-4">
                     <Link
-                      href="/guides"
-                      className="text-sm font-medium text-blue-600 hover:text-blue-700"
+                      href="/maritime-101"
+                      className="text-sm font-medium text-blue-600 hover:text-blue-700 flex items-center justify-center gap-1"
                     >
-                      All Guides →
+                      View All Maritime 101 Topics
+                      <svg
+                        className="w-4 h-4"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M9 5l7 7-7 7"
+                        />
+                      </svg>
                     </Link>
                   </div>
                 </div>
@@ -252,55 +307,26 @@ export default function Navigation() {
               </button>
 
               {activeDropdown === 'tools' && (
-                <div className="absolute top-full left-1/2 transform -translate-x-1/2 mt-2 w-96 bg-white rounded-lg shadow-xl border border-gray-200 py-6">
-                  <div className="px-6 pb-2">
-                    <h3 className="text-sm font-semibold text-gray-900 mb-3">
-                      MSC Tools
-                    </h3>
+                <div className="absolute top-full left-1/2 transform -translate-x-1/2 mt-2 w-80 bg-white rounded-lg shadow-xl border border-gray-200 py-6">
+                  <div className="px-6">
                     <div className="space-y-2">
                       <Link
                         href="/tools/pay-calculator"
                         className="block px-3 py-2 text-gray-700 hover:text-blue-600 hover:bg-blue-50 rounded-md transition-colors"
                       >
-                        Ship Pay Calculator
+                        Pay Calculator
                       </Link>
                       <Link
-                        href="/tools/pay-comparison"
+                        href="/tools/leave-chit"
                         className="block px-3 py-2 text-gray-700 hover:text-blue-600 hover:bg-blue-50 rounded-md transition-colors"
                       >
-                        Ship Pay Comparison Calculator
+                        Leave Chit Generator
                       </Link>
                       <Link
-                        href="/tools/travel-claim"
+                        href="/tools/travel-voucher"
                         className="block px-3 py-2 text-gray-700 hover:text-blue-600 hover:bg-blue-50 rounded-md transition-colors"
                       >
-                        Travel Claim Generator
-                      </Link>
-                      <Link
-                        href="/tools/msc-tools/leave-chit-calculator"
-                        className="block px-3 py-2 text-gray-700 hover:text-blue-600 hover:bg-blue-50 rounded-md transition-colors"
-                      >
-                        MSC Tools → Leave Chit Calculator
-                      </Link>
-                    </div>
-                  </div>
-
-                  <div className="border-t border-gray-100 mt-4 pt-4 px-6">
-                    <h3 className="text-sm font-semibold text-gray-900 mb-3">
-                      Mariner Tools
-                    </h3>
-                    <div className="space-y-2">
-                      <Link
-                        href="/tools/credential-management"
-                        className="block px-3 py-2 text-gray-700 hover:text-blue-600 hover:bg-blue-50 rounded-md transition-colors"
-                      >
-                        Credential Management
-                      </Link>
-                      <Link
-                        href="/tools/promotion-tracker"
-                        className="block px-3 py-2 text-gray-700 hover:text-blue-600 hover:bg-blue-50 rounded-md transition-colors"
-                      >
-                        Promotion Tracker
+                        Travel Voucher (DD 1351-2)
                       </Link>
                     </div>
                   </div>
@@ -310,115 +336,20 @@ export default function Navigation() {
                       href="/tools"
                       className="text-sm font-medium text-blue-600 hover:text-blue-700"
                     >
-                      View All Tools →
+                      All Tools →
                     </Link>
                   </div>
                 </div>
               )}
             </div>
 
-            {/* Ports Dropdown */}
-            <div className="relative">
-              <button
-                className="text-gray-700 hover:text-blue-600 transition-colors flex items-center font-medium"
-                onMouseEnter={() => handleDropdownToggle('ports')}
-              >
-                Ports
-                <svg
-                  className="ml-1 h-4 w-4"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M19 9l-7 7-7-7"
-                  />
-                </svg>
-              </button>
-
-              {activeDropdown === 'ports' && (
-                <div className="absolute top-full left-1/2 transform -translate-x-1/2 mt-2 w-80 bg-white rounded-lg shadow-xl border border-gray-200 py-6">
-                  <div className="px-6 pb-2">
-                    <Link
-                      href="/ports/map"
-                      className="block px-3 py-2 text-blue-600 font-medium hover:text-blue-700 hover:bg-blue-50 rounded-md mb-3 transition-colors"
-                    >
-                      🗺️ Interactive Map
-                    </Link>
-                  </div>
-
-                  <div className="border-t border-gray-100 pt-4 px-6">
-                    <h3 className="text-sm font-semibold text-gray-900 mb-3">
-                      By Region
-                    </h3>
-                    <div className="grid grid-cols-2 gap-1">
-                      <Link
-                        href="/ports/united-states"
-                        className="block px-3 py-2 text-sm text-gray-700 hover:text-blue-600 hover:bg-blue-50 rounded-md transition-colors"
-                      >
-                        United States
-                      </Link>
-                      <Link
-                        href="/ports/south-america"
-                        className="block px-3 py-2 text-sm text-gray-700 hover:text-blue-600 hover:bg-blue-50 rounded-md transition-colors"
-                      >
-                        South America
-                      </Link>
-                      <Link
-                        href="/ports/europe"
-                        className="block px-3 py-2 text-sm text-gray-700 hover:text-blue-600 hover:bg-blue-50 rounded-md transition-colors"
-                      >
-                        Europe
-                      </Link>
-                      <Link
-                        href="/ports/middle-east"
-                        className="block px-3 py-2 text-sm text-gray-700 hover:text-blue-600 hover:bg-blue-50 rounded-md transition-colors"
-                      >
-                        Middle East
-                      </Link>
-                      <Link
-                        href="/ports/africa"
-                        className="block px-3 py-2 text-sm text-gray-700 hover:text-blue-600 hover:bg-blue-50 rounded-md transition-colors"
-                      >
-                        Africa
-                      </Link>
-                      <Link
-                        href="/ports/far-east"
-                        className="block px-3 py-2 text-sm text-gray-700 hover:text-blue-600 hover:bg-blue-50 rounded-md transition-colors"
-                      >
-                        Far East
-                      </Link>
-                      <Link
-                        href="/ports/australia"
-                        className="block px-3 py-2 text-sm text-gray-700 hover:text-blue-600 hover:bg-blue-50 rounded-md transition-colors"
-                      >
-                        Australia
-                      </Link>
-                    </div>
-                  </div>
-
-                  <div className="border-t border-gray-100 mt-4 pt-4 px-6">
-                    <Link
-                      href="/ports"
-                      className="text-sm font-medium text-blue-600 hover:text-blue-700"
-                    >
-                      All Ports →
-                    </Link>
-                  </div>
-                </div>
-              )}
-            </div>
-
-            {/* Ships by Sector Dropdown */}
+            {/* Ships Dropdown */}
             <div className="relative">
               <button
                 className="text-gray-700 hover:text-blue-600 transition-colors flex items-center font-medium"
                 onMouseEnter={() => handleDropdownToggle('ships')}
               >
-                Ships by Sector
+                Ships
                 <svg
                   className="ml-1 h-4 w-4"
                   fill="none"
@@ -435,39 +366,27 @@ export default function Navigation() {
               </button>
 
               {activeDropdown === 'ships' && (
-                <div className="absolute top-full left-1/2 transform -translate-x-1/2 mt-2 w-72 bg-white rounded-lg shadow-xl border border-gray-200 py-6">
+                <div className="absolute top-full left-1/2 transform -translate-x-1/2 mt-2 w-80 bg-white rounded-lg shadow-xl border border-gray-200 py-6">
                   <div className="px-6">
+                    <h3 className="text-xs uppercase tracking-wide font-semibold text-gray-500 mb-3">
+                      By Sector
+                    </h3>
                     <div className="space-y-2">
                       <Link
                         href="/ships/msc"
                         className="block px-3 py-2 text-gray-700 hover:text-blue-600 hover:bg-blue-50 rounded-md transition-colors"
                       >
-                        MSC
+                        MSC Fleet
                       </Link>
-                      <Link
-                        href="/ships/noaa"
-                        className="block px-3 py-2 text-gray-700 hover:text-blue-600 hover:bg-blue-50 rounded-md transition-colors"
-                      >
-                        NOAA
-                      </Link>
-                      <Link
-                        href="/ships/deep-sea"
-                        className="block px-3 py-2 text-gray-700 hover:text-blue-600 hover:bg-blue-50 rounded-md transition-colors"
-                      >
-                        Deep Sea
-                      </Link>
-                      <Link
-                        href="/ships/tug-barge"
-                        className="block px-3 py-2 text-gray-700 hover:text-blue-600 hover:bg-blue-50 rounded-md transition-colors"
-                      >
-                        Tug and Barge
-                      </Link>
-                      <Link
-                        href="/ships/oil-rig"
-                        className="block px-3 py-2 text-gray-700 hover:text-blue-600 hover:bg-blue-50 rounded-md transition-colors"
-                      >
-                        Oil Rig
-                      </Link>
+                      <div className="px-3 py-2 text-gray-400 cursor-not-allowed text-sm">
+                        NOAA Fleet <span className="text-xs">(coming soon)</span>
+                      </div>
+                      <div className="px-3 py-2 text-gray-400 cursor-not-allowed text-sm">
+                        Commercial <span className="text-xs">(coming soon)</span>
+                      </div>
+                      <div className="px-3 py-2 text-gray-400 cursor-not-allowed text-sm">
+                        Cruise Lines <span className="text-xs">(coming soon)</span>
+                      </div>
                     </div>
                   </div>
 
@@ -476,12 +395,20 @@ export default function Navigation() {
                       href="/ships"
                       className="text-sm font-medium text-blue-600 hover:text-blue-700"
                     >
-                      All Sectors →
+                      All Ships →
                     </Link>
                   </div>
                 </div>
               )}
             </div>
+
+            {/* Ports */}
+            <Link
+              href="/ports"
+              className="text-gray-700 hover:text-blue-600 transition-colors font-medium"
+            >
+              Ports
+            </Link>
 
             {/* Blogs Dropdown */}
             <div className="relative">
@@ -677,11 +604,15 @@ export default function Navigation() {
             </a>
           </nav>
 
-          {/* Mobile Menu Button */}
-          <div className="lg:hidden flex items-center justify-center py-3">
-            <button className="text-gray-700 hover:text-blue-600">
+          {/* Mobile Menu Button - Larger touch target */}
+          <div className="lg:hidden flex items-center justify-center py-2">
+            <button 
+              onClick={() => setMobileMenuOpen(true)}
+              className="p-3 text-gray-700 hover:text-blue-600 hover:bg-gray-100 rounded-lg transition-colors"
+              aria-label="Open menu"
+            >
               <svg
-                className="h-6 w-6"
+                className="h-7 w-7"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -697,6 +628,9 @@ export default function Navigation() {
           </div>
         </div>
       </div>
+
+      {/* Mobile Navigation Drawer */}
+      <MobileNav open={mobileMenuOpen} setOpen={setMobileMenuOpen} />
     </header>
   );
 }
