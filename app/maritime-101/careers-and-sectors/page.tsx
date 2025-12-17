@@ -19,6 +19,7 @@ import {
   Wrench,
   ChefHat,
   ChevronUp,
+  ChevronDown,
   ArrowRight,
   ArrowUp,
   DollarSign,
@@ -704,20 +705,18 @@ const SECTORS = [
   },
 ];
 
-// Sticky career section with bigger cards and progression story
-function StickyCareerSection({
+// Career section with scroll snap and nested scrollable roles
+function CareerChapterSection({
   category,
   index,
+  isLast,
+  onNextChapter,
 }: {
   category: (typeof CAREER_CATEGORIES)[0];
   index: number;
+  isLast: boolean;
+  onNextChapter: () => void;
 }) {
-  const sectionRef = useRef<HTMLDivElement>(null);
-  const { scrollYProgress } = useScroll({
-    target: sectionRef,
-    offset: ['start start', 'end end'],
-  });
-
   const colorMap: Record<
     string,
     { bg: string; border: string; text: string; gradient: string; dot: string }
@@ -763,165 +762,180 @@ function StickyCareerSection({
 
   return (
     <section
-      ref={sectionRef}
-      className="relative"
-      style={{ minHeight: `${Math.max(200, category.roles.length * 60)}vh` }}
+      id={`chapter-${category.id}`}
+      className="min-h-screen snap-start snap-always flex items-start py-8"
     >
-      <div className="sticky top-0 min-h-screen flex items-start overflow-hidden py-8">
-        <div className="container mx-auto px-4">
-          <div className="grid lg:grid-cols-5 gap-8 lg:gap-12">
-            {/* Left side - Category info (2 columns) */}
-            <motion.div
-              initial={{ opacity: 0, x: -50 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.8 }}
-              className="lg:col-span-2 lg:sticky lg:top-24"
+      <div className="container mx-auto px-4 h-full">
+        <div className="grid lg:grid-cols-5 gap-8 lg:gap-12 h-full">
+          {/* Left side - Category info (2 columns) - sticky on desktop */}
+          <motion.div
+            initial={{ opacity: 0, x: -50 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.8 }}
+            className="lg:col-span-2 flex flex-col"
+          >
+            <div
+              className={`inline-flex p-3 rounded-xl ${colors.bg} ${colors.border} border mb-4 w-fit`}
             >
-              <div
-                className={`inline-flex p-3 rounded-xl ${colors.bg} ${colors.border} border mb-4`}
-              >
-                <category.icon className={`w-8 h-8 ${colors.text}`} />
+              <category.icon className={`w-8 h-8 ${colors.text}`} />
+            </div>
+
+            <h2 className="text-3xl md:text-4xl font-bold text-white mb-2">
+              {category.title}
+            </h2>
+            <p className={`text-lg ${colors.text} mb-4`}>{category.subtitle}</p>
+
+            <p className="text-slate-300 leading-relaxed mb-6">
+              {category.description}
+            </p>
+
+            <div
+              className={`p-4 rounded-lg ${colors.bg} ${colors.border} border mb-4`}
+            >
+              <div className="text-xs text-slate-400 uppercase tracking-wide mb-1">
+                Requirements
               </div>
+              <p className="text-sm text-slate-300">{category.requirements}</p>
+            </div>
 
-              <h2 className="text-3xl md:text-4xl font-bold text-white mb-2">
-                {category.title}
-              </h2>
-              <p className={`text-lg ${colors.text} mb-4`}>
-                {category.subtitle}
-              </p>
-
-              <p className="text-slate-300 leading-relaxed mb-6">
-                {category.description}
-              </p>
-
-              <div
-                className={`p-4 rounded-lg ${colors.bg} ${colors.border} border mb-6`}
-              >
-                <div className="text-xs text-slate-400 uppercase tracking-wide mb-1">
-                  Requirements
+            {category.note && (
+              <div className="p-4 rounded-lg bg-slate-800/50 border border-slate-700 mb-4">
+                <div className="text-xs text-amber-400 uppercase tracking-wide mb-1">
+                  Note
                 </div>
-                <p className="text-sm text-slate-300">
-                  {category.requirements}
-                </p>
+                <p className="text-sm text-slate-400">{category.note}</p>
               </div>
+            )}
 
-              {category.note && (
-                <div className="p-4 rounded-lg bg-slate-800/50 border border-slate-700 mb-6">
-                  <div className="text-xs text-amber-400 uppercase tracking-wide mb-1">
-                    Note
-                  </div>
-                  <p className="text-sm text-slate-400">{category.note}</p>
-                </div>
-              )}
+            {/* Chapter indicator */}
+            <div className="mt-auto pt-4">
+              <div className="flex items-center gap-2 text-xs text-slate-500">
+                <span>
+                  Chapter {index + 1} of {CAREER_CATEGORIES.length}
+                </span>
+              </div>
+            </div>
+          </motion.div>
 
-              {/* Progress indicator */}
-              <div className="flex items-center gap-3">
-                <div className="text-xs text-slate-500 uppercase tracking-wide">
-                  Progression
-                </div>
-                <div className="flex-1 h-1.5 rounded-full bg-slate-800 overflow-hidden">
+          {/* Right side - Roles with nested scroll (3 columns) */}
+          <div className="lg:col-span-3 flex flex-col h-[calc(100vh-8rem)]">
+            {/* Scrollable roles container with overscroll containment */}
+            <div
+              className="flex-1 overflow-y-auto overscroll-contain pr-2 scrollbar-thin scrollbar-thumb-slate-700 scrollbar-track-transparent"
+              style={{ scrollbarGutter: 'stable' }}
+            >
+              <div className="space-y-6 pb-4">
+                {category.roles.map((role, idx) => (
                   <motion.div
-                    className={`h-full rounded-full ${colors.dot}`}
-                    style={{ scaleX: scrollYProgress, transformOrigin: 'left' }}
-                  />
-                </div>
-              </div>
-            </motion.div>
-
-            {/* Right side - Roles with progression story (3 columns) */}
-            <div className="lg:col-span-3 space-y-6 max-h-[80vh] overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-slate-700 scrollbar-track-transparent">
-              {category.roles.map((role, idx) => (
-                <motion.div
-                  key={role.title}
-                  initial={{ opacity: 0, y: 30 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true, margin: '-50px' }}
-                  transition={{ duration: 0.5, delay: idx * 0.1 }}
-                  className="relative"
-                >
-                  {/* Progression connector line */}
-                  {idx < category.roles.length - 1 && (
-                    <div
-                      className={`absolute left-6 top-full w-0.5 h-6 ${colors.dot} opacity-30`}
-                    />
-                  )}
-
-                  <Card
-                    className={`p-6 bg-gradient-to-br ${colors.gradient} border ${colors.border} backdrop-blur-sm`}
+                    key={role.title}
+                    initial={{ opacity: 0, y: 30 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true, margin: '-50px' }}
+                    transition={{ duration: 0.5, delay: idx * 0.1 }}
+                    className="relative"
                   >
-                    {/* Header */}
-                    <div className="flex items-start justify-between gap-4 mb-4">
-                      <div className="flex items-start gap-4">
-                        {/* Step number */}
-                        <div
-                          className={`flex-shrink-0 w-12 h-12 rounded-full ${colors.bg} ${colors.border} border flex items-center justify-center`}
-                        >
-                          <span className={`text-lg font-bold ${colors.text}`}>
-                            {idx + 1}
+                    {/* Progression connector line */}
+                    {idx < category.roles.length - 1 && (
+                      <div
+                        className={`absolute left-6 top-full w-0.5 h-6 ${colors.dot} opacity-30`}
+                      />
+                    )}
+
+                    <Card
+                      className={`p-6 bg-gradient-to-br ${colors.gradient} border ${colors.border} backdrop-blur-sm`}
+                    >
+                      {/* Header */}
+                      <div className="flex items-start justify-between gap-4 mb-4">
+                        <div className="flex items-start gap-4">
+                          {/* Step number */}
+                          <div
+                            className={`flex-shrink-0 w-12 h-12 rounded-full ${colors.bg} ${colors.border} border flex items-center justify-center`}
+                          >
+                            <span
+                              className={`text-lg font-bold ${colors.text}`}
+                            >
+                              {idx + 1}
+                            </span>
+                          </div>
+                          <div>
+                            <h3 className="text-xl font-bold text-white">
+                              {role.title}
+                            </h3>
+                            <div className="flex items-center gap-3 mt-1">
+                              <span className="text-sm text-slate-400">
+                                {role.years} years typical
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                        <div className="text-right flex-shrink-0">
+                          <div className={`text-lg font-bold ${colors.text}`}>
+                            {role.salary}
+                          </div>
+                          <div className="text-xs text-slate-500">per year</div>
+                        </div>
+                      </div>
+
+                      {/* Description */}
+                      <p className="text-slate-300 mb-4 leading-relaxed">
+                        {role.description}
+                      </p>
+
+                      {/* Daily Duties */}
+                      <div className="mb-4">
+                        <div className="text-xs text-slate-500 uppercase tracking-wide mb-2">
+                          Daily Duties & Responsibilities
+                        </div>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                          {role.duties.map((duty, dutyIdx) => (
+                            <div
+                              key={dutyIdx}
+                              className="flex items-start gap-2"
+                            >
+                              <div
+                                className={`w-1.5 h-1.5 rounded-full ${colors.dot} mt-1.5 flex-shrink-0`}
+                              />
+                              <span className="text-sm text-slate-400">
+                                {duty}
+                              </span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+
+                      {/* Next Step */}
+                      <div
+                        className={`p-3 rounded-lg bg-slate-900/50 border ${colors.border}`}
+                      >
+                        <div className="flex items-center gap-2">
+                          <ArrowUp className={`w-4 h-4 ${colors.text}`} />
+                          <span className="text-xs text-slate-500 uppercase tracking-wide">
+                            Path Forward
                           </span>
                         </div>
-                        <div>
-                          <h3 className="text-xl font-bold text-white">
-                            {role.title}
-                          </h3>
-                          <div className="flex items-center gap-3 mt-1">
-                            <span className="text-sm text-slate-400">
-                              {role.years} years typical
-                            </span>
-                          </div>
-                        </div>
+                        <p className="text-sm text-slate-300 mt-1">
+                          {role.nextStep}
+                        </p>
                       </div>
-                      <div className="text-right flex-shrink-0">
-                        <div className={`text-lg font-bold ${colors.text}`}>
-                          {role.salary}
-                        </div>
-                        <div className="text-xs text-slate-500">per year</div>
-                      </div>
-                    </div>
-
-                    {/* Description */}
-                    <p className="text-slate-300 mb-4 leading-relaxed">
-                      {role.description}
-                    </p>
-
-                    {/* Daily Duties */}
-                    <div className="mb-4">
-                      <div className="text-xs text-slate-500 uppercase tracking-wide mb-2">
-                        Daily Duties & Responsibilities
-                      </div>
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-                        {role.duties.map((duty, dutyIdx) => (
-                          <div key={dutyIdx} className="flex items-start gap-2">
-                            <div
-                              className={`w-1.5 h-1.5 rounded-full ${colors.dot} mt-1.5 flex-shrink-0`}
-                            />
-                            <span className="text-sm text-slate-400">
-                              {duty}
-                            </span>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-
-                    {/* Next Step */}
-                    <div
-                      className={`p-3 rounded-lg bg-slate-900/50 border ${colors.border}`}
-                    >
-                      <div className="flex items-center gap-2">
-                        <ArrowUp className={`w-4 h-4 ${colors.text}`} />
-                        <span className="text-xs text-slate-500 uppercase tracking-wide">
-                          Path Forward
-                        </span>
-                      </div>
-                      <p className="text-sm text-slate-300 mt-1">
-                        {role.nextStep}
-                      </p>
-                    </div>
-                  </Card>
-                </motion.div>
-              ))}
+                    </Card>
+                  </motion.div>
+                ))}
+              </div>
             </div>
+
+            {/* Next chapter button */}
+            {!isLast && (
+              <div className="pt-4 flex justify-center">
+                <button
+                  onClick={onNextChapter}
+                  className={`flex items-center gap-2 px-4 py-2 rounded-full ${colors.bg} ${colors.border} border text-sm ${colors.text} hover:opacity-80 transition-opacity`}
+                >
+                  Next: {CAREER_CATEGORIES[index + 1]?.title}
+                  <ChevronDown className="w-4 h-4" />
+                </button>
+              </div>
+            )}
           </div>
         </div>
       </div>
@@ -938,7 +952,6 @@ function CompassNavigation() {
 
   const activeSectorData = SECTORS.find((s) => s.id === activeSector);
 
-  // Check for mobile
   useEffect(() => {
     const checkMobile = () => setIsMobile(window.innerWidth < 1024);
     checkMobile();
@@ -946,7 +959,6 @@ function CompassNavigation() {
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
-  // Calculate positions for 11 sectors around compass
   const getPosition = (index: number, total: number, radius: number) => {
     const angle = (index * (360 / total) - 90) * (Math.PI / 180);
     return {
@@ -1035,7 +1047,6 @@ function CompassNavigation() {
     setActiveSector(null);
   };
 
-  // Click outside to close (desktop only)
   const handleCompassAreaClick = (e: React.MouseEvent) => {
     if (e.target === e.currentTarget) {
       handleClose();
@@ -1044,7 +1055,6 @@ function CompassNavigation() {
 
   return (
     <>
-      {/* Desktop: Split screen layout */}
       <div ref={compassRef} className="relative py-12">
         <div
           className={`flex items-center gap-8 transition-all duration-500 ${
@@ -1059,7 +1069,6 @@ function CompassNavigation() {
             onClick={handleCompassAreaClick}
           >
             <div className="relative w-[420px] h-[420px] max-w-full">
-              {/* Outer ring */}
               <motion.div
                 initial={{ opacity: 0, scale: 0.8, rotate: -180 }}
                 animate={isInView ? { opacity: 1, scale: 1, rotate: 0 } : {}}
@@ -1067,7 +1076,6 @@ function CompassNavigation() {
                 className="absolute inset-0 rounded-full border-2 border-slate-700"
               />
 
-              {/* Inner decorative rings */}
               <motion.div
                 initial={{ opacity: 0 }}
                 animate={isInView ? { opacity: 1 } : {}}
@@ -1081,7 +1089,6 @@ function CompassNavigation() {
                 className="absolute inset-20 rounded-full border border-slate-800/50"
               />
 
-              {/* Center compass rose */}
               <motion.div
                 initial={{ opacity: 0, scale: 0 }}
                 animate={isInView ? { opacity: 1, scale: 1 } : {}}
@@ -1107,7 +1114,6 @@ function CompassNavigation() {
                 </div>
               </motion.div>
 
-              {/* Sector nodes */}
               {SECTORS.map((sector, idx) => {
                 const pos = getPosition(idx, SECTORS.length, 160);
                 const isActive = activeSector === sector.id;
@@ -1147,7 +1153,6 @@ function CompassNavigation() {
                 );
               })}
 
-              {/* Connection lines */}
               <svg className="absolute inset-0 w-full h-full pointer-events-none">
                 {SECTORS.map((sector, idx) => {
                   const pos = getPosition(idx, SECTORS.length, 120);
@@ -1196,7 +1201,6 @@ function CompassNavigation() {
           </AnimatePresence>
         </div>
 
-        {/* Instruction */}
         {!activeSector && (
           <motion.p
             initial={{ opacity: 0 }}
@@ -1218,7 +1222,7 @@ function CompassNavigation() {
   );
 }
 
-// Sector detail panel (used for desktop side panel)
+// Sector detail panel (desktop side panel)
 function SectorDetailPanel({
   sector,
   onClose,
@@ -1301,8 +1305,7 @@ function SectorDetailPanel({
   const colors = colorMap[sector.color];
 
   return (
-    <Card className={`p-6 ${colors.bg} border ${colors.border}`}>
-      {/* Close button */}
+    <Card className={`p-6 ${colors.bg} border ${colors.border} relative`}>
       <button
         onClick={onClose}
         className="absolute top-4 right-4 p-2 text-slate-500 hover:text-white transition-colors"
@@ -1310,7 +1313,6 @@ function SectorDetailPanel({
         <X className="w-5 h-5" />
       </button>
 
-      {/* Header */}
       <div className="flex items-center gap-4 mb-6 pr-8">
         <div className={`p-3 rounded-xl ${colors.bg} border ${colors.border}`}>
           <sector.icon className={`w-8 h-8 ${colors.text}`} />
@@ -1321,12 +1323,10 @@ function SectorDetailPanel({
         </div>
       </div>
 
-      {/* Description */}
       <p className="text-slate-300 mb-6 leading-relaxed">
         {sector.description}
       </p>
 
-      {/* Stats */}
       <div className="grid grid-cols-3 gap-3 mb-6">
         <div className="text-center p-3 bg-slate-900/50 rounded-lg">
           <Clock className="w-4 h-4 text-slate-500 mx-auto mb-1" />
@@ -1351,7 +1351,6 @@ function SectorDetailPanel({
         </div>
       </div>
 
-      {/* Highlights */}
       <div className="mb-6">
         <div className="text-xs text-slate-500 uppercase tracking-wide mb-3">
           Highlights
@@ -1371,7 +1370,6 @@ function SectorDetailPanel({
         </div>
       </div>
 
-      {/* CTA */}
       <Link href={sector.href}>
         <Button className={`w-full ${colors.button} text-white`}>
           Explore {sector.title} Careers
@@ -1382,7 +1380,7 @@ function SectorDetailPanel({
   );
 }
 
-// Mobile modal for sector details
+// Mobile modal
 function SectorModal({
   sector,
   onClose,
@@ -1573,6 +1571,15 @@ export default function CareersAndSectorsPage() {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
+  const scrollToChapter = (index: number) => {
+    const chapter = document.getElementById(
+      `chapter-${CAREER_CATEGORIES[index].id}`
+    );
+    if (chapter) {
+      chapter.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
+
   return (
     <div className="min-h-screen bg-slate-950 text-white">
       {/* Progress bar */}
@@ -1644,7 +1651,7 @@ export default function CareersAndSectorsPage() {
         </motion.div>
       </section>
 
-      {/* Section: What You Do (Careers) */}
+      {/* Section: What You Do (Careers) with scroll snap */}
       <div className="relative">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-12">
           <motion.div
@@ -1666,14 +1673,21 @@ export default function CareersAndSectorsPage() {
           </motion.div>
         </div>
 
-        {/* Sticky career sections */}
-        {CAREER_CATEGORIES.map((category, index) => (
-          <StickyCareerSection
-            key={category.id}
-            category={category}
-            index={index}
-          />
-        ))}
+        {/* Career chapters with scroll snap */}
+        <div
+          className="snap-y snap-mandatory"
+          style={{ scrollPaddingTop: '2rem' }}
+        >
+          {CAREER_CATEGORIES.map((category, index) => (
+            <CareerChapterSection
+              key={category.id}
+              category={category}
+              index={index}
+              isLast={index === CAREER_CATEGORIES.length - 1}
+              onNextChapter={() => scrollToChapter(index + 1)}
+            />
+          ))}
+        </div>
       </div>
 
       <Separator className="max-w-7xl mx-auto bg-slate-800 my-16" />

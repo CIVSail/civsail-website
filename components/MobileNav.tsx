@@ -212,24 +212,128 @@ export default function MobileNav({ open, setOpen }: MobileNavProps) {
                 >
                   MSC Fleet
                 </Link>
-                <div className="py-2 px-3 text-sm text-gray-400">
-                  NOAA Fleet (coming soon)
-                </div>
-                <div className="py-2 px-3 text-sm text-gray-400">
-                  Commercial (coming soon)
-                </div>
+                <Link
+                  href="/ships/noaa"
+                  onClick={() => setOpen(false)}
+                  className="block py-2 px-3 text-sm text-gray-700 hover:bg-gray-100 rounded transition"
+                >
+                  NOAA Fleet
+                </Link>
+                <Link
+                  href="/ships/deep-sea"
+                  onClick={() => setOpen(false)}
+                  className="block py-2 px-3 text-sm text-gray-700 hover:bg-gray-100 rounded transition"
+                >
+                  Deep Sea
+                </Link>
+                <Link
+                  href="/ships/tug-barge"
+                  onClick={() => setOpen(false)}
+                  className="block py-2 px-3 text-sm text-gray-700 hover:bg-gray-100 rounded transition"
+                >
+                  Tug and Barge
+                </Link>
+                <Link
+                  href="/ships/oil-rig"
+                  onClick={() => setOpen(false)}
+                  className="block py-2 px-3 text-sm text-gray-700 hover:bg-gray-100 rounded transition"
+                >
+                  Oil Rig
+                </Link>
               </div>
             )}
           </div>
 
-          {/* Ports */}
-          <Link
-            href="/ports"
-            onClick={() => setOpen(false)}
-            className="py-3 px-4 text-base font-medium text-gray-700 hover:bg-gray-100 rounded transition"
-          >
-            Ports
-          </Link>
+          {/* Ports - Expandable */}
+          <div>
+            <button
+              onClick={() => toggleSection('ports')}
+              className="w-full flex items-center justify-between py-3 px-4 text-base font-medium text-gray-700 hover:bg-gray-100 rounded transition"
+            >
+              Ports
+              {expandedSection === 'ports' ? (
+                <ChevronDown className="w-5 h-5" />
+              ) : (
+                <ChevronRight className="w-5 h-5" />
+              )}
+            </button>
+            
+            {expandedSection === 'ports' && (
+              <div className="ml-2 mt-1 space-y-1 px-4">
+                {/* Interactive Map link */}
+                <Link
+                  href="/ports/map"
+                  onClick={() => setOpen(false)}
+                  className="block py-2 px-3 text-sm text-blue-600 font-medium hover:bg-blue-50 rounded transition"
+                >
+                  🗺️ Interactive Map
+                </Link>
+                
+                {/* Regions */}
+                <div className="text-xs uppercase tracking-wide font-semibold text-gray-500 mt-3 mb-2 px-3">
+                  By Region
+                </div>
+                <Link
+                  href="/ports/united-states"
+                  onClick={() => setOpen(false)}
+                  className="block py-2 px-3 text-sm text-gray-700 hover:bg-gray-100 rounded transition"
+                >
+                  United States
+                </Link>
+                <Link
+                  href="/ports/south-america"
+                  onClick={() => setOpen(false)}
+                  className="block py-2 px-3 text-sm text-gray-700 hover:bg-gray-100 rounded transition"
+                >
+                  South America
+                </Link>
+                <Link
+                  href="/ports/europe"
+                  onClick={() => setOpen(false)}
+                  className="block py-2 px-3 text-sm text-gray-700 hover:bg-gray-100 rounded transition"
+                >
+                  Europe
+                </Link>
+                <Link
+                  href="/ports/middle-east"
+                  onClick={() => setOpen(false)}
+                  className="block py-2 px-3 text-sm text-gray-700 hover:bg-gray-100 rounded transition"
+                >
+                  Middle East
+                </Link>
+                <Link
+                  href="/ports/africa"
+                  onClick={() => setOpen(false)}
+                  className="block py-2 px-3 text-sm text-gray-700 hover:bg-gray-100 rounded transition"
+                >
+                  Africa
+                </Link>
+                <Link
+                  href="/ports/far-east"
+                  onClick={() => setOpen(false)}
+                  className="block py-2 px-3 text-sm text-gray-700 hover:bg-gray-100 rounded transition"
+                >
+                  Far East
+                </Link>
+                <Link
+                  href="/ports/australia"
+                  onClick={() => setOpen(false)}
+                  className="block py-2 px-3 text-sm text-gray-700 hover:bg-gray-100 rounded transition"
+                >
+                  Australia
+                </Link>
+                
+                {/* All Ports link */}
+                <Link
+                  href="/ports"
+                  onClick={() => setOpen(false)}
+                  className="block py-2 px-3 text-sm text-blue-600 font-medium hover:bg-blue-50 rounded transition mt-2"
+                >
+                  All Ports →
+                </Link>
+              </div>
+            )}
+          </div>
 
           {/* Blogs - Expandable */}
           <div>
@@ -279,26 +383,104 @@ export default function MobileNav({ open, setOpen }: MobileNavProps) {
             )}
           </div>
 
-          {/* MSC Hub */}
+          {/* MSC Hub - Expandable */}
           <div className="border-t border-gray-100 mt-2 pt-2">
-            <Link
-              href="/msc-hub"
-              onClick={() => setOpen(false)}
-              className="py-3 px-4 text-base font-medium text-gray-700 hover:bg-gray-100 rounded transition flex items-center gap-2"
+            <button
+              onClick={() => toggleSection('mschub')}
+              className="w-full flex items-center justify-between py-3 px-4 text-base font-medium text-gray-700 hover:bg-gray-100 rounded transition"
             >
-              <span className="text-xl">🇺🇸</span>
-              MSC Hub
-            </Link>
+              <span className="flex items-center gap-2">
+                <span className="text-lg">🇺🇸</span>
+                MSC Hub
+              </span>
+              {expandedSection === 'mschub' ? (
+                <ChevronDown className="w-5 h-5" />
+              ) : (
+                <ChevronRight className="w-5 h-5" />
+              )}
+            </button>
+            
+            {expandedSection === 'mschub' && (
+              <div className="ml-2 mt-1 space-y-1 px-4">
+                <Link
+                  href="/msc-hub/common-needs"
+                  onClick={() => setOpen(false)}
+                  className="block py-2 px-3 text-sm text-gray-700 hover:bg-gray-100 rounded transition"
+                >
+                  Common Needs and Requests
+                </Link>
+                <Link
+                  href="/msc-hub/policies"
+                  onClick={() => setOpen(false)}
+                  className="block py-2 px-3 text-sm text-gray-700 hover:bg-gray-100 rounded transition"
+                >
+                  Policies, Instructions & CMPIs
+                </Link>
+                <Link
+                  href="/msc-hub/forms"
+                  onClick={() => setOpen(false)}
+                  className="block py-2 px-3 text-sm text-gray-700 hover:bg-gray-100 rounded transition"
+                >
+                  Forms
+                </Link>
+                <Link
+                  href="/msc-hub/neo-help"
+                  onClick={() => setOpen(false)}
+                  className="block py-2 px-3 text-sm text-gray-700 hover:bg-gray-100 rounded transition"
+                >
+                  NEO Help and Cadets
+                </Link>
+                <Link
+                  href="/msc-hub"
+                  onClick={() => setOpen(false)}
+                  className="block py-2 px-3 text-sm text-blue-600 font-medium hover:bg-blue-50 rounded transition mt-2"
+                >
+                  MSC Hub Home →
+                </Link>
+              </div>
+            )}
           </div>
 
-          {/* Professional Network */}
-          <Link
-            href="/network"
-            onClick={() => setOpen(false)}
-            className="py-3 px-4 text-base font-medium text-gray-700 hover:bg-gray-100 rounded transition"
-          >
-            Professional Network
-          </Link>
+          {/* Professional Network - Expandable */}
+          <div>
+            <button
+              onClick={() => toggleSection('network')}
+              className="w-full flex items-center justify-between py-3 px-4 text-base font-medium text-gray-700 hover:bg-gray-100 rounded transition"
+            >
+              Professional Network
+              {expandedSection === 'network' ? (
+                <ChevronDown className="w-5 h-5" />
+              ) : (
+                <ChevronRight className="w-5 h-5" />
+              )}
+            </button>
+            
+            {expandedSection === 'network' && (
+              <div className="ml-2 mt-1 space-y-1 px-4">
+                <Link
+                  href="/network/financial"
+                  onClick={() => setOpen(false)}
+                  className="block py-2 px-3 text-sm text-gray-700 hover:bg-gray-100 rounded transition"
+                >
+                  Financial
+                </Link>
+                <Link
+                  href="/network/retirement"
+                  onClick={() => setOpen(false)}
+                  className="block py-2 px-3 text-sm text-gray-700 hover:bg-gray-100 rounded transition"
+                >
+                  Retirement
+                </Link>
+                <Link
+                  href="/network"
+                  onClick={() => setOpen(false)}
+                  className="block py-2 px-3 text-sm text-blue-600 font-medium hover:bg-blue-50 rounded transition mt-2"
+                >
+                  Professional Network →
+                </Link>
+              </div>
+            )}
+          </div>
 
           {/* Shop */}
           <a

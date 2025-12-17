@@ -402,14 +402,101 @@ export default function Navigation() {
               )}
             </div>
 
-            {/* Ports */}
-            <Link
-              href="/ports"
-              className="text-gray-700 hover:text-blue-600 transition-colors font-medium"
-            >
-              Ports
-            </Link>
 
+            {/* Ports Dropdown */}
+            <div className="relative">
+              <button
+                className="text-gray-700 hover:text-blue-600 transition-colors flex items-center font-medium"
+                onMouseEnter={() => handleDropdownToggle('ports')}
+              >
+                Ports
+                <svg
+                  className="ml-1 h-4 w-4"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M19 9l-7 7-7-7"
+                  />
+                </svg>
+              </button>
+
+              {activeDropdown === 'ports' && (
+                <div className="absolute top-full left-1/2 transform -translate-x-1/2 mt-2 w-80 bg-white rounded-lg shadow-xl border border-gray-200 py-6">
+                  <div className="px-6 pb-2">
+                    <Link
+                      href="/ports/map"
+                      className="block px-3 py-2 text-blue-600 font-medium hover:text-blue-700 hover:bg-blue-50 rounded-md mb-3 transition-colors"
+                    >
+                      🗺️ Interactive Map
+                    </Link>
+                  </div>
+
+                  <div className="border-t border-gray-100 pt-4 px-6">
+                    <h3 className="text-sm font-semibold text-gray-900 mb-3">
+                      By Region
+                    </h3>
+                    <div className="grid grid-cols-2 gap-1">
+                      <Link
+                        href="/ports/united-states"
+                        className="block px-3 py-2 text-sm text-gray-700 hover:text-blue-600 hover:bg-blue-50 rounded-md transition-colors"
+                      >
+                        United States
+                      </Link>
+                      <Link
+                        href="/ports/south-america"
+                        className="block px-3 py-2 text-sm text-gray-700 hover:text-blue-600 hover:bg-blue-50 rounded-md transition-colors"
+                      >
+                        South America
+                      </Link>
+                      <Link
+                        href="/ports/europe"
+                        className="block px-3 py-2 text-sm text-gray-700 hover:text-blue-600 hover:bg-blue-50 rounded-md transition-colors"
+                      >
+                        Europe
+                      </Link>
+                      <Link
+                        href="/ports/middle-east"
+                        className="block px-3 py-2 text-sm text-gray-700 hover:text-blue-600 hover:bg-blue-50 rounded-md transition-colors"
+                      >
+                        Middle East
+                      </Link>
+                      <Link
+                        href="/ports/africa"
+                        className="block px-3 py-2 text-sm text-gray-700 hover:text-blue-600 hover:bg-blue-50 rounded-md transition-colors"
+                      >
+                        Africa
+                      </Link>
+                      <Link
+                        href="/ports/far-east"
+                        className="block px-3 py-2 text-sm text-gray-700 hover:text-blue-600 hover:bg-blue-50 rounded-md transition-colors"
+                      >
+                        Far East
+                      </Link>
+                      <Link
+                        href="/ports/australia"
+                        className="block px-3 py-2 text-sm text-gray-700 hover:text-blue-600 hover:bg-blue-50 rounded-md transition-colors"
+                      >
+                        Australia
+                      </Link>
+                    </div>
+                  </div>
+
+                  <div className="border-t border-gray-100 mt-4 pt-4 px-6">
+                    <Link
+                      href="/ports"
+                      className="text-sm font-medium text-blue-600 hover:text-blue-700"
+                    >
+                      All Ports →
+                    </Link>
+                  </div>
+                </div>
+              )}
+            </div>
             {/* Blogs Dropdown */}
             <div className="relative">
               <button
