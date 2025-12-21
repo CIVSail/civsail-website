@@ -39,7 +39,15 @@ import { Separator } from '@/components/ui/separator';
 // ============================================================================
 
 // External Link Component
-function ExtLink({ href, children, className = '' }: { href: string; children: React.ReactNode; className?: string }) {
+function ExtLink({
+  href,
+  children,
+  className = '',
+}: {
+  href: string;
+  children: React.ReactNode;
+  className?: string;
+}) {
   return (
     <a
       href={href}
@@ -54,12 +62,12 @@ function ExtLink({ href, children, className = '' }: { href: string; children: R
 }
 
 // Scroll-Reveal Section Component
-function RevealSection({ 
-  children, 
+function RevealSection({
+  children,
   className = '',
   delay = 0,
-}: { 
-  children: React.ReactNode; 
+}: {
+  children: React.ReactNode;
   className?: string;
   delay?: number;
 }) {
@@ -105,7 +113,7 @@ function TimelineStep({
       {!isLast && (
         <div className="hidden md:block absolute top-8 left-[calc(50%+2rem)] right-0 h-0.5 bg-gradient-to-r from-blue-500/50 to-blue-500/20" />
       )}
-      
+
       <div className="flex flex-col items-center text-center">
         {/* Step Number Circle */}
         <div className="relative mb-4">
@@ -120,7 +128,7 @@ function TimelineStep({
         {/* Content */}
         <h3 className="text-lg font-bold text-white mb-2">{title}</h3>
         <p className="text-sm text-slate-400 mb-4 max-w-xs">{description}</p>
-        
+
         {/* Bullets */}
         <ul className="text-xs text-slate-500 space-y-1 mb-4">
           {bullets.map((b, i) => (
@@ -144,11 +152,27 @@ function MMCWallet() {
   const isInView = useInView(ref, { once: true, margin: '-20% 0px' });
 
   const contents = [
-    { label: 'Entry-Level Ratings', examples: 'OS, Wiper, Steward', color: 'bg-slate-600' },
+    {
+      label: 'Entry-Level Ratings',
+      examples: 'OS, Wiper, Steward',
+      color: 'bg-slate-600',
+    },
     { label: 'Ratings', examples: 'AB, QMED', color: 'bg-blue-600' },
-    { label: 'Officer Licenses', examples: 'Mate, Master, Engineer', color: 'bg-emerald-600' },
-    { label: 'Endorsements', examples: 'STCW, Tankerman, Towing', color: 'bg-amber-600' },
-    { label: 'Limitations', examples: 'Tonnage, Route, Propulsion', color: 'bg-violet-600' },
+    {
+      label: 'Officer Licenses',
+      examples: 'Mate, Master, Engineer',
+      color: 'bg-emerald-600',
+    },
+    {
+      label: 'Endorsements',
+      examples: 'STCW, Tankerman, Towing',
+      color: 'bg-amber-600',
+    },
+    {
+      label: 'Limitations',
+      examples: 'Tonnage, Route, Propulsion',
+      color: 'bg-violet-600',
+    },
   ];
 
   return (
@@ -173,8 +197,12 @@ function MMCWallet() {
                 <CreditCard className="w-6 h-6 text-blue-400" />
               </div>
               <div>
-                <div className="text-xs text-slate-500 uppercase tracking-wider">U.S. Coast Guard</div>
-                <div className="text-xl font-bold text-white">Merchant Mariner Credential</div>
+                <div className="text-xs text-slate-500 uppercase tracking-wider">
+                  U.S. Coast Guard
+                </div>
+                <div className="text-xl font-bold text-white">
+                  Merchant Mariner Credential
+                </div>
               </div>
             </div>
             <div className="text-right">
@@ -189,7 +217,8 @@ function MMCWallet() {
               The MMC is the central credential in the U.S. maritime system.
             </p>
             <p className="text-blue-400 font-semibold mt-2">
-              The MMC is a container. Licenses, ratings, and endorsements live inside it.
+              The MMC is a container. Licenses, ratings, and endorsements live
+              inside it.
             </p>
           </div>
 
@@ -199,9 +228,13 @@ function MMCWallet() {
               animate={{ y: isOpen ? 0 : [0, -4, 0] }}
               transition={{ repeat: isOpen ? 0 : Infinity, duration: 1.5 }}
             >
-              {isOpen ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+              {isOpen ? (
+                <ChevronUp className="w-4 h-4" />
+              ) : (
+                <ChevronDown className="w-4 h-4" />
+              )}
             </motion.div>
-            <span>{isOpen ? 'Tap to close' : 'Tap to see what\'s inside'}</span>
+            <span>{isOpen ? 'Tap to close' : "Tap to see what's inside"}</span>
           </div>
         </motion.div>
 
@@ -212,12 +245,19 @@ function MMCWallet() {
               initial={{ opacity: 0, y: -40 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -40 }}
-              transition={{ type: 'spring', stiffness: 300, damping: 25, delay: 0.1 }}
+              transition={{
+                type: 'spring',
+                stiffness: 300,
+                damping: 25,
+                delay: 0.1,
+              }}
               className="relative z-0 mt-4"
             >
               <div className="bg-slate-900/80 border border-slate-700 rounded-xl p-4 space-y-3">
-                <div className="text-xs text-slate-500 uppercase tracking-wider mb-3">Inside Your MMC</div>
-                
+                <div className="text-xs text-slate-500 uppercase tracking-wider mb-3">
+                  Inside Your MMC
+                </div>
+
                 {contents.map((item, idx) => (
                   <motion.div
                     key={item.label}
@@ -228,14 +268,18 @@ function MMCWallet() {
                   >
                     <div className={`w-2 h-2 rounded-full ${item.color}`} />
                     <div className="flex-1">
-                      <span className="text-white text-sm font-medium">{item.label}</span>
-                      <span className="text-slate-500 text-xs ml-2">({item.examples})</span>
+                      <span className="text-white text-sm font-medium">
+                        {item.label}
+                      </span>
+                      <span className="text-slate-500 text-xs ml-2">
+                        ({item.examples})
+                      </span>
                     </div>
                   </motion.div>
                 ))}
 
                 <Separator className="bg-slate-700 my-4" />
-                
+
                 <p className="text-xs text-slate-400 italic">
                   As your career progresses, your MMC evolves with you.
                 </p>
@@ -261,9 +305,21 @@ function MMCWallet() {
 // Visual Stack Component for STCW vs National
 function CredentialStack() {
   const layers = [
-    { label: 'STCW', sublabel: 'International Authority', color: 'bg-emerald-500/20 border-emerald-500/40 text-emerald-400' },
-    { label: 'National License or Rating', sublabel: 'Domestic Authority', color: 'bg-blue-500/20 border-blue-500/40 text-blue-400' },
-    { label: 'Merchant Mariner Credential (MMC)', sublabel: 'The Container', color: 'bg-slate-700/50 border-slate-600 text-slate-300' },
+    {
+      label: 'STCW',
+      sublabel: 'International Authority',
+      color: 'bg-emerald-500/20 border-emerald-500/40 text-emerald-400',
+    },
+    {
+      label: 'National License or Rating',
+      sublabel: 'Domestic Authority',
+      color: 'bg-blue-500/20 border-blue-500/40 text-blue-400',
+    },
+    {
+      label: 'Merchant Mariner Credential (MMC)',
+      sublabel: 'The Container',
+      color: 'bg-slate-700/50 border-slate-600 text-slate-300',
+    },
   ];
 
   return (
@@ -311,10 +367,12 @@ function FlowDiagram() {
             </div>
             <div>
               <div className="text-sm font-medium text-white">{step.label}</div>
-              {step.sublabel && <div className="text-xs text-slate-500">{step.sublabel}</div>}
+              {step.sublabel && (
+                <div className="text-xs text-slate-500">{step.sublabel}</div>
+              )}
             </div>
           </motion.div>
-          
+
           {idx < steps.length - 1 && (
             <div className="flex justify-center py-1">
               <ChevronDown className="w-4 h-4 text-slate-600" />
@@ -351,9 +409,21 @@ function DefinitionCard({
   color: 'blue' | 'amber' | 'violet';
 }) {
   const colorClasses = {
-    blue: { bg: 'bg-blue-500/10', border: 'border-blue-500/30', text: 'text-blue-400' },
-    amber: { bg: 'bg-amber-500/10', border: 'border-amber-500/30', text: 'text-amber-400' },
-    violet: { bg: 'bg-violet-500/10', border: 'border-violet-500/30', text: 'text-violet-400' },
+    blue: {
+      bg: 'bg-blue-500/10',
+      border: 'border-blue-500/30',
+      text: 'text-blue-400',
+    },
+    amber: {
+      bg: 'bg-amber-500/10',
+      border: 'border-amber-500/30',
+      text: 'text-amber-400',
+    },
+    violet: {
+      bg: 'bg-violet-500/10',
+      border: 'border-violet-500/30',
+      text: 'text-violet-400',
+    },
   };
 
   const c = colorClasses[color];
@@ -391,9 +461,16 @@ export default function CredentialsPage() {
       {/* Breadcrumbs */}
       <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 pt-8">
         <nav className="flex items-center text-sm text-slate-400">
-          <Link href="/" className="hover:text-white transition-colors">Home</Link>
+          <Link href="/" className="hover:text-white transition-colors">
+            Home
+          </Link>
           <span className="mx-2">/</span>
-          <Link href="/maritime-101" className="hover:text-white transition-colors">Maritime 101</Link>
+          <Link
+            href="/maritime-101"
+            className="hover:text-white transition-colors"
+          >
+            Maritime 101
+          </Link>
           <span className="mx-2">/</span>
           <span className="text-white">Credentials & Licensing</span>
         </nav>
@@ -413,12 +490,14 @@ export default function CredentialsPage() {
             Credentials & Licensing
           </h1>
           <p className="text-xl text-slate-300 mb-4 max-w-3xl mx-auto">
-            The documents that determine who you are, where you can sail, and what you're legally allowed to do.
+            The documents that determine who you are, where you can sail, and
+            what you're legally allowed to do.
           </p>
           <p className="text-slate-400 max-w-2xl mx-auto">
             Working as a merchant mariner requires more than a single "license."
-            U.S. mariners operate under a layered system of identity documents, Coast Guard credentials, 
-            medical approvals, and training requirements — each serving a distinct legal purpose.
+            U.S. mariners operate under a layered system of identity documents,
+            Coast Guard credentials, medical approvals, and training
+            requirements — each serving a distinct legal purpose.
           </p>
         </motion.div>
       </section>
@@ -430,10 +509,13 @@ export default function CredentialsPage() {
             <Badge className="mb-4 bg-emerald-500/20 text-emerald-400 border-emerald-500/50">
               Starting Point
             </Badge>
-            <h2 className="text-2xl md:text-3xl font-bold text-white mb-3">If You're Completely New</h2>
+            <h2 className="text-2xl md:text-3xl font-bold text-white mb-3">
+              If You're Completely New
+            </h2>
             <p className="text-slate-400 max-w-2xl mx-auto">
-              If you are starting from zero, most mariners follow this sequence — not because it's arbitrary, 
-              but because the system is designed this way.
+              If you are starting from zero, most mariners follow this sequence
+              — not because it's arbitrary, but because the system is designed
+              this way.
             </p>
           </div>
 
@@ -498,20 +580,25 @@ export default function CredentialsPage() {
                 The National Maritime Center
               </h2>
               <p className="text-slate-300 mb-6">
-                The National Maritime Center (NMC) is part of the U.S. Coast Guard and administers 
-                the merchant mariner credentialing system.
+                The National Maritime Center (NMC) is part of the U.S. Coast
+                Guard and administers the merchant mariner credentialing system.
               </p>
               <p className="text-slate-400 text-sm mb-6">
-                When mariners talk about "the Coast Guard" in credentialing conversations, 
-                they are usually referring to the NMC.
+                When mariners talk about "the Coast Guard" in credentialing
+                conversations, they are usually referring to the NMC.
               </p>
-              <ExtLink href="https://www.dco.uscg.mil/nmc/" className="text-base font-medium">
+              <ExtLink
+                href="https://www.dco.uscg.mil/nmc/"
+                className="text-base font-medium"
+              >
                 National Maritime Center
               </ExtLink>
             </div>
-            
+
             <Card className="p-6 bg-slate-900/50 border border-slate-800">
-              <h3 className="text-lg font-semibold text-white mb-4">The NMC:</h3>
+              <h3 className="text-lg font-semibold text-white mb-4">
+                The NMC:
+              </h3>
               <ul className="space-y-3">
                 {[
                   'Processes MMC applications',
@@ -520,7 +607,10 @@ export default function CredentialsPage() {
                   'Administers Coast Guard examinations',
                   'Manages medical certification',
                 ].map((item, idx) => (
-                  <li key={idx} className="flex items-center gap-3 text-slate-300">
+                  <li
+                    key={idx}
+                    className="flex items-center gap-3 text-slate-300"
+                  >
                     <div className="w-2 h-2 rounded-full bg-blue-500" />
                     {item}
                   </li>
@@ -540,9 +630,12 @@ export default function CredentialsPage() {
             <Badge className="mb-4 bg-slate-800 text-slate-300 border-slate-700">
               Foundation
             </Badge>
-            <h2 className="text-2xl md:text-3xl font-bold text-white mb-3">The Core Documents Everyone Needs</h2>
+            <h2 className="text-2xl md:text-3xl font-bold text-white mb-3">
+              The Core Documents Everyone Needs
+            </h2>
             <p className="text-slate-400 max-w-2xl mx-auto">
-              These documents are foundational. They are not licenses — but without them, nothing else happens.
+              These documents are foundational. They are not licenses — but
+              without them, nothing else happens.
             </p>
           </div>
 
@@ -555,7 +648,8 @@ export default function CredentialsPage() {
                 <h3 className="text-xl font-bold text-white">TWIC Card</h3>
               </div>
               <p className="text-slate-300 text-sm mb-3">
-                A security and identity credential required to access ports and vessels.
+                A security and identity credential required to access ports and
+                vessels.
               </p>
               <p className="text-slate-500 text-xs">
                 Required before applying for an MMC.
@@ -570,7 +664,8 @@ export default function CredentialsPage() {
                 <h3 className="text-xl font-bold text-white">Passport</h3>
               </div>
               <p className="text-slate-300 text-sm mb-3">
-                An international travel document required for most international service and many domestic positions.
+                An international travel document required for most international
+                service and many domestic positions.
               </p>
               <p className="text-slate-500 text-xs">
                 Strongly recommended for all mariners.
@@ -589,7 +684,9 @@ export default function CredentialsPage() {
             <Badge className="mb-4 bg-blue-500/20 text-blue-400 border-blue-500/50">
               The Centerpiece
             </Badge>
-            <h2 className="text-2xl md:text-3xl font-bold text-white mb-3">The Merchant Mariner Credential</h2>
+            <h2 className="text-2xl md:text-3xl font-bold text-white mb-3">
+              The Merchant Mariner Credential
+            </h2>
             <p className="text-slate-400 max-w-2xl mx-auto">
               The central credential in the U.S. maritime system.
             </p>
@@ -609,20 +706,40 @@ export default function CredentialsPage() {
               <Badge className="mb-4 bg-emerald-500/20 text-emerald-400 border-emerald-500/50">
                 Entry Level
               </Badge>
-              <h2 className="text-2xl md:text-3xl font-bold text-white mb-4">Getting Your First MMC</h2>
+              <h2 className="text-2xl md:text-3xl font-bold text-white mb-4">
+                Getting Your First MMC
+              </h2>
               <p className="text-slate-300 mb-4">
-                Entry-level MMC endorsements require no sea time and are designed for mariners 
-                entering the industry for the first time.
+                Entry-level MMC endorsements require no sea time and are
+                designed for mariners entering the industry for the first time.
               </p>
               <p className="text-slate-400 text-sm mb-6">
                 Common entry-level endorsements include:
               </p>
               <div className="flex flex-wrap gap-2 mb-6">
-                <Badge variant="outline" className="border-slate-600 text-slate-300">Ordinary Seaman (OS)</Badge>
-                <Badge variant="outline" className="border-slate-600 text-slate-300">Wiper</Badge>
-                <Badge variant="outline" className="border-slate-600 text-slate-300">Steward's Department</Badge>
+                <Badge
+                  variant="outline"
+                  className="border-slate-600 text-slate-300"
+                >
+                  Ordinary Seaman (OS)
+                </Badge>
+                <Badge
+                  variant="outline"
+                  className="border-slate-600 text-slate-300"
+                >
+                  Wiper
+                </Badge>
+                <Badge
+                  variant="outline"
+                  className="border-slate-600 text-slate-300"
+                >
+                  Steward's Department
+                </Badge>
               </div>
-              <ExtLink href="https://www.dco.uscg.mil/nmc/forms/" className="text-base font-medium">
+              <ExtLink
+                href="https://www.dco.uscg.mil/nmc/forms/"
+                className="text-base font-medium"
+              >
                 Official Coast Guard Forms
               </ExtLink>
             </div>
@@ -634,10 +751,18 @@ export default function CredentialsPage() {
               </h3>
               <div className="space-y-3">
                 <ChecklistItem>Valid TWIC card</ChecklistItem>
-                <ChecklistItem>Completed CG-719B (Application for MMC)</ChecklistItem>
-                <ChecklistItem>Proof of U.S. citizenship or permanent residency</ChecklistItem>
-                <ChecklistItem>Drug test completed within previous 6 months</ChecklistItem>
-                <ChecklistItem>Coast Guard medical certificate (or application in process)</ChecklistItem>
+                <ChecklistItem>
+                  Completed CG-719B (Application for MMC)
+                </ChecklistItem>
+                <ChecklistItem>
+                  Proof of U.S. citizenship or permanent residency
+                </ChecklistItem>
+                <ChecklistItem>
+                  Drug test completed within previous 6 months
+                </ChecklistItem>
+                <ChecklistItem>
+                  Coast Guard medical certificate (or application in process)
+                </ChecklistItem>
                 <ChecklistItem>Applicable fees</ChecklistItem>
               </div>
             </Card>
@@ -655,9 +780,12 @@ export default function CredentialsPage() {
               <Badge className="mb-4 bg-red-500/20 text-red-400 border-red-500/50">
                 Required
               </Badge>
-              <h2 className="text-2xl md:text-3xl font-bold text-white mb-3">Medical Certification</h2>
+              <h2 className="text-2xl md:text-3xl font-bold text-white mb-3">
+                Medical Certification
+              </h2>
               <p className="text-slate-400">
-                All mariners must hold a valid Coast Guard medical certificate certifying fitness for duty.
+                All mariners must hold a valid Coast Guard medical certificate
+                certifying fitness for duty.
               </p>
             </div>
 
@@ -667,7 +795,9 @@ export default function CredentialsPage() {
                   <Stethoscope className="w-6 h-6 text-red-400" />
                 </div>
                 <div>
-                  <h3 className="text-lg font-semibold text-white mb-2">Medical certification is:</h3>
+                  <h3 className="text-lg font-semibold text-white mb-2">
+                    Medical certification is:
+                  </h3>
                   <ul className="text-slate-300 text-sm space-y-1">
                     <li>• Required for original MMC issuance</li>
                     <li>• Required for license upgrades</li>
@@ -680,13 +810,20 @@ export default function CredentialsPage() {
             <div className="flex items-start gap-3 p-4 bg-amber-500/10 border border-amber-500/30 rounded-xl mb-6">
               <AlertCircle className="w-5 h-5 text-amber-400 flex-shrink-0 mt-0.5" />
               <p className="text-amber-200 text-sm">
-                A company or employer physical does <strong>not</strong> replace Coast Guard medical certification.
+                A company or employer physical does <strong>not</strong> replace
+                Coast Guard medical certification.
               </p>
             </div>
 
             <div className="text-center">
-              <p className="text-slate-400 text-sm mb-2">Required Form: <span className="text-white font-medium">CG-719K</span></p>
-              <ExtLink href="https://www.dco.uscg.mil/nmc/forms/" className="text-base font-medium">
+              <p className="text-slate-400 text-sm mb-2">
+                Required Form:{' '}
+                <span className="text-white font-medium">CG-719K</span>
+              </p>
+              <ExtLink
+                href="https://www.dco.uscg.mil/nmc/forms/"
+                className="text-base font-medium"
+              >
                 Medical Certificate Forms
               </ExtLink>
             </div>
@@ -703,7 +840,9 @@ export default function CredentialsPage() {
             <Badge className="mb-4 bg-slate-800 text-slate-300 border-slate-700">
               Key Distinction
             </Badge>
-            <h2 className="text-2xl md:text-3xl font-bold text-white mb-3">National vs STCW Credentials</h2>
+            <h2 className="text-2xl md:text-3xl font-bold text-white mb-3">
+              National vs STCW Credentials
+            </h2>
             <p className="text-slate-400 max-w-2xl mx-auto">
               One of the most common sources of confusion in maritime careers.
             </p>
@@ -716,17 +855,29 @@ export default function CredentialsPage() {
                 <div className="w-10 h-10 rounded-lg bg-blue-500/20 border border-blue-500/40 flex items-center justify-center">
                   <Shield className="w-5 h-5 text-blue-400" />
                 </div>
-                <h3 className="text-xl font-bold text-blue-400">National Credentials</h3>
+                <h3 className="text-xl font-bold text-blue-400">
+                  National Credentials
+                </h3>
               </div>
               <p className="text-slate-300 text-sm mb-4">
-                National credentials govern your <strong>domestic authority</strong> to work aboard U.S.-flagged vessels.
+                National credentials govern your{' '}
+                <strong>domestic authority</strong> to work aboard U.S.-flagged
+                vessels.
               </p>
               <div className="text-xs text-slate-500 mb-3">Examples:</div>
               <div className="flex flex-wrap gap-2">
-                <Badge className="bg-blue-500/10 text-blue-300 border-blue-500/30">Able Seaman</Badge>
-                <Badge className="bg-blue-500/10 text-blue-300 border-blue-500/30">Mate 500/1600</Badge>
-                <Badge className="bg-blue-500/10 text-blue-300 border-blue-500/30">Master 1600</Badge>
-                <Badge className="bg-blue-500/10 text-blue-300 border-blue-500/30">QMED</Badge>
+                <Badge className="bg-blue-500/10 text-blue-300 border-blue-500/30">
+                  Able Seaman
+                </Badge>
+                <Badge className="bg-blue-500/10 text-blue-300 border-blue-500/30">
+                  Mate 500/1600
+                </Badge>
+                <Badge className="bg-blue-500/10 text-blue-300 border-blue-500/30">
+                  Master 1600
+                </Badge>
+                <Badge className="bg-blue-500/10 text-blue-300 border-blue-500/30">
+                  QMED
+                </Badge>
               </div>
             </Card>
 
@@ -736,14 +887,18 @@ export default function CredentialsPage() {
                 <div className="w-10 h-10 rounded-lg bg-emerald-500/20 border border-emerald-500/40 flex items-center justify-center">
                   <Globe className="w-5 h-5 text-emerald-400" />
                 </div>
-                <h3 className="text-xl font-bold text-emerald-400">STCW Endorsements</h3>
+                <h3 className="text-xl font-bold text-emerald-400">
+                  STCW Endorsements
+                </h3>
               </div>
               <p className="text-slate-300 text-sm mb-4">
-                STCW is an <strong>international framework</strong> established by the IMO. Required for most international voyages.
+                STCW is an <strong>international framework</strong> established
+                by the IMO. Required for most international voyages.
               </p>
               <p className="text-slate-500 text-xs">
-                A mariner may hold a national license and still be prohibited from sailing internationally 
-                without appropriate STCW endorsements.
+                A mariner may hold a national license and still be prohibited
+                from sailing internationally without appropriate STCW
+                endorsements.
               </p>
             </Card>
           </div>
@@ -755,12 +910,15 @@ export default function CredentialsPage() {
               STCW Basic Safety Training (BST)
             </h4>
             <p className="text-slate-300 text-sm mb-4">
-              At the foundation of STCW is Basic Safety Training. BST is required for international voyages, 
-              most deep-sea vessels, and many government/commercial operations.
+              At the foundation of STCW is Basic Safety Training. BST is
+              required for international voyages, most deep-sea vessels, and
+              many government/commercial operations.
             </p>
             <div className="grid sm:grid-cols-2 gap-4 mb-4">
               <div>
-                <div className="text-xs text-slate-500 uppercase tracking-wide mb-2">BST Includes</div>
+                <div className="text-xs text-slate-500 uppercase tracking-wide mb-2">
+                  BST Includes
+                </div>
                 <ul className="text-sm text-slate-300 space-y-1">
                   <li>• Personal Survival Techniques</li>
                   <li>• Fire Prevention and Firefighting</li>
@@ -769,7 +927,9 @@ export default function CredentialsPage() {
                 </ul>
               </div>
               <div>
-                <div className="text-xs text-slate-500 uppercase tracking-wide mb-2">Important Notes</div>
+                <div className="text-xs text-slate-500 uppercase tracking-wide mb-2">
+                  Important Notes
+                </div>
                 <ul className="text-sm text-slate-400 space-y-1">
                   <li>• Must be USCG-approved training</li>
                   <li>• Company training doesn't replace it</li>
@@ -845,7 +1005,9 @@ export default function CredentialsPage() {
               <Badge className="mb-4 bg-slate-800 text-slate-300 border-slate-700">
                 Additional Requirements
               </Badge>
-              <h2 className="text-2xl md:text-3xl font-bold text-white mb-3">Beyond the Coast Guard</h2>
+              <h2 className="text-2xl md:text-3xl font-bold text-white mb-3">
+                Beyond the Coast Guard
+              </h2>
               <p className="text-slate-400">
                 In addition to Coast Guard requirements, mariners may need:
               </p>
@@ -856,9 +1018,15 @@ export default function CredentialsPage() {
                 { icon: Building2, label: 'Company-specific training' },
                 { icon: Users, label: 'Union training' },
                 { icon: Ship, label: 'Vessel-specific qualifications' },
-                { icon: Shield, label: 'Security requirements (CAC, MSC, etc.)' },
+                {
+                  icon: Shield,
+                  label: 'Security requirements (CAC, MSC, etc.)',
+                },
               ].map((item, idx) => (
-                <Card key={idx} className="p-4 bg-slate-900/50 border border-slate-800 flex items-center gap-3">
+                <Card
+                  key={idx}
+                  className="p-4 bg-slate-900/50 border border-slate-800 flex items-center gap-3"
+                >
                   <div className="w-10 h-10 rounded-lg bg-slate-800 flex items-center justify-center">
                     <item.icon className="w-5 h-5 text-slate-400" />
                   </div>
@@ -868,7 +1036,9 @@ export default function CredentialsPage() {
             </div>
 
             <p className="text-center text-slate-400 text-sm">
-              These requirements are important — but they sit <strong className="text-white">on top of</strong> Coast Guard credentials, not instead of them.
+              These requirements are important — but they sit{' '}
+              <strong className="text-white">on top of</strong> Coast Guard
+              credentials, not instead of them.
             </p>
           </div>
         </RevealSection>
@@ -883,7 +1053,9 @@ export default function CredentialsPage() {
             <Badge className="mb-4 bg-emerald-500/20 text-emerald-400 border-emerald-500/50">
               The Big Picture
             </Badge>
-            <h2 className="text-2xl md:text-3xl font-bold text-white mb-3">How It All Fits Together</h2>
+            <h2 className="text-2xl md:text-3xl font-bold text-white mb-3">
+              How It All Fits Together
+            </h2>
           </div>
 
           <FlowDiagram />
@@ -897,12 +1069,13 @@ export default function CredentialsPage() {
         <RevealSection>
           <div className="text-center">
             <h2 className="text-2xl md:text-3xl font-bold text-white mb-4">
-              Understanding the credential system makes every career decision easier.
+              Understanding the credential system makes every career decision
+              easier.
             </h2>
             <p className="text-slate-400 mb-8 max-w-2xl mx-auto">
               Explore the system. Then use it intentionally.
             </p>
-            
+
             <div className="flex flex-wrap justify-center gap-4">
               <Link href="/maritime-101/training-and-entry">
                 <Button size="lg" className="bg-blue-600 hover:bg-blue-700">
@@ -911,12 +1084,21 @@ export default function CredentialsPage() {
                 </Button>
               </Link>
               <Link href="/maritime-101/training-and-entry">
-                <Button size="lg" variant="outline" className="border-slate-600 text-slate-300 hover:bg-slate-800">
+                <Button
+                  size="lg"
+                  variant="outline"
+                  className="border-slate-600 text-slate-300 hover:bg-slate-800"
+                >
                   Explore Training Paths
                   <ArrowRight className="w-4 h-4 ml-2" />
                 </Button>
               </Link>
-              <Button size="lg" variant="ghost" className="text-slate-500" disabled>
+              <Button
+                size="lg"
+                variant="ghost"
+                className="text-slate-500"
+                disabled
+              >
                 Track Credentials (Coming Soon)
               </Button>
             </div>

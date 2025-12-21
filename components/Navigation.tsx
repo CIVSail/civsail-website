@@ -562,7 +562,7 @@ export default function Navigation() {
               )}
             </div>
 
-            {/* MSC Hub Dropdown */}
+         {/* MSC Hub Dropdown */}
             <div className="relative">
               <button
                 className="text-gray-700 hover:text-blue-600 transition-colors flex items-center font-medium"
@@ -589,10 +589,16 @@ export default function Navigation() {
                   <div className="px-6">
                     <div className="space-y-2">
                       <Link
-                        href="/msc-hub/common-needs"
+                        href="/tools"
                         className="block px-3 py-2 text-gray-700 hover:text-blue-600 hover:bg-blue-50 rounded-md transition-colors"
                       >
-                        Common Needs and Requests
+                        Tools
+                      </Link>
+                      <Link
+                        href="/msc-hub/forms"
+                        className="block px-3 py-2 text-gray-700 hover:text-blue-600 hover:bg-blue-50 rounded-md transition-colors"
+                      >
+                        Forms
                       </Link>
                       <Link
                         href="/msc-hub/policies"
@@ -601,10 +607,10 @@ export default function Navigation() {
                         Policies, Instructions and CMPIs
                       </Link>
                       <Link
-                        href="/msc-hub/forms"
+                        href="/msc-hub/common-needs"
                         className="block px-3 py-2 text-gray-700 hover:text-blue-600 hover:bg-blue-50 rounded-md transition-colors"
                       >
-                        Forms
+                        Common Needs and Requests
                       </Link>
                       <Link
                         href="/msc-hub/neo-help"

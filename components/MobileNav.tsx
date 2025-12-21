@@ -86,7 +86,7 @@ export default function MobileNav({ open, setOpen }: MobileNavProps) {
                 <ChevronRight className="w-5 h-5" />
               )}
             </button>
-            
+
             {expandedSection === 'maritime101' && (
               <div className="ml-2 mt-1 space-y-1">
                 {/* Start Here section */}
@@ -161,7 +161,7 @@ export default function MobileNav({ open, setOpen }: MobileNavProps) {
                 <ChevronRight className="w-5 h-5" />
               )}
             </button>
-            
+
             {expandedSection === 'tools' && (
               <div className="ml-2 mt-1 space-y-1 px-4">
                 <Link
@@ -202,7 +202,7 @@ export default function MobileNav({ open, setOpen }: MobileNavProps) {
                 <ChevronRight className="w-5 h-5" />
               )}
             </button>
-            
+
             {expandedSection === 'ships' && (
               <div className="ml-2 mt-1 space-y-1 px-4">
                 <Link
@@ -257,7 +257,7 @@ export default function MobileNav({ open, setOpen }: MobileNavProps) {
                 <ChevronRight className="w-5 h-5" />
               )}
             </button>
-            
+
             {expandedSection === 'ports' && (
               <div className="ml-2 mt-1 space-y-1 px-4">
                 {/* Interactive Map link */}
@@ -268,7 +268,7 @@ export default function MobileNav({ open, setOpen }: MobileNavProps) {
                 >
                   🗺️ Interactive Map
                 </Link>
-                
+
                 {/* Regions */}
                 <div className="text-xs uppercase tracking-wide font-semibold text-gray-500 mt-3 mb-2 px-3">
                   By Region
@@ -322,7 +322,7 @@ export default function MobileNav({ open, setOpen }: MobileNavProps) {
                 >
                   Australia
                 </Link>
-                
+
                 {/* All Ports link */}
                 <Link
                   href="/ports"
@@ -348,7 +348,7 @@ export default function MobileNav({ open, setOpen }: MobileNavProps) {
                 <ChevronRight className="w-5 h-5" />
               )}
             </button>
-            
+
             {expandedSection === 'blogs' && (
               <div className="ml-2 mt-1 space-y-1 px-4">
                 <Link
@@ -399,15 +399,22 @@ export default function MobileNav({ open, setOpen }: MobileNavProps) {
                 <ChevronRight className="w-5 h-5" />
               )}
             </button>
-            
+
             {expandedSection === 'mschub' && (
               <div className="ml-2 mt-1 space-y-1 px-4">
                 <Link
-                  href="/msc-hub/common-needs"
+                  href="/tools"
                   onClick={() => setOpen(false)}
                   className="block py-2 px-3 text-sm text-gray-700 hover:bg-gray-100 rounded transition"
                 >
-                  Common Needs and Requests
+                  Tools
+                </Link>
+                <Link
+                  href="/msc-hub/forms"
+                  onClick={() => setOpen(false)}
+                  className="block py-2 px-3 text-sm text-gray-700 hover:bg-gray-100 rounded transition"
+                >
+                  Forms
                 </Link>
                 <Link
                   href="/msc-hub/policies"
@@ -417,11 +424,11 @@ export default function MobileNav({ open, setOpen }: MobileNavProps) {
                   Policies, Instructions & CMPIs
                 </Link>
                 <Link
-                  href="/msc-hub/forms"
+                  href="/msc-hub/common-needs"
                   onClick={() => setOpen(false)}
                   className="block py-2 px-3 text-sm text-gray-700 hover:bg-gray-100 rounded transition"
                 >
-                  Forms
+                  Common Needs and Requests
                 </Link>
                 <Link
                   href="/msc-hub/neo-help"
@@ -454,7 +461,7 @@ export default function MobileNav({ open, setOpen }: MobileNavProps) {
                 <ChevronRight className="w-5 h-5" />
               )}
             </button>
-            
+
             {expandedSection === 'network' && (
               <div className="ml-2 mt-1 space-y-1 px-4">
                 <Link
