@@ -11,7 +11,7 @@ import {
   TrendingUp,
   Minus,
 } from 'lucide-react';
-import { createClient } from '@/lib/supabase/client';
+import { createPayClient } from '@/lib/supabase/pay-client';
 
 // ============================================================================
 // TYPES
@@ -106,7 +106,7 @@ export default function ShipPayCalculatorPage() {
   const [positions, setPositions] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
 
-  const supabase = useMemo(() => createClient(), []);
+  const supabase = useMemo(() => createPayClient(), []);
   // Calculator state
   const [state, setState] = useState<CalculatorState>({
     ship: '',

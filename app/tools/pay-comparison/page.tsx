@@ -13,7 +13,7 @@ import {
   ArrowRight,
   Anchor,
 } from 'lucide-react';
-import { createClient } from '@/lib/supabase/client';
+import { createPayClient } from '@/lib/supabase/pay-client';
 import Link from 'next/link';
 
 // ============================================================================
@@ -86,7 +86,7 @@ const formatCurrencyWithSign = (value: number): string => {
 // ============================================================================
 
 export default function PayComparisonPage() {
-  const supabase = useMemo(() => createClient(), []);
+  const supabase = useMemo(() => createPayClient(), []);
   
   // Data from Supabase
   const [ships, setShips] = useState<ShipOption[]>([]);
