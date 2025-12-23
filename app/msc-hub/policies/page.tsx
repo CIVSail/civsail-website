@@ -24,7 +24,7 @@ import {
 import CMPICard from './CMPICard';
 import { CMPIS, CMPI_CATEGORY_CONFIG, type CMPICategory } from './cmpiData';
 
-// "All" option for the filter
+// "All" option for the fi
 type FilterOption = CMPICategory | 'all';
 
 export default function PoliciesPage() {
