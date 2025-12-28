@@ -197,7 +197,6 @@ export default function Navigation() {
               {activeDropdown === 'maritime101' && (
                 <div className="absolute top-full left-1/2 transform -translate-x-1/2 mt-2 w-[700px] bg-white rounded-lg shadow-xl border border-gray-200 py-6 px-6">
                   <div className="grid grid-cols-3 gap-6">
-                    
                     {/* Column 1: Start Here */}
                     <div>
                       <h3 className="text-gray-700 font-semibold mb-3 text-xs uppercase tracking-wide">
@@ -395,13 +394,16 @@ export default function Navigation() {
                         MSC Fleet
                       </Link>
                       <div className="px-3 py-2 text-gray-400 cursor-not-allowed text-sm">
-                        NOAA Fleet <span className="text-xs">(coming soon)</span>
+                        NOAA Fleet{' '}
+                        <span className="text-xs">(coming soon)</span>
                       </div>
                       <div className="px-3 py-2 text-gray-400 cursor-not-allowed text-sm">
-                        Commercial <span className="text-xs">(coming soon)</span>
+                        Commercial{' '}
+                        <span className="text-xs">(coming soon)</span>
                       </div>
                       <div className="px-3 py-2 text-gray-400 cursor-not-allowed text-sm">
-                        Cruise Lines <span className="text-xs">(coming soon)</span>
+                        Cruise Lines{' '}
+                        <span className="text-xs">(coming soon)</span>
                       </div>
                     </div>
                   </div>
@@ -417,7 +419,6 @@ export default function Navigation() {
                 </div>
               )}
             </div>
-
 
             {/* Ports Dropdown */}
             <div className="relative">
@@ -544,21 +545,27 @@ export default function Navigation() {
                         className="block px-3 py-2 text-gray-700 hover:text-blue-600 hover:bg-blue-50 rounded-md transition-colors"
                       >
                         <span className="font-medium">Soundings</span>
-                        <span className="block text-xs text-gray-500">Essays & analysis</span>
+                        <span className="block text-xs text-gray-500">
+                          Essays & analysis
+                        </span>
                       </Link>
                       <Link
                         href="/editorials/final-muster"
                         className="block px-3 py-2 text-gray-700 hover:text-blue-600 hover:bg-blue-50 rounded-md transition-colors"
                       >
                         <span className="font-medium">The Final Muster</span>
-                        <span className="block text-xs text-gray-500">Retirement & benefits</span>
+                        <span className="block text-xs text-gray-500">
+                          Retirement & benefits
+                        </span>
                       </Link>
                       <Link
                         href="/editorials/profiles"
                         className="block px-3 py-2 text-gray-700 hover:text-blue-600 hover:bg-blue-50 rounded-md transition-colors"
                       >
                         <span className="font-medium">Mariner Profiles</span>
-                        <span className="block text-xs text-gray-500">Career stories</span>
+                        <span className="block text-xs text-gray-500">
+                          Career stories
+                        </span>
                       </Link>
                     </div>
                   </div>
@@ -575,7 +582,7 @@ export default function Navigation() {
               )}
             </div>
 
-         {/* MSC Hub Dropdown */}
+            {/* MSC Hub Dropdown */}
             <div className="relative">
               <button
                 className="text-gray-700 hover:text-blue-600 transition-colors flex items-center font-medium"
@@ -712,7 +719,7 @@ export default function Navigation() {
 
           {/* Mobile Menu Button - Larger touch target */}
           <div className="lg:hidden flex items-center justify-center py-2">
-            <button 
+            <button
               onClick={() => setMobileMenuOpen(true)}
               className="p-3 text-gray-700 hover:text-blue-600 hover:bg-gray-100 rounded-lg transition-colors"
               aria-label="Open menu"
