@@ -9,12 +9,16 @@ module.exports = {
   ],
   theme: {
     extend: {
+      fontFamily: {
+        serif: ['Georgia', 'Cambria', 'Times New Roman', 'Times', 'serif'],
+      },
       borderRadius: {
         lg: 'var(--radius)',
         md: 'calc(var(--radius) - 2px)',
         sm: 'calc(var(--radius) - 4px)',
       },
       colors: {
+        // ... keep all your existing colors
         background: 'hsl(var(--background))',
         foreground: 'hsl(var(--foreground))',
         card: {
@@ -58,5 +62,8 @@ module.exports = {
       },
     },
   },
-  plugins: [require('tailwindcss-animate')],
+  plugins: [
+    require('tailwindcss-animate'),
+    require('@tailwindcss/typography'),
+  ],
 };

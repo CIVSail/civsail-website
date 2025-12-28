@@ -308,13 +308,20 @@ export default function Navigation() {
 
               {activeDropdown === 'tools' && (
                 <div className="absolute top-full left-1/2 transform -translate-x-1/2 mt-2 w-80 bg-white rounded-lg shadow-xl border border-gray-200 py-6">
+                  {/* MSC Tools Section */}
                   <div className="px-6">
+                    <Link
+                      href="/tools"
+                      className="text-xs uppercase tracking-wide font-semibold text-gray-500 mb-3 block hover:text-blue-600 transition-colors"
+                    >
+                      MSC Tools →
+                    </Link>
                     <div className="space-y-2">
                       <Link
-                        href="/tools/pay-calculator"
+                        href="/tools/ship-pay-calculator"
                         className="block px-3 py-2 text-gray-700 hover:text-blue-600 hover:bg-blue-50 rounded-md transition-colors"
                       >
-                        Pay Calculator
+                        Ship Pay Calculator
                       </Link>
                       <Link
                         href="/tools/leave-chit"
@@ -323,21 +330,30 @@ export default function Navigation() {
                         Leave Chit Generator
                       </Link>
                       <Link
-                        href="/tools/travel-voucher"
+                        href="/tools/travel-claim"
                         className="block px-3 py-2 text-gray-700 hover:text-blue-600 hover:bg-blue-50 rounded-md transition-colors"
                       >
-                        Travel Voucher (DD 1351-2)
+                        Travel Claim Calculator
                       </Link>
                     </div>
                   </div>
 
+                  {/* Coming Soon Section */}
                   <div className="border-t border-gray-100 mt-4 pt-4 px-6">
-                    <Link
-                      href="/tools"
-                      className="text-sm font-medium text-blue-600 hover:text-blue-700"
-                    >
-                      All Tools →
-                    </Link>
+                    <h3 className="text-xs uppercase tracking-wide font-semibold text-gray-500 mb-3">
+                      Coming Soon
+                    </h3>
+                    <div className="space-y-2">
+                      <div className="px-3 py-2 text-gray-400 cursor-not-allowed text-sm">
+                        Credential Expiration Reminders
+                      </div>
+                      <div className="px-3 py-2 text-gray-400 cursor-not-allowed text-sm">
+                        Sea Day Tracking
+                      </div>
+                      <div className="px-3 py-2 text-gray-400 cursor-not-allowed text-sm">
+                        Career Planning
+                      </div>
+                    </div>
                   </div>
                 </div>
               )}
@@ -497,13 +513,13 @@ export default function Navigation() {
                 </div>
               )}
             </div>
-            {/* Blogs Dropdown */}
+            {/* Editorials Dropdown */}
             <div className="relative">
               <button
                 className="text-gray-700 hover:text-blue-600 transition-colors flex items-center font-medium"
-                onMouseEnter={() => handleDropdownToggle('blogs')}
+                onMouseEnter={() => handleDropdownToggle('editorials')}
               >
-                Blogs
+                Editorials
                 <svg
                   className="ml-1 h-4 w-4"
                   fill="none"
@@ -519,43 +535,40 @@ export default function Navigation() {
                 </svg>
               </button>
 
-              {activeDropdown === 'blogs' && (
-                <div className="absolute top-full left-1/2 transform -translate-x-1/2 mt-2 w-72 bg-white rounded-lg shadow-xl border border-gray-200 py-6">
+              {activeDropdown === 'editorials' && (
+                <div className="absolute top-full left-1/2 transform -translate-x-1/2 mt-2 w-80 bg-white rounded-lg shadow-xl border border-gray-200 py-6">
                   <div className="px-6">
                     <div className="space-y-2">
                       <Link
-                        href="/blogs/from-the-team"
+                        href="/editorials/soundings"
                         className="block px-3 py-2 text-gray-700 hover:text-blue-600 hover:bg-blue-50 rounded-md transition-colors"
                       >
-                        From the Team
+                        <span className="font-medium">Soundings</span>
+                        <span className="block text-xs text-gray-500">Essays & analysis</span>
                       </Link>
                       <Link
-                        href="/blogs/final-muster"
+                        href="/editorials/final-muster"
                         className="block px-3 py-2 text-gray-700 hover:text-blue-600 hover:bg-blue-50 rounded-md transition-colors"
                       >
-                        The Final Muster
+                        <span className="font-medium">The Final Muster</span>
+                        <span className="block text-xs text-gray-500">Retirement & benefits</span>
                       </Link>
                       <Link
-                        href="/blogs/mariner-profiles"
+                        href="/editorials/profiles"
                         className="block px-3 py-2 text-gray-700 hover:text-blue-600 hover:bg-blue-50 rounded-md transition-colors"
                       >
-                        Mariner Profiles
-                      </Link>
-                      <Link
-                        href="/blogs/essays-advice"
-                        className="block px-3 py-2 text-gray-700 hover:text-blue-600 hover:bg-blue-50 rounded-md transition-colors"
-                      >
-                        Essays and Advice
+                        <span className="font-medium">Mariner Profiles</span>
+                        <span className="block text-xs text-gray-500">Career stories</span>
                       </Link>
                     </div>
                   </div>
 
                   <div className="border-t border-gray-100 mt-4 pt-4 px-6">
                     <Link
-                      href="/blogs"
+                      href="/editorials"
                       className="text-sm font-medium text-blue-600 hover:text-blue-700"
                     >
-                      All Blogs →
+                      All Editorials →
                     </Link>
                   </div>
                 </div>

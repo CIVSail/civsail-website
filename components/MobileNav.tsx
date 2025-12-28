@@ -164,12 +164,20 @@ export default function MobileNav({ open, setOpen }: MobileNavProps) {
 
             {expandedSection === 'tools' && (
               <div className="ml-2 mt-1 space-y-1 px-4">
+                {/* MSC Tools Subheading */}
                 <Link
-                  href="/tools/pay-calculator"
+                  href="/tools"
+                  onClick={() => setOpen(false)}
+                  className="block py-2 px-3 text-xs uppercase tracking-wide font-semibold text-gray-500 hover:text-blue-600 transition"
+                >
+                  MSC Tools →
+                </Link>
+                <Link
+                  href="/tools/ship-pay-calculator"
                   onClick={() => setOpen(false)}
                   className="block py-2 px-3 text-sm text-gray-700 hover:bg-gray-100 rounded transition"
                 >
-                  Pay Calculator
+                  Ship Pay Calculator
                 </Link>
                 <Link
                   href="/tools/leave-chit"
@@ -179,12 +187,28 @@ export default function MobileNav({ open, setOpen }: MobileNavProps) {
                   Leave Chit Generator
                 </Link>
                 <Link
-                  href="/tools/travel-voucher"
+                  href="/tools/travel-claim"
                   onClick={() => setOpen(false)}
                   className="block py-2 px-3 text-sm text-gray-700 hover:bg-gray-100 rounded transition"
                 >
-                  Travel Voucher
+                  Travel Claim Calculator
                 </Link>
+
+                {/* Coming Soon Divider */}
+                <div className="pt-2 mt-2 border-t border-gray-100">
+                  <span className="block py-2 px-3 text-xs uppercase tracking-wide font-semibold text-gray-400">
+                    Coming Soon
+                  </span>
+                  <div className="py-2 px-3 text-sm text-gray-400 cursor-not-allowed">
+                    Credential Expiration Reminders
+                  </div>
+                  <div className="py-2 px-3 text-sm text-gray-400 cursor-not-allowed">
+                    Sea Day Tracking
+                  </div>
+                  <div className="py-2 px-3 text-sm text-gray-400 cursor-not-allowed">
+                    Career Planning
+                  </div>
+                </div>
               </div>
             )}
           </div>
@@ -335,49 +359,49 @@ export default function MobileNav({ open, setOpen }: MobileNavProps) {
             )}
           </div>
 
-          {/* Blogs - Expandable */}
+          {/* Editorials - Expandable */}
           <div>
             <button
-              onClick={() => toggleSection('blogs')}
+              onClick={() => toggleSection('editorials')}
               className="w-full flex items-center justify-between py-3 px-4 text-base font-medium text-gray-700 hover:bg-gray-100 rounded transition"
             >
-              Blogs
-              {expandedSection === 'blogs' ? (
+              Editorials
+              {expandedSection === 'editorials' ? (
                 <ChevronDown className="w-5 h-5" />
               ) : (
                 <ChevronRight className="w-5 h-5" />
               )}
             </button>
 
-            {expandedSection === 'blogs' && (
+            {expandedSection === 'editorials' && (
               <div className="ml-2 mt-1 space-y-1 px-4">
                 <Link
-                  href="/blogs/from-the-team"
+                  href="/editorials/soundings"
                   onClick={() => setOpen(false)}
                   className="block py-2 px-3 text-sm text-gray-700 hover:bg-gray-100 rounded transition"
                 >
-                  From the Team
+                  Soundings
                 </Link>
                 <Link
-                  href="/blogs/final-muster"
+                  href="/editorials/final-muster"
                   onClick={() => setOpen(false)}
                   className="block py-2 px-3 text-sm text-gray-700 hover:bg-gray-100 rounded transition"
                 >
                   The Final Muster
                 </Link>
                 <Link
-                  href="/blogs/mariner-profiles"
+                  href="/editorials/profiles"
                   onClick={() => setOpen(false)}
                   className="block py-2 px-3 text-sm text-gray-700 hover:bg-gray-100 rounded transition"
                 >
                   Mariner Profiles
                 </Link>
                 <Link
-                  href="/blogs/essays-advice"
+                  href="/editorials"
                   onClick={() => setOpen(false)}
-                  className="block py-2 px-3 text-sm text-gray-700 hover:bg-gray-100 rounded transition"
+                  className="block py-2 px-3 text-sm text-blue-600 font-medium hover:bg-blue-50 rounded transition mt-2"
                 >
-                  Essays and Advice
+                  All Editorials →
                 </Link>
               </div>
             )}
