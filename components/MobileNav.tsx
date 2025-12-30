@@ -496,7 +496,7 @@ export default function MobileNav({ open, setOpen }: MobileNavProps) {
                   Financial
                 </Link>
                 <Link
-                  href="/network/retirement"
+                  href="/retirement"
                   onClick={() => setOpen(false)}
                   className="block py-2 px-3 text-sm text-gray-700 hover:bg-gray-100 rounded transition"
                 >
