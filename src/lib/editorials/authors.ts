@@ -25,13 +25,13 @@ export const AUTHORS: Record<string, Author> = {
     // avatar: '/authors/civsail-logo.png',
   },
   'mark-brown': {
-    slug: 'mark-brown',
-    name: 'Mark Brown',
-    role: 'Retirement & Benefits Contributor',
-    bio: 'Mark Brown sailed for 30 years with MSC and now helps fellow mariners navigate retirement planning and benefits.',
-    // TODO: Add Mark's headshot when available
-    // avatar: '/authors/mark-brown.jpg',
-  },
+  slug: 'mark-brown',
+  name: 'Mark Brown',
+  role: 'Retirement & Benefits Contributor',
+  bio: 'Founder of High3Team.com, Mark Brown has spent over 22 years helping federal employees with complex, non-traditional careers navigate retirement. From High-3 calculations and FERS quirks to military buybacks and TSP strategy, Mark has guided hundreds of retirees, including CIVMARs, through the maze of federal benefits with clarity and care. Mark has personally visited 22 MSC ships, meeting with mariners around the world to help them take control of their post-sea future. Now, he brings that expertise to CIVSail with a monthly column answering your most pressing retirement questions.',
+  // TODO: Add Mark's headshot when available
+  // avatar: '/authors/mark-brown.jpg',
+},
   'alec-schenning': {
     slug: 'alec-schenning',
     name: 'Alec Schenning',
