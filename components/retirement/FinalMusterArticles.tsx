@@ -32,7 +32,7 @@ export default function FinalMusterArticles() {
               className="group overflow-hidden rounded-2xl bg-white shadow-md transition hover:shadow-xl"
             >
               {/* Cover Image */}
-              <div className="relative aspect-[16/9] overflow-hidden bg-gradient-to-br from-[#1e3a5f] to-[#3db4c0]">
+              <div className="relative aspect-video overflow-hidden bg-linear-to-br from-[#1e3a5f] to-[#3db4c0]">
                 {post.frontmatter.coverImage ? (
                   <Image
                     src={post.frontmatter.coverImage}

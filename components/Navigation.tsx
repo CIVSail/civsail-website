@@ -195,7 +195,7 @@ export default function Navigation() {
               </button>
 
               {activeDropdown === 'maritime101' && (
-                <div className="absolute top-full left-1/2 transform -translate-x-1/2 mt-2 w-[700px] bg-white rounded-lg shadow-xl border border-gray-200 py-6 px-6">
+                <div className="absolute top-full left-1/2 transform -translate-x-1/2 mt-2 w-175 bg-white rounded-lg shadow-xl border border-gray-200 py-6 px-6">
                   <div className="grid grid-cols-3 gap-6">
                     {/* Column 1: Start Here */}
                     <div>

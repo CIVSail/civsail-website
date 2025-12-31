@@ -8,7 +8,7 @@ export default function MarkBrownBio() {
       <div className="mx-auto max-w-5xl px-4">
         <div className="grid gap-12 md:grid-cols-3">
           <div className="flex justify-center md:justify-start">
-            <div className="relative h-64 w-64 overflow-hidden rounded-2xl bg-gradient-to-br from-[#1e3a5f] to-[#3db4c0] shadow-xl">
+            <div className="relative h-64 w-64 overflow-hidden rounded-2xl bg-linear-to-br from-[#1e3a5f] to-[#3db4c0] shadow-xl">
               <div className="flex h-full w-full items-center justify-center">
                 <span className="text-6xl font-bold text-white/30">MB</span>
               </div>

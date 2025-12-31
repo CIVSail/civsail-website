@@ -55,7 +55,7 @@ export default function ReviewsSection({ reviews }: ReviewsSectionProps) {
               </p>
 
               <div className="flex items-center gap-3">
-                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-[#1e3a5f] to-[#3db4c0]">
+                <div className="flex size-10 items-center justify-center rounded-full bg-linear-to-br from-h3t-navy to-h3t-teal">
                   <span className="text-sm font-semibold text-white">
                     {review.name.charAt(0).toUpperCase()}
                   </span>

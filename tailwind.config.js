@@ -18,7 +18,12 @@ module.exports = {
         sm: 'calc(var(--radius) - 4px)',
       },
       colors: {
-        // ... keep all your existing colors
+        // High 3 Team brand colors
+        'h3t-navy': '#1e3a5f',
+        'h3t-teal': '#3db4c0',
+        'h3t-light': '#e8f4f6',
+        
+        // Existing shadcn/ui colors
         background: 'hsl(var(--background))',
         foreground: 'hsl(var(--foreground))',
         card: {
