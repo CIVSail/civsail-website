@@ -92,3 +92,18 @@ export interface ExpirationInfo {
   daysRemaining: number;
   message: string;
 }
+// Add this to types/database.ts
+
+export interface CredentialReminder {
+  id: string;
+  user_id: string;
+  document_type: 'mmc' | 'medical' | 'passport' | 'twic' | 'license';
+  document_name: string;
+  milestone: string;
+  days_before_expiration: number;
+  expiration_date: string;
+  sent_at: string;
+  emails_sent_to: string[];
+  delivery_status: 'sent' | 'delivered' | 'bounced' | 'failed';
+  resend_message_id: string | null;
+}

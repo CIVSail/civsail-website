@@ -819,7 +819,7 @@ function SeaServiceTab({
       {/* Summary Stats */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         {/* Total Days */}
-        <div className="bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl shadow-lg p-6 text-white">
+        <div className="bg-linear-to-br from-blue-500 to-blue-600 rounded-2xl shadow-lg p-6 text-white">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-blue-100 text-sm font-medium">
@@ -833,7 +833,7 @@ function SeaServiceTab({
         </div>
 
         {/* Deck Days */}
-        <div className="bg-gradient-to-br from-green-500 to-green-600 rounded-2xl shadow-lg p-6 text-white">
+        <div className="bg-linear-to-br from-green-500 to-green-600 rounded-2xl shadow-lg p-6 text-white">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-green-100 text-sm font-medium">Deck Days</p>
@@ -845,7 +845,7 @@ function SeaServiceTab({
         </div>
 
         {/* Most Recent */}
-        <div className="bg-gradient-to-br from-teal-500 to-teal-600 rounded-2xl shadow-lg p-6 text-white">
+        <div className="bg-linear-to-br from-teal-500 to-teal-600 rounded-2xl shadow-lg p-6 text-white">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-teal-100 text-sm font-medium">Most Recent</p>
@@ -869,7 +869,7 @@ function SeaServiceTab({
         </div>
 
         {/* Needs Review Count */}
-        <div className="bg-gradient-to-br from-amber-500 to-amber-600 rounded-2xl shadow-lg p-6 text-white">
+        <div className="bg-linear-to-br from-amber-500 to-amber-600 rounded-2xl shadow-lg p-6 text-white">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-amber-100 text-sm font-medium">Needs Review</p>
@@ -1483,7 +1483,7 @@ function CareerGoalsSection({
           ) : (
             <>
               {/* Credentials */}
-              <div className="grid grid-cols-2 gap-4 p-4 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg">
+              <div className="grid grid-cols-2 gap-4 p-4 bg-linear-to-r from-blue-50 to-indigo-50 rounded-lg">
                 <div>
                   <p className="text-sm text-gray-600">Current</p>
                   <p className="font-semibold text-gray-900 capitalize">

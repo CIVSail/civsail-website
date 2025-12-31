@@ -3,6 +3,14 @@
     {
       "path": "/api/cron/check-nmc-emails",
       "schedule": "0 9 * * *"
+    },
+    {
+      "path": "/api/cron/check-expirations",
+      "schedule": "0 8 * * *"
     }
   ]
 }
+
+
+
+
