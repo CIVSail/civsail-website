@@ -147,8 +147,7 @@ export default function MobileNav({ open, setOpen }: MobileNavProps) {
               </div>
             )}
           </div>
-
-          {/* Tools - Expandable */}
+{/* Tools - Expandable */}
           <div>
             <button
               onClick={() => toggleSection('tools')}
@@ -180,6 +179,13 @@ export default function MobileNav({ open, setOpen }: MobileNavProps) {
                   Ship Pay Calculator
                 </Link>
                 <Link
+                  href="/tools/pay-comparison"
+                  onClick={() => setOpen(false)}
+                  className="block py-2 px-3 text-sm text-gray-700 hover:bg-gray-100 rounded transition"
+                >
+                  Ship Pay Comparison
+                </Link>
+                <Link
                   href="/tools/leave-chit"
                   onClick={() => setOpen(false)}
                   className="block py-2 px-3 text-sm text-gray-700 hover:bg-gray-100 rounded transition"
@@ -193,22 +199,6 @@ export default function MobileNav({ open, setOpen }: MobileNavProps) {
                 >
                   Travel Claim Calculator
                 </Link>
-
-                {/* Coming Soon Divider */}
-                <div className="pt-2 mt-2 border-t border-gray-100">
-                  <span className="block py-2 px-3 text-xs uppercase tracking-wide font-semibold text-gray-400">
-                    Coming Soon
-                  </span>
-                  <div className="py-2 px-3 text-sm text-gray-400 cursor-not-allowed">
-                    Credential Expiration Reminders
-                  </div>
-                  <div className="py-2 px-3 text-sm text-gray-400 cursor-not-allowed">
-                    Sea Day Tracking
-                  </div>
-                  <div className="py-2 px-3 text-sm text-gray-400 cursor-not-allowed">
-                    Career Planning
-                  </div>
-                </div>
               </div>
             )}
           </div>
