@@ -323,6 +323,12 @@ export default function Navigation() {
                         Ship Pay Calculator
                       </Link>
                       <Link
+                        href="/tools/pay-comparison"
+                        className="block px-3 py-2 text-gray-700 hover:text-blue-600 hover:bg-blue-50 rounded-md transition-colors"
+                      >
+                        Ship Pay Comparison Calculator
+                      </Link>
+                      <Link
                         href="/tools/leave-chit"
                         className="block px-3 py-2 text-gray-700 hover:text-blue-600 hover:bg-blue-50 rounded-md transition-colors"
                       >
