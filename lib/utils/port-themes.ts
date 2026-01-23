@@ -90,6 +90,104 @@ export const PORT_THEMES: Record<string, PortTheme> = {
     heroText: 'white',
   },
 
+  // ===== EUROPE REGION =====
+
+  // Spain flag: red, yellow, red
+  'spain': {
+    heroGradient: 'from-red-900 via-yellow-700 to-red-900',
+    accent: 'red-600',
+    secondary: 'yellow-500',
+    heroText: 'white',
+  },
+
+  // Greece flag: blue and white stripes
+  'greece': {
+    heroGradient: 'from-blue-900 via-blue-800 to-sky-900',
+    accent: 'blue-600',
+    secondary: 'sky-500',
+    heroText: 'white',
+  },
+
+  // Italy flag: green, white, red
+  'italy': {
+    heroGradient: 'from-green-900 via-slate-700 to-red-900',
+    accent: 'green-600',
+    secondary: 'red-500',
+    heroText: 'white',
+  },
+
+  // Croatia flag: red, white, blue with checkerboard
+  'croatia': {
+    heroGradient: 'from-red-900 via-blue-800 to-red-900',
+    accent: 'red-600',
+    secondary: 'blue-500',
+    heroText: 'white',
+  },
+
+  // Slovenia flag: white, blue, red with coat of arms
+  'slovenia': {
+    heroGradient: 'from-blue-900 via-slate-700 to-red-900',
+    accent: 'blue-600',
+    secondary: 'red-500',
+    heroText: 'white',
+  },
+
+  // UK flag: red, white, blue (Union Jack)
+  'uk': {
+    heroGradient: 'from-blue-950 via-red-900 to-blue-950',
+    accent: 'blue-600',
+    secondary: 'red-500',
+    heroText: 'white',
+  },
+
+  // Scotland flag: blue with white saltire
+  'scotland': {
+    heroGradient: 'from-blue-900 via-blue-800 to-indigo-900',
+    accent: 'blue-600',
+    secondary: 'sky-400',
+    heroText: 'white',
+  },
+
+  // Sweden flag: blue with yellow cross
+  'sweden': {
+    heroGradient: 'from-blue-900 via-yellow-700 to-blue-900',
+    accent: 'blue-600',
+    secondary: 'yellow-500',
+    heroText: 'white',
+  },
+
+  // Germany flag: black, red, gold
+  'germany': {
+    heroGradient: 'from-slate-900 via-red-900 to-yellow-800',
+    accent: 'red-600',
+    secondary: 'yellow-500',
+    heroText: 'white',
+  },
+
+  // Norway flag: red with blue cross outlined in white
+  'norway': {
+    heroGradient: 'from-red-900 via-blue-800 to-red-900',
+    accent: 'red-600',
+    secondary: 'blue-500',
+    heroText: 'white',
+  },
+
+  // Poland flag: white and red
+  'poland': {
+    heroGradient: 'from-slate-700 via-red-800 to-red-900',
+    accent: 'red-600',
+    secondary: 'slate-400',
+    heroText: 'white',
+  },
+
+  // Europe region default (deep blue/navy, EU inspired)
+  'europe': {
+    heroGradient: 'from-blue-950 via-indigo-900 to-blue-950',
+    accent: 'blue-600',
+    secondary: 'indigo-500',
+    heroText: 'white',
+  },
+
   // ===== FAR EAST REGION (for reference/future use) =====
 
   'japan': {
