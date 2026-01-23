@@ -188,6 +188,16 @@ export const PORT_THEMES: Record<string, PortTheme> = {
     heroText: 'white',
   },
 
+  // ===== AUSTRALIA REGION =====
+
+  // Australia - Green and gold (national colors)
+  'australia': {
+    heroGradient: 'from-green-900 via-yellow-700 to-green-900',
+    accent: 'green-600',
+    secondary: 'yellow-500',
+    heroText: 'white',
+  },
+
   // ===== UNITED STATES REGION =====
 
   // USA - Red, white, blue (American flag inspired)
@@ -251,6 +261,122 @@ export const PORT_THEMES: Record<string, PortTheme> = {
     heroGradient: 'from-green-950 via-emerald-900 to-green-950',
     accent: 'green-600',
     secondary: 'emerald-500',
+    heroText: 'white',
+  },
+
+  // ===== MIDDLE EAST REGION =====
+
+  // UAE flag: green, white, black, red vertical band
+  'uae': {
+    heroGradient: 'from-green-900 via-slate-800 to-red-900',
+    accent: 'green-600',
+    secondary: 'red-500',
+    heroText: 'white',
+  },
+
+  // Saudi Arabia flag: green with white Arabic script and sword
+  'saudi-arabia': {
+    heroGradient: 'from-green-900 via-green-800 to-emerald-900',
+    accent: 'green-600',
+    secondary: 'emerald-500',
+    heroText: 'white',
+  },
+
+  // Oman flag: red, white, green with national emblem
+  'oman': {
+    heroGradient: 'from-red-900 via-slate-700 to-green-900',
+    accent: 'red-600',
+    secondary: 'green-500',
+    heroText: 'white',
+  },
+
+  // Bahrain flag: red with white serrated band
+  'bahrain': {
+    heroGradient: 'from-red-900 via-red-800 to-rose-900',
+    accent: 'red-600',
+    secondary: 'rose-500',
+    heroText: 'white',
+  },
+
+  // Middle East region default (desert gold/sand tones)
+  'middle-east': {
+    heroGradient: 'from-amber-900 via-yellow-800 to-orange-900',
+    accent: 'amber-600',
+    secondary: 'yellow-500',
+    heroText: 'white',
+  },
+
+  // ===== SOUTH AMERICA / CARIBBEAN REGION =====
+
+  // Puerto Rico - US territory flag: red, white, blue with single star
+  'puerto-rico': {
+    heroGradient: 'from-blue-900 via-red-800 to-blue-900',
+    accent: 'blue-600',
+    secondary: 'red-500',
+    heroText: 'white',
+  },
+
+  // Brazil flag: green, yellow, blue globe
+  'brazil': {
+    heroGradient: 'from-green-900 via-yellow-700 to-blue-900',
+    accent: 'green-600',
+    secondary: 'yellow-500',
+    heroText: 'white',
+  },
+
+  // Colombia flag: yellow, blue, red horizontal bands
+  'colombia': {
+    heroGradient: 'from-yellow-700 via-blue-800 to-red-900',
+    accent: 'yellow-600',
+    secondary: 'blue-500',
+    heroText: 'white',
+  },
+
+  // Guatemala flag: blue and white with coat of arms
+  'guatemala': {
+    heroGradient: 'from-sky-900 via-slate-700 to-sky-900',
+    accent: 'sky-600',
+    secondary: 'slate-400',
+    heroText: 'white',
+  },
+
+  // Honduras flag: blue and white with five stars
+  'honduras': {
+    heroGradient: 'from-blue-900 via-slate-700 to-blue-900',
+    accent: 'blue-600',
+    secondary: 'sky-400',
+    heroText: 'white',
+  },
+
+  // Cuba flag: blue and white stripes with red triangle
+  'cuba': {
+    heroGradient: 'from-blue-900 via-red-800 to-blue-900',
+    accent: 'blue-600',
+    secondary: 'red-500',
+    heroText: 'white',
+  },
+
+  // Dominican Republic flag: blue, red, white cross
+  'dominican-republic': {
+    heroGradient: 'from-blue-900 via-red-800 to-blue-900',
+    accent: 'blue-600',
+    secondary: 'red-500',
+    heroText: 'white',
+  },
+
+  // Haiti flag: blue and red horizontal bands
+  'haiti': {
+    heroGradient: 'from-blue-900 via-red-800 to-blue-900',
+    accent: 'blue-600',
+    secondary: 'red-500',
+    heroText: 'white',
+  },
+
+  // South America region default (tropical green/emerald tones)
+  'south-america': {
+    heroGradient: 'from-emerald-900 via-green-800 to-teal-900',
+    accent: 'emerald-600',
+    secondary: 'green-500',
     heroText: 'white',
   },
 
