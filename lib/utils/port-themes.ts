@@ -188,6 +188,72 @@ export const PORT_THEMES: Record<string, PortTheme> = {
     heroText: 'white',
   },
 
+  // ===== UNITED STATES REGION =====
+
+  // USA - Red, white, blue (American flag inspired)
+  'united-states': {
+    heroGradient: 'from-blue-950 via-red-900 to-blue-950',
+    accent: 'blue-600',
+    secondary: 'red-500',
+    heroText: 'white',
+  },
+
+  // Virginia - Navy blue (naval heritage)
+  'virginia': {
+    heroGradient: 'from-blue-950 via-blue-900 to-indigo-950',
+    accent: 'blue-600',
+    secondary: 'indigo-500',
+    heroText: 'white',
+  },
+
+  // New Jersey - Buff/yellow and blue (state colors)
+  'new-jersey': {
+    heroGradient: 'from-blue-900 via-yellow-800 to-blue-900',
+    accent: 'blue-600',
+    secondary: 'yellow-500',
+    heroText: 'white',
+  },
+
+  // California - Blue and gold (state colors)
+  'california': {
+    heroGradient: 'from-blue-900 via-yellow-700 to-blue-900',
+    accent: 'blue-600',
+    secondary: 'yellow-500',
+    heroText: 'white',
+  },
+
+  // Alabama - Crimson red (state identity)
+  'alabama': {
+    heroGradient: 'from-red-950 via-red-900 to-rose-950',
+    accent: 'red-600',
+    secondary: 'rose-500',
+    heroText: 'white',
+  },
+
+  // South Carolina - Indigo blue and palmetto (state flag)
+  'south-carolina': {
+    heroGradient: 'from-indigo-950 via-indigo-900 to-blue-950',
+    accent: 'indigo-600',
+    secondary: 'blue-500',
+    heroText: 'white',
+  },
+
+  // Pennsylvania - Blue and gold (state colors)
+  'pennsylvania': {
+    heroGradient: 'from-blue-950 via-yellow-800 to-blue-950',
+    accent: 'blue-600',
+    secondary: 'yellow-500',
+    heroText: 'white',
+  },
+
+  // Washington - Green (Pacific Northwest evergreen)
+  'washington': {
+    heroGradient: 'from-green-950 via-emerald-900 to-green-950',
+    accent: 'green-600',
+    secondary: 'emerald-500',
+    heroText: 'white',
+  },
+
   // ===== FAR EAST REGION (for reference/future use) =====
 
   'japan': {
