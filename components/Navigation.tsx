@@ -452,7 +452,7 @@ export default function Navigation() {
                 <div className="absolute top-full left-1/2 transform -translate-x-1/2 mt-2 w-80 bg-white rounded-lg shadow-xl border border-gray-200 py-6">
                   <div className="px-6 pb-2">
                     <Link
-                      href="/ports/map"
+                      href="/ports"
                       className="block px-3 py-2 text-blue-600 font-medium hover:text-blue-700 hover:bg-blue-50 rounded-md mb-3 transition-colors"
                     >
                       🗺️ Interactive Map
@@ -507,15 +507,6 @@ export default function Navigation() {
                         Australia
                       </Link>
                     </div>
-                  </div>
-
-                  <div className="border-t border-gray-100 mt-4 pt-4 px-6">
-                    <Link
-                      href="/ports"
-                      className="text-sm font-medium text-blue-600 hover:text-blue-700"
-                    >
-                      All Ports →
-                    </Link>
                   </div>
                 </div>
               )}

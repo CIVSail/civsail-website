@@ -276,7 +276,7 @@ export default function MobileNav({ open, setOpen }: MobileNavProps) {
               <div className="ml-2 mt-1 space-y-1 px-4">
                 {/* Interactive Map link */}
                 <Link
-                  href="/ports/map"
+                  href="/ports"
                   onClick={() => setOpen(false)}
                   className="block py-2 px-3 text-sm text-blue-600 font-medium hover:bg-blue-50 rounded transition"
                 >
@@ -335,15 +335,6 @@ export default function MobileNav({ open, setOpen }: MobileNavProps) {
                   className="block py-2 px-3 text-sm text-gray-700 hover:bg-gray-100 rounded transition"
                 >
                   Australia
-                </Link>
-
-                {/* All Ports link */}
-                <Link
-                  href="/ports"
-                  onClick={() => setOpen(false)}
-                  className="block py-2 px-3 text-sm text-blue-600 font-medium hover:bg-blue-50 rounded transition mt-2"
-                >
-                  All Ports →
                 </Link>
               </div>
             )}
