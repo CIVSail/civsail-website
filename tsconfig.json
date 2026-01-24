@@ -150,9 +150,11 @@
     // Skipping this saves 90% of compilation time
     ".next",
     // Build output folder (generated code, not source)
-    "templates"
+    "templates",
     // Your custom folder - maybe example code or archived files?
-    // Add any other folders you don't want checked here
+    "scripts"
+    // Development-only scripts (import-ports, mark-existing-ports)
+    // These use dev dependencies like 'dotenv' that aren't in production
   ]
   // ============================================================================
   // DEBUGGING TIPS
