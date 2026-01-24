@@ -8,6 +8,7 @@ import {
   ArrowRight,
   Sparkles,
 } from 'lucide-react';
+import ToolDisclaimer from '@/components/tools/ToolDisclaimer';
 
 export const metadata = {
   title: 'Tools | CIVSail',
@@ -21,7 +22,6 @@ const tools = [
     description: 'Estimate your total earnings based on position, ship type, overtime, and deductions. See your projected gross and net pay.',
     href: '/tools/ship-pay-calculator',
     icon: Calculator,
-    status: 'coming-soon' as const,
     color: 'blue',
   },
   {
@@ -30,7 +30,6 @@ const tools = [
     description: 'Compare compensation between different ships and positions side-by-side. Find the best opportunity for your career.',
     href: '/tools/pay-comparison',
     icon: GitCompare,
-    status: 'coming-soon' as const,
     color: 'emerald',
   },
   {
@@ -39,7 +38,6 @@ const tools = [
     description: 'Generate properly formatted leave request forms. Fill in your details and download a ready-to-submit chit.',
     href: '/tools/leave-chit',
     icon: ClipboardList,
-    status: 'coming-soon' as const,
     color: 'amber',
   },
   {
@@ -48,7 +46,6 @@ const tools = [
     description: 'Create DD1351-2 travel voucher forms automatically. Input your travel details and generate a completed PDF.',
     href: '/tools/travel-claim',
     icon: FileText,
-    status: 'coming-soon' as const,
     color: 'purple',
   },
 ];
@@ -101,8 +98,7 @@ export default function ToolsPage() {
           
           <p className="text-xl text-blue-100/80 max-w-2xl">
             Powerful calculators and generators to help you navigate MSC pay, 
-            travel claims, leave requests, and more. Select a tool from the 
-            sidebar or below to get started.
+            travel claims, leave requests, and more. Select a tool below to get started.
           </p>
         </div>
       </div>
@@ -124,15 +120,6 @@ export default function ToolsPage() {
                 href={tool.href}
                 className={`group relative bg-white rounded-2xl border-2 ${colors.border} p-6 transition-all duration-300 hover:shadow-lg ${colors.hover}`}
               >
-                {/* Status Badge */}
-                {tool.status === 'coming-soon' && (
-                  <div className="absolute top-4 right-4">
-                    <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-600">
-                      Coming Soon
-                    </span>
-                  </div>
-                )}
-                
                 {/* Icon */}
                 <div className={`inline-flex p-3 rounded-xl ${colors.icon} text-white mb-4`}>
                   <Icon className="w-6 h-6" />
@@ -157,28 +144,8 @@ export default function ToolsPage() {
           })}
         </div>
 
-        {/* Current Tools Notice */}
-        <div className="mt-12 bg-blue-50 border border-blue-200 rounded-xl p-6">
-          <div className="flex flex-col sm:flex-row sm:items-center gap-4">
-            <div className="flex-1">
-              <h3 className="font-semibold text-blue-900 mb-1">
-                Need these tools right now?
-              </h3>
-              <p className="text-blue-700 text-sm">
-                While we migrate to this new platform, our tools are still available on the current site.
-              </p>
-            </div>
-            <a
-              href="https://civsail.com/pages/ship-pay-calculator"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 bg-blue-600 text-white px-5 py-2.5 rounded-lg font-medium hover:bg-blue-700 transition-colors whitespace-nowrap"
-            >
-              Visit Current Tools
-              <ArrowRight className="w-4 h-4" />
-            </a>
-          </div>
-        </div>
+        {/* Disclaimer and Feedback */}
+        <ToolDisclaimer />
       </div>
     </div>
   );
