@@ -887,13 +887,22 @@ export default function TARCShipPage() {
                     </div>
                   </div>
 
-                  {/* Photo Placeholder */}
-                  <div className="rounded-lg aspect-video overflow-hidden">
-                    <img
-                      src="/images/global/Coming_Soon_Graphic.png"
-                      alt="T-ARC Mess Deck - Photo Coming Soon"
-                      className="w-full h-full object-cover"
-                    />
+                  {/* Mess Deck Photos */}
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="rounded-lg aspect-square overflow-hidden">
+                      <img
+                        src="/images/ships/msc/t-arc/mess_decks/Mess Deck Best.JPG"
+                        alt="T-ARC Mess Deck"
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                    <div className="rounded-lg aspect-square overflow-hidden">
+                      <img
+                        src="/images/ships/msc/t-arc/mess_decks/Mess Deck 2.JPG"
+                        alt="T-ARC Mess Deck"
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
                   </div>
                 </div>
               </div>

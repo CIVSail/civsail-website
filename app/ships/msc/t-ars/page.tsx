@@ -803,19 +803,19 @@ export default function TARSShipPage() {
                     </div>
                   </div>
 
-                  {/* Photo Placeholders */}
+                  {/* Officer Room Photos */}
                   <div className="grid grid-cols-2 gap-3">
                     <div className="rounded-lg aspect-square overflow-hidden">
                       <img
                         src="/images/global/Coming_Soon_Graphic.png"
-                        alt="T-ARS Officer Room - Photo Coming Soon"
+                        alt="T-ARS Officer Room"
                         className="w-full h-full object-cover"
                       />
                     </div>
                     <div className="rounded-lg aspect-square overflow-hidden">
                       <img
                         src="/images/global/Coming_Soon_Graphic.png"
-                        alt="T-ARS Officer Room - Photo Coming Soon"
+                        alt="T-ARS Officer Room"
                         className="w-full h-full object-cover"
                       />
                     </div>
@@ -858,13 +858,22 @@ export default function TARSShipPage() {
                     </div>
                   </div>
 
-                  {/* Photo Placeholder */}
-                  <div className="rounded-lg aspect-video overflow-hidden">
-                    <img
-                      src="/images/global/Coming_Soon_Graphic.png"
-                      alt="T-ARS Berthing - Photo Coming Soon"
-                      className="w-full h-full object-cover"
-                    />
+                  {/* Unlicensed Berthing Photos */}
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="rounded-lg aspect-square overflow-hidden">
+                      <img
+                        src="/images/ships/msc/t-ars/staterooms/unlicensed/dd2ab957-3d8f-41ca-80af-4d62d6b08c4a.JPG"
+                        alt="T-ARS Unlicensed Berthing"
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                    <div className="rounded-lg aspect-square overflow-hidden">
+                      <img
+                        src="/images/ships/msc/t-ars/staterooms/unlicensed/PHOTO-2023-12-21-13-08-25.jpg"
+                        alt="T-ARS Unlicensed Berthing"
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
                   </div>
                 </div>
               </div>
@@ -912,13 +921,22 @@ export default function TARSShipPage() {
                     </div>
                   </div>
 
-                  {/* Photo Placeholder */}
-                  <div className="rounded-lg aspect-video overflow-hidden">
-                    <img
-                      src="/images/global/Coming_Soon_Graphic.png"
-                      alt="T-ARS Mess Deck - Photo Coming Soon"
-                      className="w-full h-full object-cover"
-                    />
+                  {/* Mess Deck Photos */}
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="rounded-lg aspect-square overflow-hidden">
+                      <img
+                        src="/images/ships/msc/t-ars/mess_decks/8fd8fa09-cc77-48c1-b54e-2d150e8224aa.JPG"
+                        alt="T-ARS Mess Deck"
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                    <div className="rounded-lg aspect-square overflow-hidden">
+                      <img
+                        src="/images/ships/msc/t-ars/mess_decks/f72e7565-b1c2-4b87-9a83-07f0cd979846.JPG"
+                        alt="T-ARS Mess Deck"
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
                   </div>
                 </div>
               </div>
@@ -992,13 +1010,22 @@ export default function TARSShipPage() {
                     </div>
                   </div>
 
-                  {/* Photo Placeholder */}
-                  <div className="rounded-lg aspect-video overflow-hidden">
-                    <img
-                      src="/images/global/Coming_Soon_Graphic.png"
-                      alt="T-ARS Gym - Photo Coming Soon"
-                      className="w-full h-full object-cover"
-                    />
+                  {/* Gym Photos */}
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="rounded-lg aspect-square overflow-hidden">
+                      <img
+                        src="/images/ships/msc/t-ars/gyms/27157e9c-bc8e-47eb-b1c8-f7d958206392.JPG"
+                        alt="T-ARS Gym"
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                    <div className="rounded-lg aspect-square overflow-hidden">
+                      <img
+                        src="/images/ships/msc/t-ars/gyms/2ceb5213-c814-4691-a4e5-796758a49b3e.JPG"
+                        alt="T-ARS Gym"
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
                   </div>
                 </div>
               </div>

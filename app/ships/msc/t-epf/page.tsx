@@ -1006,19 +1006,19 @@ export default function TEPFShipPage() {
                     </div>
                   </div>
 
-                  {/* Photo Placeholders - Officer Rooms */}
+                  {/* Officer Room Photos */}
                   <div className="grid grid-cols-2 gap-3">
                     <div className="rounded-lg aspect-square overflow-hidden">
                       <img
                         src="/images/global/Coming_Soon_Graphic.png"
-                        alt="T-EPF Officer Stateroom - Photo Coming Soon"
+                        alt="T-EPF Officer Stateroom"
                         className="w-full h-full object-cover"
                       />
                     </div>
                     <div className="rounded-lg aspect-square overflow-hidden">
                       <img
                         src="/images/global/Coming_Soon_Graphic.png"
-                        alt="T-EPF Shared Officer Room - Photo Coming Soon"
+                        alt="T-EPF Shared Officer Room"
                         className="w-full h-full object-cover"
                       />
                     </div>
@@ -1052,19 +1052,19 @@ export default function TEPFShipPage() {
                     </div>
                   </div>
 
-                  {/* Photo Placeholders - Unlicensed Berthing */}
+                  {/* Unlicensed Berthing Photos */}
                   <div className="grid grid-cols-2 gap-3">
                     <div className="rounded-lg aspect-square overflow-hidden">
                       <img
-                        src="/images/global/Coming_Soon_Graphic.png"
-                        alt="T-EPF Unlicensed Berthing - Photo Coming Soon"
+                        src="/images/ships/msc/t-epf/staterooms/unlicensed/EPF Berthing 2.jpg"
+                        alt="T-EPF Unlicensed Berthing"
                         className="w-full h-full object-cover"
                       />
                     </div>
                     <div className="rounded-lg aspect-square overflow-hidden">
                       <img
-                        src="/images/global/Coming_Soon_Graphic.png"
-                        alt="T-EPF Shared Head - Photo Coming Soon"
+                        src="/images/ships/msc/t-epf/staterooms/unlicensed/EPF Head.jpg"
+                        alt="T-EPF Shared Head"
                         className="w-full h-full object-cover"
                       />
                     </div>
@@ -1098,13 +1098,22 @@ export default function TEPFShipPage() {
                     </div>
                   </div>
 
-                  {/* Photo Placeholder - 312 */}
-                  <div className="rounded-lg aspect-video overflow-hidden">
-                    <img
-                      src="/images/global/Coming_Soon_Graphic.png"
-                      alt="T-EPF 312 Seating Area - Photo Coming Soon"
-                      className="w-full h-full object-cover"
-                    />
+                  {/* 312 Area Photos */}
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="rounded-lg aspect-square overflow-hidden">
+                      <img
+                        src="/images/ships/msc/t-epf/lounges/312 Photo 1.jpg"
+                        alt="T-EPF 312 Seating Area"
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                    <div className="rounded-lg aspect-square overflow-hidden">
+                      <img
+                        src="/images/ships/msc/t-epf/lounges/312 Photo 2.jpg"
+                        alt="T-EPF 312 Seating Area"
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
                   </div>
                 </div>
               </div>
@@ -1154,33 +1163,33 @@ export default function TEPFShipPage() {
                     </div>
                   </div>
 
-                  {/* Photo Placeholders - Common Areas */}
+                  {/* Common Areas Photos */}
                   <div className="grid grid-cols-2 gap-3">
                     <div className="rounded-lg aspect-square overflow-hidden">
                       <img
-                        src="/images/global/Coming_Soon_Graphic.png"
-                        alt="T-EPF Mess Deck - Photo Coming Soon"
+                        src="/images/ships/msc/t-epf/lounges/EPF Crew Computers.jpg"
+                        alt="T-EPF Crew Computers"
                         className="w-full h-full object-cover"
                       />
                     </div>
                     <div className="rounded-lg aspect-square overflow-hidden">
                       <img
-                        src="/images/global/Coming_Soon_Graphic.png"
-                        alt="T-EPF Lounge - Photo Coming Soon"
+                        src="/images/ships/msc/t-epf/lounges/EPF Laundry Room.jpg"
+                        alt="T-EPF Laundry Room"
                         className="w-full h-full object-cover"
                       />
                     </div>
                     <div className="rounded-lg aspect-square overflow-hidden">
                       <img
-                        src="/images/global/Coming_Soon_Graphic.png"
-                        alt="T-EPF Bridge - Photo Coming Soon"
+                        src="/images/ships/msc/t-epf/gyms/EPF Gym.jpg"
+                        alt="T-EPF Gym"
                         className="w-full h-full object-cover"
                       />
                     </div>
                     <div className="rounded-lg aspect-square overflow-hidden">
                       <img
-                        src="/images/global/Coming_Soon_Graphic.png"
-                        alt="T-EPF Mission Bay - Photo Coming Soon"
+                        src="/images/ships/msc/t-epf/lounges/312 Photo 1.jpg"
+                        alt="T-EPF 312 Area"
                         className="w-full h-full object-cover"
                       />
                     </div>
@@ -1212,11 +1221,11 @@ export default function TEPFShipPage() {
                     </div>
                   </div>
 
-                  {/* Photo Placeholder - Gym */}
+                  {/* Gym Photo */}
                   <div className="rounded-lg aspect-video overflow-hidden">
                     <img
-                      src="/images/global/Coming_Soon_Graphic.png"
-                      alt="T-EPF Mission Bay Gym - Photo Coming Soon"
+                      src="/images/ships/msc/t-epf/gyms/EPF Gym.jpg"
+                      alt="T-EPF Mission Bay Gym"
                       className="w-full h-full object-cover"
                     />
                   </div>

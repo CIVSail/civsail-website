@@ -1079,7 +1079,7 @@ export default function TAKEShipPage() {
                       </div>
                       <div className="rounded-lg aspect-square overflow-hidden">
                         <img
-                          src="/images/ships/msc/t-ake/staterooms/T-AKE Officer Room 2 -CHD.JPG"
+                          src="/images/ships/msc/t-ake/staterooms/T-AKE Officer Room 2-CHD.JPG"
                           alt="T-AKE Officer Room 2"
                           className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
                           onError={(e) => {

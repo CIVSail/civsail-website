@@ -886,14 +886,14 @@ export default function LCCShipPage() {
                     <div className="rounded-lg aspect-square overflow-hidden">
                       <img
                         src="/images/global/Coming_Soon_Graphic.png"
-                        alt="LCC Officer Stateroom - Photo Coming Soon"
+                        alt="LCC Officer Stateroom"
                         className="w-full h-full object-cover"
                       />
                     </div>
                     <div className="rounded-lg aspect-square overflow-hidden">
                       <img
                         src="/images/global/Coming_Soon_Graphic.png"
-                        alt="LCC Officer Stateroom - Photo Coming Soon"
+                        alt="LCC Officer Stateroom"
                         className="w-full h-full object-cover"
                       />
                     </div>
@@ -934,11 +934,11 @@ export default function LCCShipPage() {
                     </div>
                   </div>
 
-                  {/* Photo Placeholder */}
+                  {/* Stateroom Photo */}
                   <div className="rounded-lg aspect-video overflow-hidden">
                     <img
-                      src="/images/global/Coming_Soon_Graphic.png"
-                      alt="LCC Berthing - Photo Coming Soon"
+                      src="/images/ships/msc/lcc/staterooms/unlicensed/a42de96d-640f-468b-9d7b-fa5717a6c578.JPG"
+                      alt="LCC Stateroom"
                       className="w-full h-full object-cover"
                     />
                   </div>
@@ -991,13 +991,22 @@ export default function LCCShipPage() {
                     </div>
                   </div>
 
-                  {/* Photo Placeholder */}
-                  <div className="rounded-lg aspect-video overflow-hidden">
-                    <img
-                      src="/images/global/Coming_Soon_Graphic.png"
-                      alt="LCC Mess Deck - Photo Coming Soon"
-                      className="w-full h-full object-cover"
-                    />
+                  {/* Mess Deck Photos */}
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="rounded-lg aspect-square overflow-hidden">
+                      <img
+                        src="/images/ships/msc/lcc/mess_decks/3584c667-b9b2-4b57-adb6-9db556d07420.JPG"
+                        alt="LCC Mess Deck"
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                    <div className="rounded-lg aspect-square overflow-hidden">
+                      <img
+                        src="/images/ships/msc/lcc/mess_decks/90adf9cd-d8ab-4874-a14e-6927dbb97d9a.JPG"
+                        alt="LCC Mess Deck"
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
                   </div>
                 </div>
 
