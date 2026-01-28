@@ -429,7 +429,7 @@ export default function MobileNav({ open, setOpen }: MobileNavProps) {
                   Policies, Instructions & CMPIs
                 </Link>
                 <Link
-                  href="/msc-hub/common-needs"
+                  href="/common-requests"
                   onClick={() => setOpen(false)}
                   className="block py-2 px-3 text-sm text-gray-700 hover:bg-gray-100 rounded transition"
                 >
