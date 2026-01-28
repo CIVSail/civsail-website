@@ -470,7 +470,7 @@ export default function MobileNav({ open, setOpen }: MobileNavProps) {
             {expandedSection === 'network' && (
               <div className="ml-2 mt-1 space-y-1 px-4">
                 <Link
-                  href="/network/financial"
+                  href="/financial"
                   onClick={() => setOpen(false)}
                   className="block py-2 px-3 text-sm text-gray-700 hover:bg-gray-100 rounded transition"
                 >

@@ -677,7 +677,7 @@ export default function Navigation() {
                   <div className="px-6">
                     <div className="space-y-2">
                       <Link
-                        href="/network/financial"
+                        href="/financial"
                         className="block px-3 py-2 text-gray-700 hover:text-blue-600 hover:bg-blue-50 rounded-md transition-colors"
                       >
                         Financial
