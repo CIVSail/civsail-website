@@ -830,19 +830,19 @@ export default function ESBShipPage() {
                     </div>
                   </div>
 
-                  {/* Photo Placeholders - Officer Rooms */}
+                  {/* Officer Room Photos */}
                   <div className="grid grid-cols-2 gap-3">
                     <div className="rounded-lg aspect-square overflow-hidden">
                       <img
-                        src="/images/global/Coming_Soon_Graphic.png"
-                        alt="ESB Officer Room - Photo Coming Soon"
+                        src="/images/ships/msc/esb/staterooms/officer/ESB Officer Room.JPG"
+                        alt="ESB Officer Room"
                         className="w-full h-full object-cover"
                       />
                     </div>
                     <div className="rounded-lg aspect-square overflow-hidden">
                       <img
-                        src="/images/global/Coming_Soon_Graphic.png"
-                        alt="ESB Senior Officer Room - Photo Coming Soon"
+                        src="/images/ships/msc/esb/staterooms/officer/IMG_1557.JPG"
+                        alt="ESB Officer Stateroom"
                         className="w-full h-full object-cover"
                       />
                     </div>
@@ -886,13 +886,22 @@ export default function ESBShipPage() {
                     </div>
                   </div>
 
-                  {/* Photo Placeholder */}
-                  <div className="rounded-lg aspect-video overflow-hidden">
-                    <img
-                      src="/images/global/Coming_Soon_Graphic.png"
-                      alt="ESB Unlicensed Berthing - Photo Coming Soon"
-                      className="w-full h-full object-cover"
-                    />
+                  {/* Unlicensed Berthing Photos */}
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="rounded-lg aspect-square overflow-hidden">
+                      <img
+                        src="/images/global/Coming_Soon_Graphic.png"
+                        alt="ESB Unlicensed Berthing"
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                    <div className="rounded-lg aspect-square overflow-hidden">
+                      <img
+                        src="/images/global/Coming_Soon_Graphic.png"
+                        alt="ESB Berthing Area"
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
                   </div>
                 </div>
               </div>
@@ -935,13 +944,22 @@ export default function ESBShipPage() {
                     </div>
                   </div>
 
-                  {/* Photo Placeholder */}
-                  <div className="rounded-lg aspect-video overflow-hidden">
-                    <img
-                      src="/images/global/Coming_Soon_Graphic.png"
-                      alt="ESB Gym - Photo Coming Soon"
-                      className="w-full h-full object-cover"
-                    />
+                  {/* Gym Photos */}
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="rounded-lg aspect-square overflow-hidden">
+                      <img
+                        src="/images/ships/msc/esb/gyms/IMG_9803.jpg"
+                        alt="ESB Gym Equipment"
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                    <div className="rounded-lg aspect-square overflow-hidden">
+                      <img
+                        src="/images/ships/msc/esb/gyms/IMG_9806.jpg"
+                        alt="ESB Gym Area"
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
                   </div>
                 </div>
               </div>
@@ -1023,13 +1041,22 @@ export default function ESBShipPage() {
                     </div>
                   </div>
 
-                  {/* Photo Placeholder */}
-                  <div className="rounded-lg aspect-video overflow-hidden">
-                    <img
-                      src="/images/global/Coming_Soon_Graphic.png"
-                      alt="ESB Lounge - Photo Coming Soon"
-                      className="w-full h-full object-cover"
-                    />
+                  {/* Lounge Photos */}
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="rounded-lg aspect-square overflow-hidden">
+                      <img
+                        src="/images/ships/msc/esb/lounges/IMG_9809.JPG"
+                        alt="ESB Crew Lounge"
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                    <div className="rounded-lg aspect-square overflow-hidden">
+                      <img
+                        src="/images/ships/msc/esb/lounges/IMG_9813.jpg"
+                        alt="ESB Lounge Area"
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
                   </div>
                 </div>
               </div>
