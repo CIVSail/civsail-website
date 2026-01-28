@@ -1,7 +1,13 @@
 'use client';
 
 import { useState } from 'react';
-import { AlertTriangle, MessageSquare, Send, CheckCircle, AlertCircle } from 'lucide-react';
+import {
+  AlertTriangle,
+  MessageSquare,
+  Send,
+  CheckCircle,
+  AlertCircle,
+} from 'lucide-react';
 
 export default function ToolDisclaimer() {
   const [showForm, setShowForm] = useState(false);
@@ -18,7 +24,7 @@ export default function ToolDisclaimer() {
     e.preventDefault();
     setLoading(true);
     setError(null);
-    
+
     try {
       const response = await fetch('/api/feedback', {
         method: 'POST',
@@ -32,7 +38,7 @@ export default function ToolDisclaimer() {
 
       setSubmitted(true);
       setFormData({ type: 'bug', message: '', email: '' });
-      
+
       setTimeout(() => {
         setSubmitted(false);
         setShowForm(false);
@@ -51,14 +57,20 @@ export default function ToolDisclaimer() {
         <div className="flex items-start gap-4">
           <AlertTriangle className="w-6 h-6 text-amber-600 flex-shrink-0 mt-0.5" />
           <div>
-            <h3 className="text-lg font-semibold text-amber-900 mb-2">Disclaimer</h3>
+            <h3 className="text-lg font-semibold text-amber-900 mb-2">
+              Disclaimer
+            </h3>
             <p className="text-amber-800 text-sm leading-relaxed">
-              This tool is provided for{" "}
-              <span className="font-medium">informational and planning purposes only</span>.
-              Always verify calculations with official sources and your HR or payroll department.
-              Results are estimates based on publicly available information and may not reflect
-              your specific situation, contract terms, or current rates. This tool is not legally
-              binding and CIVSail assumes no liability for decisions made based on these calculations.
+              This tool is provided for{' '}
+              <span className="font-medium">
+                informational and planning purposes only
+              </span>
+              . Always verify calculations with official sources and your HR or
+              payroll department. Results are estimates based on publicly
+              available information and may not reflect your specific situation,
+              contract terms, or current rates. This tool is not legally binding
+              and CIVSail assumes no liability for decisions made based on these
+              calculations.
             </p>
           </div>
         </div>
@@ -69,9 +81,12 @@ export default function ToolDisclaimer() {
           <div className="flex items-start gap-4">
             <MessageSquare className="w-6 h-6 text-blue-600 flex-shrink-0 mt-0.5" />
             <div>
-              <h3 className="text-lg font-semibold text-gray-900 mb-1">Feedback and Issues</h3>
+              <h3 className="text-lg font-semibold text-gray-900 mb-1">
+                Feedback and Issues
+              </h3>
               <p className="text-gray-600 text-sm">
-                Found a bug? Have a feature request? Let us know so we can improve.
+                Found a bug? Have a feature request? Let us know so we can
+                improve.
               </p>
             </div>
           </div>
@@ -88,7 +103,9 @@ export default function ToolDisclaimer() {
         {submitted && (
           <div className="mt-4 p-4 bg-emerald-50 border border-emerald-200 rounded-lg flex items-center gap-3">
             <CheckCircle className="w-5 h-5 text-emerald-600" />
-            <p className="text-emerald-700">Thanks for your feedback! We will look into it.</p>
+            <p className="text-emerald-700">
+              Thanks for your feedback! We will look into it.
+            </p>
           </div>
         )}
 
@@ -159,7 +176,9 @@ export default function ToolDisclaimer() {
               </label>
               <textarea
                 value={formData.message}
-                onChange={(e) => setFormData({ ...formData, message: e.target.value })}
+                onChange={(e) =>
+                  setFormData({ ...formData, message: e.target.value })
+                }
                 placeholder="Tell us what you found or what you would like to see..."
                 rows={4}
                 required
@@ -174,7 +193,9 @@ export default function ToolDisclaimer() {
               <input
                 type="email"
                 value={formData.email}
-                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                onChange={(e) =>
+                  setFormData({ ...formData, email: e.target.value })
+                }
                 placeholder="your@email.com"
                 className="w-full px-4 py-3 bg-white border border-gray-300 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               />
