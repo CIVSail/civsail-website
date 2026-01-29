@@ -194,3 +194,152 @@
   border-top: 1px solid #d1d5db;
   margin: 2.5rem 0 !important;
 }
+
+/* ==========================================================================
+   NEO Help Prose Styles (Dark Theme)
+   ========================================================================== */
+
+.neo-prose {
+  font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+.neo-prose p {
+  font-size: 1.125rem;
+  line-height: 1.8;
+  color: #cbd5e1; /* slate-300 */
+  margin-bottom: 1.5rem !important;
+}
+
+.neo-prose h2 {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: #ffffff;
+  margin-top: 2.5rem !important;
+  margin-bottom: 1rem !important;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.neo-prose h3 {
+  font-size: 1.375rem;
+  font-weight: 600;
+  color: #f1f5f9; /* slate-100 */
+  margin-top: 2rem !important;
+  margin-bottom: 0.75rem !important;
+}
+
+.neo-prose h4 {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: #e2e8f0; /* slate-200 */
+  margin-top: 1.5rem !important;
+  margin-bottom: 0.5rem !important;
+}
+
+.neo-prose strong {
+  font-weight: 600;
+  color: #ffffff;
+}
+
+.neo-prose a {
+  color: #60a5fa; /* blue-400 */
+  text-decoration: none;
+  border-bottom: 1px solid rgba(96, 165, 250, 0.3);
+  transition: all 0.2s ease;
+}
+
+.neo-prose a:hover {
+  color: #93c5fd; /* blue-300 */
+  border-color: #60a5fa;
+}
+
+.neo-prose blockquote {
+  font-size: 1.125rem;
+  font-style: normal;
+  color: #e2e8f0; /* slate-200 */
+  border-left: 4px solid #3b82f6; /* blue-500 */
+  background: rgba(59, 130, 246, 0.1);
+  padding: 1rem 1.5rem;
+  margin: 1.5rem 0 !important;
+  border-radius: 0 0.5rem 0.5rem 0;
+}
+
+.neo-prose blockquote p {
+  margin-bottom: 0 !important;
+}
+
+.neo-prose ul,
+.neo-prose ol {
+  font-size: 1.125rem;
+  line-height: 1.8;
+  color: #cbd5e1; /* slate-300 */
+  margin: 1.25rem 0 !important;
+  padding-left: 1.5rem;
+}
+
+.neo-prose li {
+  margin-bottom: 0.5rem !important;
+}
+
+.neo-prose li::marker {
+  color: #60a5fa; /* blue-400 */
+}
+
+.neo-prose hr {
+  border: none;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  margin: 2.5rem 0 !important;
+}
+
+/* Tables */
+.neo-prose table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 1.5rem 0 !important;
+  font-size: 1rem;
+}
+
+.neo-prose thead {
+  background: rgba(59, 130, 246, 0.2);
+}
+
+.neo-prose th {
+  color: #ffffff;
+  font-weight: 600;
+  text-align: left;
+  padding: 0.75rem 1rem;
+  border-bottom: 2px solid rgba(59, 130, 246, 0.3);
+}
+
+.neo-prose td {
+  color: #cbd5e1; /* slate-300 */
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.neo-prose tbody tr:hover {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+/* Code blocks */
+.neo-prose code {
+  background: rgba(255, 255, 255, 0.1);
+  color: #f1f5f9;
+  padding: 0.2rem 0.4rem;
+  border-radius: 0.25rem;
+  font-size: 0.9em;
+}
+
+.neo-prose pre {
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 0.5rem;
+  padding: 1rem;
+  overflow-x: auto;
+  margin: 1.5rem 0 !important;
+}
+
+.neo-prose pre code {
+  background: none;
+  padding: 0;
+}
