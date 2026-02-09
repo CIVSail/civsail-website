@@ -1,324 +1,672 @@
+'use client';
+
+import { useState } from 'react';
 import Link from 'next/link';
+import { FadeIn } from '@/components/FadeIn';
 
+/* ───────────────────────────────────────────
+   Pain-point cards for "The maritime world is complex" section
+   ─────────────────────────────────────────── */
+const PAIN_POINTS = [
+  {
+    pain: '"What\'s the room situation on a T-AKE?"',
+    fix: 'Ship guides with real details on berthing, gyms, mess — not a spec sheet.',
+  },
+  {
+    pain: '"What\'s the pay like?"',
+    fix: 'Calculators that break down base, penalty, OT, and premium by ship class.',
+  },
+  {
+    pain: '"Where do I eat in Guam?"',
+    fix: 'Interactive port pages with maps, restaurant picks, and local tips.',
+  },
+  {
+    pain: '"When does my medical expire?"',
+    fix: 'Credential dashboard with auto-verification against Coast Guard records.',
+  },
+  {
+    pain: '"What\'s it like to sail for that company — and can I?"',
+    fix: 'Employer info, qualification requirements, and what the job is actually like from people who\'ve done it.',
+  },
+  {
+    pain: '"When should I stop sailing?"',
+    fix: 'Career guides and real perspectives on when to come ashore — and what comes next.',
+  },
+];
+
+/* ───────────────────────────────────────────
+   MSC Hub items
+   ─────────────────────────────────────────── */
+const MSC_HUB_ITEMS = [
+  { icon: '💰', label: 'Ship Pay Calculator', desc: 'Base pay, overtime, penalty, and premium by ship class and position' },
+  { icon: '📊', label: 'Pay Comparison Tool', desc: 'Compare compensation across MSC ship classes side by side' },
+  { icon: '📝', label: 'Leave Chit Generator', desc: 'Auto-fill MSC leave request forms — print-ready PDF in seconds' },
+  { icon: '✈️', label: 'Travel Claim & Comp Time', desc: 'Calculate comp time and generate travel voucher paperwork' },
+  { icon: '🚢', label: 'MSC Ship Class Pages', desc: '10+ classes with pay, ops, life aboard, and fleet rosters' },
+];
+
+/* ───────────────────────────────────────────
+   For All Mariners items
+   ─────────────────────────────────────────── */
+const ALL_MARINER_ITEMS = [
+  { icon: '🗺️', label: 'Port Guides', desc: 'Interactive maps, restaurant picks, local tips, and Know Before You Go briefings from mariners who\'ve been there', status: 'growing' as const, statusLabel: 'Growing' },
+  { icon: '⚓', label: 'Ship Information Library', desc: 'Specs and crew-sourced details on what it\'s really like aboard', status: 'growing' as const, statusLabel: 'Growing' },
+  { icon: '📚', label: 'Guides & Resources', desc: 'Credentials, training, renewals — without digging through USCG.gov', status: 'growing' as const, statusLabel: 'Growing' },
+  { icon: '📋', label: 'Credential Dashboard', desc: 'Track MMC, TWIC, medical, STCW — with NMC auto-verification', status: 'coming' as const, statusLabel: 'In Development' },
+  { icon: '🤝', label: 'Professional Network', desc: 'Financial planning, retirement resources, and connections to vetted professionals who understand mariners', status: 'growing' as const, statusLabel: 'Growing' },
+];
+
+const STATUS_COLORS = {
+  live: { bg: 'bg-green-500/10', text: 'text-green-400' },
+  growing: { bg: 'bg-yellow-400/10', text: 'text-yellow-400' },
+  building: { bg: 'bg-blue-400/10', text: 'text-blue-400' },
+  coming: { bg: 'bg-violet-400/10', text: 'text-violet-400' },
+};
+
+/* ───────────────────────────────────────────
+   Contribution cards
+   ─────────────────────────────────────────── */
+const CONTRIBUTION_CARDS = [
+  { icon: '📸', title: 'Ship Photos', desc: 'Rooms, gyms, mess decks, common areas — the stuff people want to see before they sign on.', cta: 'Send photos →' },
+  { icon: '🗺️', title: 'Port Tips', desc: 'Where to eat, what to do, how to get around. Your knowledge helps the next crew that pulls in.', cta: 'Share a tip →' },
+  { icon: '🚢', title: 'Ship Info & Corrections', desc: 'Ops details, crew culture, life aboard — or corrections to existing pages. If you sailed it, you know it best.', cta: 'Contribute info →' },
+  { icon: '💼', title: 'Work With Mariners?', desc: 'If you have a product or service mariners need — financial, legal, gear, training — let\'s talk about how to get it in front of them.', cta: 'Reach out →' },
+];
+
+/* ───────────────────────────────────────────
+   Featured articles
+   ─────────────────────────────────────────── */
+const STACKED_ARTICLES = [
+  {
+    tag: 'MARINER STORIES',
+    title: 'Shore Shock',
+    desc: 'What nobody tells you about the transition from sea to shore — and why it hits harder than you expect.',
+    color: 'amber',
+    href: '/editorials/soundings/shore-shock',
+  },
+  {
+    tag: 'MSC STORIES',
+    title: 'Pros and Cons of Sailing with MSC',
+    desc: 'An honest breakdown of what MSC gets right, what it doesn\'t, and who it\'s best for.',
+    color: 'blue',
+    href: '/editorials/soundings/msc-pros-cons',
+  },
+];
+
+/* ───────────────────────────────────────────
+   Footer nav links
+   ─────────────────────────────────────────── */
+const FOOTER_LINKS = [
+  { label: 'MSC Hub', href: '/ships/msc' },
+  { label: 'Ships', href: '/ships' },
+  { label: 'Ports', href: '/ports' },
+  { label: 'Tools', href: '/tools' },
+  { label: 'Guides', href: '/maritime-101' },
+  { label: 'About', href: '/about' },
+  { label: 'Contact', href: 'mailto:alec.schenning@civsail.com' },
+];
+
+/* ═══════════════════════════════════════════
+   PAGE COMPONENT
+   ═══════════════════════════════════════════ */
 export default function Home() {
+  const [email, setEmail] = useState('');
+
   return (
-    <div className="min-h-screen bg-white">
-      {/* Hero Section */}
-      <section className="relative bg-gradient-to-br from-slate-900 via-blue-900 to-blue-800 text-white">
-        <div className="container mx-auto px-4 py-24">
-          <div className="max-w-4xl mx-auto text-center">
-            <h1 className="text-5xl md:text-6xl font-serif font-bold mb-6">
-              Tools & Resources for Civilian Mariners
+    <div className="font-body text-slate-200 bg-[#0a0f1a] min-h-screen overflow-x-hidden">
+
+      {/* ════════ HERO ════════ */}
+      <section className="relative min-h-[min(88vh,780px)] flex items-center overflow-hidden">
+        {/* Decorative background gradients */}
+        <div
+          className="absolute inset-0"
+          style={{
+            background:
+              'radial-gradient(ellipse 70% 55% at 45% 35%, rgba(37,99,235,0.1) 0%, transparent 70%), radial-gradient(ellipse 40% 40% at 80% 65%, rgba(250,204,21,0.04) 0%, transparent 60%)',
+          }}
+        />
+        <div
+          className="absolute inset-0 opacity-[0.02]"
+          style={{
+            backgroundImage:
+              'linear-gradient(rgba(255,255,255,0.08) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.08) 1px, transparent 1px)',
+            backgroundSize: '72px 72px',
+          }}
+        />
+        <div
+          className="absolute bottom-0 left-0 right-0 h-px"
+          style={{
+            background:
+              'linear-gradient(90deg, transparent, rgba(37,99,235,0.2), rgba(250,204,21,0.15), transparent)',
+          }}
+        />
+
+        <div className="relative max-w-[800px] mx-auto px-8 pt-24 pb-20 w-full text-center">
+          <FadeIn>
+            <h1 className="font-heading font-extrabold text-[clamp(2.6rem,5.5vw,4rem)] leading-[1.08] mb-[22px] tracking-[-0.03em]">
+              <span className="text-slate-100">One hub for your </span>
+              <span className="bg-gradient-to-br from-yellow-400 to-yellow-500 bg-clip-text text-transparent">
+                life as a mariner.
+              </span>
             </h1>
-            <p className="text-xl md:text-2xl text-blue-100 mb-12 leading-relaxed">
-              From pay calculators to credential tracking, CIVSail provides the
-              tools MSC mariners need to manage their careers and maximize their
-              earnings
-            </p>
+          </FadeIn>
 
-            {/* CTAs */}
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+          <FadeIn delay={120}>
+            <p className="text-[1.1rem] leading-[1.7] text-white/50 max-w-[560px] mx-auto mb-9">
+              The information you need shouldn&apos;t live in a Facebook group, a
+              ten-year-old PDF, or leave at crew change. Ships, ports, tools,
+              your career, all in one place.
+            </p>
+          </FadeIn>
+
+          <FadeIn delay={240}>
+            <div className="flex gap-3 flex-wrap justify-center">
               <Link
-                href="/signup"
-                className="bg-white text-blue-900 px-8 py-4 rounded-lg font-semibold text-lg hover:bg-gray-100 transition-colors"
+                href="/ships"
+                className="font-body bg-blue-600 text-white px-7 py-[13px] rounded-[9px] text-[0.92rem] font-semibold shadow-[0_2px_16px_rgba(37,99,235,0.35)] tracking-[0.01em] hover:bg-blue-700 transition-colors"
               >
-                Get Started Free
-              </Link>
-              <Link
-                href="/tools/pay-calculator"
-                className="border-2 border-white text-white px-8 py-4 rounded-lg font-semibold text-lg hover:bg-white hover:text-blue-900 transition-colors"
-              >
-                Try Pay Calculator
+                Explore the Platform →
               </Link>
             </div>
+          </FadeIn>
+
+          {/* Trust line */}
+          <FadeIn delay={360}>
+            <div className="flex items-center justify-center gap-6 mt-12 flex-wrap">
+              {[
+                { text: 'MSC pay calculators & tools', color: 'bg-blue-500' },
+                { text: '10+ ship class guides', color: 'bg-green-500' },
+                { text: 'Interactive port pages', color: 'bg-amber-500' },
+              ].map((item) => (
+                <div key={item.text} className="flex items-center gap-2">
+                  <div className={`w-[5px] h-[5px] rounded-full ${item.color}`} />
+                  <span className="font-body text-[0.82rem] text-white/[0.38] font-medium tracking-[0.01em]">
+                    {item.text}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </FadeIn>
+        </div>
+      </section>
+
+      {/* ════════ THE MARITIME WORLD IS COMPLEX ════════ */}
+      <section className="px-8 pt-28 pb-[5.5rem]">
+        <div className="max-w-[1000px] mx-auto">
+          <FadeIn>
+            <div className="text-center mb-11">
+              <h2 className="font-heading font-bold text-[clamp(1.85rem,3.5vw,2.75rem)] text-slate-100 leading-[1.15] tracking-[-0.02em] mb-4">
+                The maritime world is complex.
+              </h2>
+              <p className="font-body text-base text-white/45 leading-[1.7] max-w-[580px] mx-auto">
+                No two ships are the same. No two rotations are the same.
+                Mariners are spread across the globe, and the answers you need
+                are scattered across a dozen sources — if they exist at all.
+                CIVSail puts it in one place and keeps it current.
+              </p>
+            </div>
+          </FadeIn>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {PAIN_POINTS.map((item, i) => (
+              <FadeIn key={i} delay={i * 70}>
+                <div className="bg-white/[0.025] border border-white/[0.07] rounded-xl p-[22px] transition-all duration-300 hover:border-yellow-400/25 hover:-translate-y-[3px]">
+                  <p className="font-body italic text-white/70 text-[0.95rem] mb-3 font-medium leading-[1.5]">
+                    {item.pain}
+                  </p>
+                  <div
+                    className="w-7 h-[2px] mb-[10px] rounded-sm"
+                    style={{
+                      background: 'linear-gradient(90deg, #facc15, transparent)',
+                    }}
+                  />
+                  <p className="font-body text-[0.84rem] text-white/45 leading-[1.7]">
+                    {item.fix}
+                  </p>
+                </div>
+              </FadeIn>
+            ))}
           </div>
         </div>
       </section>
 
-      {/* Featured Tools Section */}
-      <section className="py-20 bg-gray-50">
-        <div className="container mx-auto px-4">
-          <div className="text-center mb-16">
-            <h2 className="text-4xl font-serif font-bold text-gray-900 mb-4">
-              Essential Tools for Every Mariner
+      {/* ════════ WHAT'S LIVE TODAY ════════ */}
+      <section
+        className="px-8 py-[5.5rem]"
+        style={{
+          background:
+            'linear-gradient(180deg, rgba(37,99,235,0.025) 0%, transparent 100%)',
+        }}
+      >
+        <div className="max-w-[1100px] mx-auto">
+          <FadeIn>
+            <div className="text-center mb-12">
+              <p className="font-body font-semibold text-[0.8rem] tracking-[0.08em] uppercase text-green-500 mb-[14px]">
+                Live now
+              </p>
+              <h2 className="font-heading font-bold text-[clamp(1.85rem,3.5vw,2.75rem)] text-slate-100 leading-[1.15] tracking-[-0.02em]">
+                What&apos;s live today.
+              </h2>
+              <p className="font-body text-[0.95rem] text-white/45 leading-[1.7] max-w-[540px] mx-auto mt-3">
+                MSC was the starting point — not the ceiling. Every tool, guide,
+                and page is built to expand across the industry.
+              </p>
+            </div>
+          </FadeIn>
+
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-7">
+            {/* MSC Hub */}
+            <FadeIn>
+              <div className="bg-white/[0.02] border border-blue-500/[0.12] rounded-2xl overflow-hidden h-full">
+                <div
+                  className="px-[26px] pt-6 pb-5 border-b border-blue-500/[0.08]"
+                  style={{
+                    background:
+                      'linear-gradient(135deg, rgba(59,130,246,0.1), rgba(59,130,246,0.03))',
+                  }}
+                >
+                  <div className="flex items-center gap-3 mb-2">
+                    <div className="w-9 h-9 rounded-[9px] bg-gradient-to-br from-blue-600 to-blue-700 flex items-center justify-center text-[1.05rem]">
+                      🔧
+                    </div>
+                    <div>
+                      <h3 className="font-heading font-bold text-[1.2rem] text-slate-100 tracking-[-0.01em]">
+                        MSC Hub
+                      </h3>
+                      <p className="font-body text-[0.72rem] text-blue-400 font-semibold tracking-[0.05em] uppercase">
+                        Purpose-built for MSC mariners
+                      </p>
+                    </div>
+                  </div>
+                  <p className="font-body text-[0.84rem] text-white/45 leading-[1.7]">
+                    Tools and calculators built specifically for Military Sealift
+                    Command civil service mariners — current or prospective.
+                  </p>
+                </div>
+
+                <div className="px-[26px] pt-4 pb-[26px]">
+                  {MSC_HUB_ITEMS.map((item, i) => (
+                    <div
+                      key={i}
+                      className={`flex gap-3 items-start py-[13px] ${
+                        i < MSC_HUB_ITEMS.length - 1
+                          ? 'border-b border-white/[0.035]'
+                          : ''
+                      }`}
+                    >
+                      <span className="text-[1.1rem] mt-[1px]">{item.icon}</span>
+                      <div>
+                        <div className="font-heading font-semibold text-[0.86rem] text-slate-100 mb-[2px] tracking-[-0.01em]">
+                          {item.label}
+                        </div>
+                        <div className="font-body text-[0.8rem] text-white/45 leading-[1.7]">
+                          {item.desc}
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                  <Link
+                    href="/tools/ship-pay-calculator"
+                    className="font-body inline-flex items-center gap-[6px] mt-[14px] text-blue-400 text-[0.85rem] font-semibold tracking-[0.01em] hover:text-blue-300 transition-colors"
+                  >
+                    Explore MSC Hub →
+                  </Link>
+                </div>
+              </div>
+            </FadeIn>
+
+            {/* For All Mariners */}
+            <FadeIn delay={140}>
+              <div className="bg-white/[0.02] border border-green-500/[0.12] rounded-2xl overflow-hidden h-full">
+                <div
+                  className="px-[26px] pt-6 pb-5 border-b border-green-500/[0.08]"
+                  style={{
+                    background:
+                      'linear-gradient(135deg, rgba(34,197,94,0.1), rgba(34,197,94,0.03))',
+                  }}
+                >
+                  <div className="flex items-center gap-3 mb-2">
+                    <div className="w-9 h-9 rounded-[9px] bg-gradient-to-br from-green-500 to-green-600 flex items-center justify-center text-[1.05rem]">
+                      🌍
+                    </div>
+                    <div>
+                      <h3 className="font-heading font-bold text-[1.2rem] text-slate-100 tracking-[-0.01em]">
+                        For All Mariners
+                      </h3>
+                      <p className="font-body text-[0.72rem] text-green-400 font-semibold tracking-[0.05em] uppercase">
+                        MSC · NOAA · Commercial · Academy
+                      </p>
+                    </div>
+                  </div>
+                  <p className="font-body text-[0.84rem] text-white/45 leading-[1.7]">
+                    Ship info, port guides, and career resources useful to any
+                    merchant mariner — regardless of employer.
+                  </p>
+                </div>
+
+                <div className="px-[26px] pt-4 pb-[26px]">
+                  {ALL_MARINER_ITEMS.map((item, i) => {
+                    const sc = STATUS_COLORS[item.status];
+                    return (
+                      <div
+                        key={i}
+                        className={`flex gap-3 items-start py-[13px] ${
+                          i < ALL_MARINER_ITEMS.length - 1
+                            ? 'border-b border-white/[0.035]'
+                            : ''
+                        }`}
+                      >
+                        <span className="text-[1.1rem] mt-[1px]">
+                          {item.icon}
+                        </span>
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2 mb-[2px]">
+                            <span className="font-heading font-semibold text-[0.86rem] text-slate-100 tracking-[-0.01em]">
+                              {item.label}
+                            </span>
+                            <span
+                              className={`font-body text-[0.6rem] font-semibold tracking-[0.05em] uppercase px-[6px] py-[2px] rounded ${sc.bg} ${sc.text}`}
+                            >
+                              {item.statusLabel}
+                            </span>
+                          </div>
+                          <div className="font-body text-[0.8rem] text-white/45 leading-[1.7]">
+                            {item.desc}
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
+
+                  <div className="mt-[18px] p-[14px_16px] rounded-[10px] bg-yellow-400/[0.04] border border-yellow-400/10">
+                    <p className="font-body text-[0.82rem] text-white/45 leading-[1.55]">
+                      <span className="text-yellow-400 font-semibold">
+                        Growing
+                      </span>{' '}
+                      means it&apos;s live but needs more content — that&apos;s
+                      where you come in.{' '}
+                      <span className="text-violet-400 font-semibold">
+                        In Development
+                      </span>{' '}
+                      means it&apos;s being built.
+                    </p>
+                  </div>
+
+                  <Link
+                    href="/ports"
+                    className="font-body inline-flex items-center gap-[6px] mt-[14px] text-green-400 text-[0.85rem] font-semibold tracking-[0.01em] hover:text-green-300 transition-colors"
+                  >
+                    Browse Guides & Ports →
+                  </Link>
+                </div>
+              </div>
+            </FadeIn>
+          </div>
+        </div>
+      </section>
+
+      {/* ════════ HELP US GET THERE ════════ */}
+      <section className="px-8 py-[5.5rem]">
+        <div className="max-w-[1000px] mx-auto">
+          <FadeIn>
+            <div
+              className="border border-yellow-400/10 rounded-[20px] p-[44px_36px] relative overflow-hidden"
+              style={{
+                background:
+                  'linear-gradient(135deg, rgba(250,204,21,0.04), rgba(245,158,11,0.015))',
+              }}
+            >
+              {/* Corner glow */}
+              <div
+                className="absolute top-0 right-0 w-[280px] h-[280px]"
+                style={{
+                  background:
+                    'radial-gradient(circle at top right, rgba(250,204,21,0.04), transparent 70%)',
+                }}
+              />
+
+              <div className="relative">
+                <div className="text-center mb-9">
+                  <p className="font-body font-semibold text-[0.8rem] tracking-[0.08em] uppercase text-yellow-400 mb-[14px]">
+                    Help us get there
+                  </p>
+                  <h2 className="font-heading font-bold text-[clamp(1.85rem,3.5vw,2.75rem)] text-slate-100 leading-[1.15] tracking-[-0.02em] max-w-[560px] mx-auto mb-[14px]">
+                    The more mariners contribute, the better this gets.
+                  </h2>
+                  <p className="font-body text-[0.95rem] text-white/45 leading-[1.7] max-w-[540px] mx-auto">
+                    Ship pages and port guides get better with every photo, tip,
+                    and correction. If you&apos;ve sailed it or been there, you
+                    know something we need. Every contribution gets credited.
+                  </p>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  {CONTRIBUTION_CARDS.map((item, i) => (
+                    <div
+                      key={i}
+                      className="bg-black/20 border border-white/5 rounded-xl p-[22px] transition-colors duration-300 hover:border-yellow-400/20"
+                    >
+                      <span className="text-2xl block mb-[10px]">
+                        {item.icon}
+                      </span>
+                      <h3 className="font-heading font-semibold text-[0.95rem] text-slate-100 mb-[6px] tracking-[-0.01em]">
+                        {item.title}
+                      </h3>
+                      <p className="font-body text-[0.82rem] text-white/45 leading-[1.7] mb-[14px]">
+                        {item.desc}
+                      </p>
+                      <a
+                        href="mailto:alec.schenning@civsail.com"
+                        className="font-body text-yellow-400 text-[0.82rem] font-semibold hover:text-yellow-300 transition-colors"
+                      >
+                        {item.cta}
+                      </a>
+                    </div>
+                  ))}
+                </div>
+
+                <p className="font-body text-[0.78rem] text-white/[0.28] mt-5 text-center">
+                  Email contributions to{' '}
+                  <span className="text-white/45">
+                    alec.schenning@civsail.com
+                  </span>{' '}
+                  — all contributors are credited.
+                </p>
+              </div>
+            </div>
+          </FadeIn>
+        </div>
+      </section>
+
+      {/* ════════ STORIES FROM THE INDUSTRY ════════ */}
+      <section className="px-8 py-[5.5rem]">
+        <div className="max-w-[1000px] mx-auto">
+          <FadeIn>
+            <div className="text-center mb-10">
+              <h2 className="font-heading font-bold text-[clamp(1.85rem,3.5vw,2.75rem)] text-slate-100 leading-[1.15] tracking-[-0.02em]">
+                Stories from the industry.
+              </h2>
+              <p className="font-body text-[0.95rem] text-white/45 leading-[1.7] max-w-[480px] mx-auto mt-3">
+                Real experiences, honest takes, and the things nobody tells you
+                until it&apos;s too late.
+              </p>
+            </div>
+          </FadeIn>
+
+          {/* Magazine layout: large left + two stacked right */}
+          <div className="grid grid-cols-1 lg:grid-cols-[1.15fr_1fr] gap-5">
+            {/* Large featured card — Adam Butters */}
+            <FadeIn>
+              <Link
+                href="/editorials/profiles/adam-butters-story"
+                className="block h-full"
+              >
+                <div
+                  className="border border-red-500/[0.12] rounded-2xl p-[36px_32px] h-full flex flex-col justify-between transition-all duration-300 cursor-pointer relative overflow-hidden hover:border-red-500/35 hover:-translate-y-[3px]"
+                  style={{
+                    background:
+                      'linear-gradient(160deg, rgba(239,68,68,0.08), rgba(239,68,68,0.02))',
+                  }}
+                >
+                  <div
+                    className="absolute top-0 right-0 w-[200px] h-[200px]"
+                    style={{
+                      background:
+                        'radial-gradient(circle at top right, rgba(239,68,68,0.06), transparent 70%)',
+                    }}
+                  />
+                  <div className="relative">
+                    <span className="font-body text-[0.65rem] font-semibold tracking-[0.06em] uppercase text-red-500 bg-red-500/10 px-[10px] py-1 rounded-md">
+                      MSC Stories
+                    </span>
+                    <h3 className="font-heading font-bold text-2xl text-slate-100 mt-4 mb-[14px] tracking-[-0.02em] leading-[1.25]">
+                      The Adam Butters Story
+                    </h3>
+                    <p className="font-body text-[0.92rem] text-white/45 leading-[1.7] max-w-[400px]">
+                      A story every MSC mariner should know. How one
+                      person&apos;s experience exposed cracks in the system —
+                      and why it matters for everyone still sailing.
+                    </p>
+                  </div>
+                  <span className="font-body inline-block mt-6 text-red-500 text-[0.85rem] font-semibold">
+                    Read the full story →
+                  </span>
+                </div>
+              </Link>
+            </FadeIn>
+
+            {/* Two stacked cards */}
+            <div className="flex flex-col gap-5">
+              {STACKED_ARTICLES.map((article, i) => {
+                const isAmber = article.color === 'amber';
+                const borderClass = isAmber
+                  ? 'border-amber-500/[0.12] hover:border-amber-500/35'
+                  : 'border-blue-500/[0.12] hover:border-blue-500/35';
+                const tagColor = isAmber ? 'text-amber-500' : 'text-blue-500';
+                const ctaColor = isAmber ? 'text-amber-500' : 'text-blue-500';
+                const gradient = isAmber
+                  ? 'linear-gradient(160deg, rgba(245,158,11,0.08), rgba(245,158,11,0.02))'
+                  : 'linear-gradient(160deg, rgba(59,130,246,0.08), rgba(59,130,246,0.02))';
+
+                return (
+                  <FadeIn key={i} delay={100 + i * 100}>
+                    <Link href={article.href} className="block">
+                      <div
+                        className={`border ${borderClass} rounded-2xl p-[26px_28px] transition-all duration-300 cursor-pointer hover:-translate-y-[2px]`}
+                        style={{ background: gradient }}
+                      >
+                        <span
+                          className={`font-body text-[0.62rem] font-semibold tracking-[0.06em] uppercase ${tagColor}`}
+                        >
+                          {article.tag}
+                        </span>
+                        <h3 className="font-heading font-bold text-[1.05rem] text-slate-100 mt-2 mb-2 tracking-[-0.01em] leading-[1.3]">
+                          {article.title}
+                        </h3>
+                        <p className="font-body text-[0.82rem] text-white/40 leading-[1.6]">
+                          {article.desc}
+                        </p>
+                        <span
+                          className={`font-body inline-block mt-3 ${ctaColor} text-[0.82rem] font-semibold`}
+                        >
+                          Read →
+                        </span>
+                      </div>
+                    </Link>
+                  </FadeIn>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* About CIVSail bar */}
+          <FadeIn delay={300}>
+            <Link href="/about" className="block">
+              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between bg-white/[0.02] border border-white/[0.06] rounded-xl px-6 py-4 mt-5 transition-colors duration-300 hover:border-blue-400/25 gap-2">
+                <span className="font-body text-[0.85rem] text-white/40 font-medium">
+                  How maritime academy, sea time, and shoreside experience led
+                  to building this site
+                </span>
+                <span className="font-body text-blue-400 text-[0.82rem] font-semibold tracking-[0.01em] whitespace-nowrap">
+                  Read our story →
+                </span>
+              </div>
+            </Link>
+          </FadeIn>
+        </div>
+      </section>
+
+      {/* ════════ STAY IN THE LOOP ════════ */}
+      <section className="px-8 py-[5.5rem] text-center">
+        <div className="max-w-[520px] mx-auto">
+          <FadeIn>
+            <h2 className="font-heading font-bold text-[clamp(1.85rem,3.5vw,2.75rem)] text-slate-100 leading-[1.15] tracking-[-0.02em] mb-[14px]">
+              Stay in the loop.
             </h2>
-            <p className="text-xl text-gray-600">
-              Calculate pay, generate forms, and manage your maritime career
+            <p className="font-body text-base text-white/45 leading-[1.7] mb-8">
+              New tools, new port guides, new ship pages — drop your email and
+              we&apos;ll let you know when something ships. We promise not to
+              spam you.
             </p>
-          </div>
 
-          <div className="grid md:grid-cols-3 gap-8">
-            {/* Pay Calculator */}
-            <div className="bg-white p-8 rounded-xl shadow-lg hover:shadow-xl transition-shadow group">
-              <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mb-6 group-hover:bg-blue-200 transition-colors">
-                <span className="text-2xl">💰</span>
+            <div className="bg-white/[0.025] border border-white/[0.07] rounded-xl p-6">
+              <div className="flex flex-col sm:flex-row gap-2">
+                <input
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="your.name@ship-email.com"
+                  className="font-body flex-1 px-[14px] py-3 rounded-lg bg-white/5 border border-white/[0.08] text-slate-100 text-[0.9rem] outline-none focus:border-blue-500/50 transition-colors placeholder:text-white/25"
+                />
+                <button className="font-body bg-blue-600 text-white px-[22px] py-3 rounded-lg border-none font-semibold text-[0.9rem] cursor-pointer whitespace-nowrap tracking-[0.01em] hover:bg-blue-700 transition-colors">
+                  Keep Me Posted
+                </button>
               </div>
-              <h3 className="text-2xl font-semibold mb-4">Pay Calculator</h3>
-              <p className="text-gray-600 mb-6">
-                Calculate ship pay with overtime, retention bonuses, and
-                benefits. Compare different vessels and deployments.
+              <p className="font-body text-[0.76rem] text-white/25 mt-3">
+                Updates only. No spam. Unsubscribe anytime.
               </p>
-              <Link
-                href="/tools/pay-calculator"
-                className="inline-flex items-center text-blue-600 font-semibold hover:text-blue-700 transition-colors"
-              >
-                Try Calculator →
-              </Link>
             </div>
-
-            {/* Leave Chit Generator */}
-            <div className="bg-white p-8 rounded-xl shadow-lg hover:shadow-xl transition-shadow group">
-              <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mb-6 group-hover:bg-green-200 transition-colors">
-                <span className="text-2xl">📝</span>
-              </div>
-              <h3 className="text-2xl font-semibold mb-4">
-                Leave Chit Generator
-              </h3>
-              <p className="text-gray-600 mb-6">
-                Generate properly formatted annual and sick leave requests.
-                Calculate leave balances and accrual rates.
-              </p>
-              <Link
-                href="/tools/leave-chit"
-                className="inline-flex items-center text-blue-600 font-semibold hover:text-blue-700 transition-colors"
-              >
-                Generate Form →
-              </Link>
-            </div>
-
-            {/* Travel Voucher */}
-            <div className="bg-white p-8 rounded-xl shadow-lg hover:shadow-xl transition-shadow group">
-              <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center mb-6 group-hover:bg-purple-200 transition-colors">
-                <span className="text-2xl">✈️</span>
-              </div>
-              <h3 className="text-2xl font-semibold mb-4">
-                Travel Voucher (DD 1351-2)
-              </h3>
-              <p className="text-gray-600 mb-6">
-                Auto-generate travel claims with proper receipts and
-                documentation for faster reimbursement.
-              </p>
-              <Link
-                href="/tools/travel-voucher"
-                className="inline-flex items-center text-blue-600 font-semibold hover:text-blue-700 transition-colors"
-              >
-                Generate Voucher →
-              </Link>
-            </div>
-          </div>
+          </FadeIn>
         </div>
       </section>
 
-      {/* Featured Articles Section */}
-      <section className="py-20 bg-white">
-        <div className="container mx-auto px-4">
-          <div className="text-center mb-16">
-            <h2 className="text-4xl font-serif font-bold text-gray-900 mb-4">
-              Latest Guides & Resources
-            </h2>
-            <p className="text-xl text-gray-600">
-              Expert insights and practical advice for your maritime career
+      {/* ════════ FOOTER ════════ */}
+      <footer className="border-t border-white/5 px-8 py-10">
+        <div className="max-w-[1200px] mx-auto flex flex-col md:flex-row justify-between items-center gap-4 flex-wrap">
+          <div className="text-center md:text-left">
+            <span className="font-heading font-extrabold text-[1.2rem] tracking-[-0.02em]">
+              <span className="text-yellow-400">CIV</span>
+              <span className="text-blue-400">Sail</span>
+            </span>
+            <p className="font-body text-[0.76rem] text-white/[0.28] mt-[3px]">
+              Built by a mariner, for mariners.
             </p>
           </div>
-
-          <div className="grid md:grid-cols-3 gap-8">
-            {/* Shore Shock Article */}
-            <article className="group cursor-pointer">
-              <Link href="https://civsail.com/blogs/from-the-team/shore-shock-what-happens-after-you-stop-sailing-and-how-to-prepare">
-                <div className="bg-gradient-to-br from-blue-500 to-blue-700 h-48 rounded-lg mb-6 flex items-center justify-center">
-                  <span className="text-white text-6xl">🏠</span>
-                </div>
-                <div className="space-y-3">
-                  <span className="inline-block bg-blue-100 text-blue-800 text-sm px-3 py-1 rounded-full">
-                    Career Planning
-                  </span>
-                  <h3 className="text-xl font-semibold group-hover:text-blue-600 transition-colors">
-                    Shore Shock: What Happens After You Stop Sailing
-                  </h3>
-                  <p className="text-gray-600">
-                    Complete guide to transitioning from sea to shore, including
-                    financial planning and career options.
-                  </p>
-                  <span className="text-sm text-gray-500">5 min read</span>
-                </div>
-              </Link>
-            </article>
-
-            {/* Pay Guide Article */}
-            <article className="group cursor-pointer">
-              <Link href="https://civsail.com/blogs/neo-topics/pay-payroll-dfas-and-pay-issues">
-                <div className="bg-gradient-to-br from-green-500 to-green-700 h-48 rounded-lg mb-6 flex items-center justify-center">
-                  <span className="text-white text-6xl">💸</span>
-                </div>
-                <div className="space-y-3">
-                  <span className="inline-block bg-green-100 text-green-800 text-sm px-3 py-1 rounded-full">
-                    Pay & Benefits
-                  </span>
-                  <h3 className="text-xl font-semibold group-hover:text-blue-600 transition-colors">
-                    Pay, Payroll, DFAS and Pay Issues
-                  </h3>
-                  <p className="text-gray-600">
-                    Everything you need to know about CIVMAR pay, overtime, and
-                    resolving common payroll problems.
-                  </p>
-                  <span className="text-sm text-gray-500">8 min read</span>
-                </div>
-              </Link>
-            </article>
-
-            {/* T-AKE Operations Article */}
-            <article className="group cursor-pointer">
-              <Link href="https://civsail.com/blogs/t-ake/t-ake-money-and-operations">
-                <div className="bg-gradient-to-br from-purple-500 to-purple-700 h-48 rounded-lg mb-6 flex items-center justify-center">
-                  <span className="text-white text-6xl">🚢</span>
-                </div>
-                <div className="space-y-3">
-                  <span className="inline-block bg-purple-100 text-purple-800 text-sm px-3 py-1 rounded-full">
-                    Ship Classes
-                  </span>
-                  <h3 className="text-xl font-semibold group-hover:text-blue-600 transition-colors">
-                    T-AKE Money and Operations
-                  </h3>
-                  <p className="text-gray-600">
-                    Detailed breakdown of T-AKE operations, deployment cycles,
-                    and earning potential.
-                  </p>
-                  <span className="text-sm text-gray-500">12 min read</span>
-                </div>
-              </Link>
-            </article>
+          <div className="flex flex-wrap justify-center gap-x-[22px] gap-y-2 text-[0.82rem] text-white/35 font-body font-medium">
+            {FOOTER_LINKS.map((item) =>
+              item.href.startsWith('mailto:') ? (
+                <a
+                  key={item.label}
+                  href={item.href}
+                  className="hover:text-white/70 transition-colors"
+                >
+                  {item.label}
+                </a>
+              ) : (
+                <Link
+                  key={item.label}
+                  href={item.href}
+                  className="hover:text-white/70 transition-colors"
+                >
+                  {item.label}
+                </Link>
+              )
+            )}
           </div>
-        </div>
-      </section>
-
-      {/* CTA Section */}
-      <section className="py-20 bg-slate-900 text-white">
-        <div className="container mx-auto px-4 text-center">
-          <h2 className="text-4xl font-serif font-bold mb-6">
-            Ready to take control of your maritime career?
-          </h2>
-          <p className="text-xl text-gray-300 mb-10 max-w-3xl mx-auto">
-            Join thousands of CIVMARs who use CIVSail to track credentials,
-            calculate pay, and plan their next moves. Get started today with our
-            free tools.
+          <p className="font-body text-[0.72rem] text-white/[0.18]">
+            © {new Date().getFullYear()} CIVSail.com — Not affiliated with MSC,
+            NOAA, or USCG.
           </p>
-          <Link
-            href="/signup"
-            className="inline-block bg-blue-600 hover:bg-blue-700 text-white px-10 py-4 rounded-lg font-semibold text-lg transition-colors"
-          >
-            Create Your Free Account
-          </Link>
-        </div>
-      </section>
-
-      {/* Footer */}
-      <footer className="bg-gray-900 text-white py-12">
-        <div className="container mx-auto px-4">
-          <div className="grid md:grid-cols-4 gap-8">
-            {/* Brand */}
-            <div>
-              <h3 className="text-xl font-bold mb-4">CIVSail</h3>
-              <p className="text-gray-400 mb-4">
-                Tools and resources built by mariners, for mariners. Making MSC
-                careers easier since 2024.
-              </p>
-            </div>
-
-            {/* Tools */}
-            <div>
-              <h4 className="font-semibold mb-4">Tools</h4>
-              <ul className="space-y-2 text-gray-400">
-                <li>
-                  <Link
-                    href="/tools/pay-calculator"
-                    className="hover:text-white"
-                  >
-                    Pay Calculator
-                  </Link>
-                </li>
-                <li>
-                  <Link href="/tools/leave-chit" className="hover:text-white">
-                    Leave Chit Generator
-                  </Link>
-                </li>
-                <li>
-                  <Link
-                    href="/tools/travel-voucher"
-                    className="hover:text-white"
-                  >
-                    Travel Voucher
-                  </Link>
-                </li>
-                <li>
-                  <Link href="/tools" className="hover:text-white">
-                    All Tools
-                  </Link>
-                </li>
-              </ul>
-            </div>
-
-            {/* Resources */}
-            <div>
-              <h4 className="font-semibold mb-4">Resources</h4>
-              <ul className="space-y-2 text-gray-400">
-                <li>
-                  <Link
-                    href="https://civsail.com/blogs"
-                    className="hover:text-white"
-                  >
-                    Blog
-                  </Link>
-                </li>
-                <li>
-                  <Link href="/ships" className="hover:text-white">
-                    Ship Classes
-                  </Link>
-                </li>
-                <li>
-                  <Link href="/ports" className="hover:text-white">
-                    Port Guides
-                  </Link>
-                </li>
-                <li>
-                  <Link
-                    href="https://civsail.com/products"
-                    className="hover:text-white"
-                  >
-                    Shop
-                  </Link>
-                </li>
-              </ul>
-            </div>
-
-            {/* Support */}
-            <div>
-              <h4 className="font-semibold mb-4">Support</h4>
-              <ul className="space-y-2 text-gray-400">
-                <li>
-                  <Link href="/about" className="hover:text-white">
-                    About
-                  </Link>
-                </li>
-                <li>
-                  <Link href="/contact" className="hover:text-white">
-                    Contact
-                  </Link>
-                </li>
-                <li>
-                  <a
-                    href="mailto:support@civsail.com"
-                    className="hover:text-white"
-                  >
-                    support@civsail.com
-                  </a>
-                </li>
-              </ul>
-            </div>
-          </div>
-
-          <div className="border-t border-gray-700 mt-8 pt-8 text-center text-gray-400">
-            <p>&copy; 2025 CIVSail.com. Built for mariners, by mariners.</p>
-          </div>
         </div>
       </footer>
     </div>
