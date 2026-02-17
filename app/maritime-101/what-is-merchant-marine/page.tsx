@@ -20,7 +20,6 @@ import {
   ChevronDown,
   ChevronUp,
   ArrowRight,
-  Building2,
   BookOpen,
   Award,
   AlertCircle,
@@ -192,7 +191,7 @@ const HISTORY_EVENTS = [
     title: 'Merchant Marine Acts',
     subtitle: 'Policy foundations for U.S. maritime strength',
     content:
-      'The Jones Act (1920) required domestic shipping between U.S. ports to use American-built, -owned, -crewed and -flagged vessels. The Merchant Marine Act of 1936 supported shipbuilding and training programs. Together, these laws aimed to maintain a viable domestic maritime industry capable of supporting national defense during wartime.',
+      'The Jones Act (1920) required domestic shipping between U.S. ports to use American-built, owned, crewed and flagged vessels. The Merchant Marine Act of 1936 supported shipbuilding and training programs. Together, these laws aimed to maintain a viable domestic maritime industry capable of supporting national defense during wartime.',
   },
   {
     year: '2020-2022',
@@ -230,21 +229,21 @@ const WHY_IT_MATTERS = [
     icon: AlertCircle,
     title: 'Resilience',
     content:
-      'Modern supply chains are fragile by design - optimized for cost, not disruption. Blocked canals, port strikes and crew shortages reveal how dependent society is on maritime systems working seamlessly. Building resilience requires investment in infrastructure, training and strategic capacity.',
+      'Modern supply chains are fragile by design and optimized for cost, not disruption. Blocked canals, port strikes and crew shortages reveal how dependent society is on maritime systems working seamlessly. Building resilience requires investment in infrastructure, training and strategic capacity.',
     ctas: ['Careers', 'Credentials'],
   },
   {
     icon: Shield,
     title: 'National Capacity',
     content:
-      'The United States maintains sealift capability through Military Sealift Command, the Ready Reserve Fleet and domestic maritime industries. This capacity matters during contingencies - but sustaining it requires a pipeline of skilled civilian mariners who can crew vessels when surge capacity is needed.',
+      'The United States maintains sealift capability through Military Sealift Command, the Ready Reserve Fleet and domestic maritime industries. This capacity matters during contingencies but sustaining it requires a pipeline of skilled civilian mariners who can crew vessels when surge capacity is needed.',
     ctas: ['Training'],
   },
   {
     icon: Award,
     title: 'Career Opportunity',
     content:
-      'Maritime careers offer strong pay, specialized skills and geographic mobility. The tradeoffs - time away from home, rotating schedules, physical demands - are real. But for those who thrive in maritime environments, the work provides stability, advancement pathways and a role in systems that power modern life.',
+      'Maritime careers offer strong pay, specialized skills and geographic mobility. The tradeoffs,  time away from home, rotating schedules, physical demands, are real. But for those who thrive in maritime environments, the work provides stability, advancement pathways and a role in systems that power modern life.',
     ctas: ['Explore Careers', 'See Training Paths'],
   },
 ];
@@ -491,11 +490,15 @@ export default function WhatIsMerchantMarinePage() {
             That Moves the World
           </h1>
           <p className="text-xl md:text-2xl text-slate-300 mb-12 leading-relaxed">
-            The Merchant Marine is the global network of commercial vessels,
-            crews and systems that move 90% of world trade. In the United
-            States, it includes both international operators and the domestic
-            fleet serving American ports - a vital workforce that CIVSail helps
-            navigate their careers.
+            The Merchant Marine is the civilian maritime industry that operates
+            commercial vessels facilitating global trade. A merchant
+            mariner is the credentialed professional who works aboard those
+            ships, ensuring cargo, fuel, and essential goods move safely between
+            ports. The Merchant Marine is not an official branch of the
+            military, but it plays a critical role in supporting national
+            defense, operating under the longstanding motto “In peace and war.”
+            It is a vital but often overlooked workforce that CIVSail exists to
+            support.
           </p>
           <div className="flex flex-wrap gap-4">
             <Link href="/maritime-101/careers-and-sectors">
@@ -506,9 +509,8 @@ export default function WhatIsMerchantMarinePage() {
             </Link>
             <Button
               size="lg"
-              variant="outline"
               onClick={() => scrollToSection('sectors')}
-              className="border-slate-700 hover:bg-slate-800"
+              className="bg-blue-600 hover:bg-blue-700"
             >
               See the Industry Map
             </Button>
@@ -563,8 +565,8 @@ export default function WhatIsMerchantMarinePage() {
               The Merchant Marine works best when it is invisible. Ships arrive
               on schedule, store shelves stay stocked, fuel flows to refineries
               and power plants. Only when disruptions occur - blocked canals,
-              port strikes, crew shortages - does the public glimpse how
-              dependent modern life is on this seamless global system.
+              port strikes, crew shortages - does the public get a glimpse into how
+              dependent modern life is on this global system.
             </p>
           </div>
         </motion.div>
@@ -687,15 +689,6 @@ export default function WhatIsMerchantMarinePage() {
                   </div>
                 </div>
 
-                <Link href="/maritime-101/sectors/international">
-                  <Button
-                    variant="outline"
-                    className="w-full border-slate-700 hover:bg-slate-800"
-                  >
-                    Explore International
-                    <ArrowRight className="w-4 h-4 ml-2" />
-                  </Button>
-                </Link>
               </Card>
             </motion.div>
 
@@ -748,15 +741,6 @@ export default function WhatIsMerchantMarinePage() {
                   </div>
                 </div>
 
-                <Link href="/maritime-101/sectors/domestic">
-                  <Button
-                    variant="outline"
-                    className="w-full border-slate-700 hover:bg-slate-800"
-                  >
-                    Explore Domestic
-                    <ArrowRight className="w-4 h-4 ml-2" />
-                  </Button>
-                </Link>
               </Card>
             </motion.div>
 
@@ -804,15 +788,6 @@ export default function WhatIsMerchantMarinePage() {
                   </div>
                 </div>
 
-                <Link href="/maritime-101/sectors/government">
-                  <Button
-                    variant="outline"
-                    className="w-full border-slate-700 hover:bg-slate-800"
-                  >
-                    Explore Government
-                    <ArrowRight className="w-4 h-4 ml-2" />
-                  </Button>
-                </Link>
               </Card>
             </motion.div>
           </div>
@@ -834,30 +809,25 @@ export default function WhatIsMerchantMarinePage() {
         >
           <h2 className="text-4xl font-bold mb-4">Major Players</h2>
           <p className="text-lg text-slate-300 mb-12 max-w-3xl">
-            Companies run ships, labor crews ships, regulators set the rules
+            Companies own/operate ships, unions crew ships, regulators set and enforce the rules
           </p>
 
           {/* Ecosystem Visual */}
           <div className="mb-16 relative">
-            <div className="flex items-center justify-center mb-12">
-              <div className="relative">
-                <div className="absolute inset-0 bg-blue-500/20 blur-3xl"></div>
-                <div className="relative bg-slate-900 border-2 border-blue-500 rounded-2xl p-8">
-                  <Ship className="w-16 h-16 text-blue-400 mx-auto" />
-                  <p className="text-center text-sm font-semibold mt-4 text-white">
-                    The Ship
-                  </p>
-                </div>
-              </div>
-            </div>
-
             <div className="grid md:grid-cols-3 gap-6">
               {/* Operators */}
               <Card className="p-6 bg-slate-900 border-slate-800">
-                <Building2 className="w-8 h-8 text-blue-400 mb-4" />
-                <h3 className="text-xl font-semibold mb-4 text-white">
-                  Operators & Companies
-                </h3>
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="relative">
+                    <div className="absolute inset-0 bg-blue-500/20 blur-xl"></div>
+                    <div className="relative bg-slate-800 border border-blue-500/50 rounded-xl p-3">
+                      <Ship className="w-8 h-8 text-blue-400" />
+                    </div>
+                  </div>
+                  <h3 className="text-xl font-semibold text-white">
+                    Operators & Companies
+                  </h3>
+                </div>
                 <div className="space-y-4">
                   <div>
                     <h4 className="text-sm font-semibold text-white mb-2">
@@ -899,10 +869,17 @@ export default function WhatIsMerchantMarinePage() {
 
               {/* Labor */}
               <Card className="p-6 bg-slate-900 border-slate-800">
-                <Users className="w-8 h-8 text-blue-400 mb-4" />
-                <h3 className="text-xl font-semibold mb-4 text-white">
-                  Crewing & Labor
-                </h3>
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="relative">
+                    <div className="absolute inset-0 bg-blue-500/20 blur-xl"></div>
+                    <div className="relative bg-slate-800 border border-blue-500/50 rounded-xl p-3">
+                      <Users className="w-8 h-8 text-blue-400" />
+                    </div>
+                  </div>
+                  <h3 className="text-xl font-semibold text-white">
+                    Crewing & Labor
+                  </h3>
+                </div>
                 <div className="space-y-3">
                   {UNIONS.map((union) => (
                     <div
@@ -931,10 +908,17 @@ export default function WhatIsMerchantMarinePage() {
 
               {/* Regulators */}
               <Card className="p-6 bg-slate-900 border-slate-800">
-                <Scale className="w-8 h-8 text-blue-400 mb-4" />
-                <h3 className="text-xl font-semibold mb-4 text-white">
-                  Regulatory & Standards
-                </h3>
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="relative">
+                    <div className="absolute inset-0 bg-blue-500/20 blur-xl"></div>
+                    <div className="relative bg-slate-800 border border-blue-500/50 rounded-xl p-3">
+                      <Scale className="w-8 h-8 text-blue-400" />
+                    </div>
+                  </div>
+                  <h3 className="text-xl font-semibold text-white">
+                    Regulatory & Standards
+                  </h3>
+                </div>
                 <div className="space-y-3">
                   {REGULATORS.map((org) => (
                     <div
@@ -1012,11 +996,7 @@ export default function WhatIsMerchantMarinePage() {
 
           <div className="text-center">
             <Link href="/ships">
-              <Button
-                variant="outline"
-                size="lg"
-                className="border-slate-700 hover:bg-slate-800"
-              >
+              <Button size="lg" className="bg-blue-600 hover:bg-blue-700">
                 Explore ship types and real examples
                 <ArrowRight className="w-4 h-4 ml-2" />
               </Button>
@@ -1116,7 +1096,7 @@ export default function WhatIsMerchantMarinePage() {
         >
           <h2 className="text-4xl font-bold mb-4">Why It Matters Now</h2>
           <p className="text-lg text-slate-300 mb-12 max-w-3xl">
-            Three reasons maritime careers and maritime strength matter in 2025
+            Three reasons maritime careers and maritime strength matter in 2026
           </p>
 
           {/* Stats */}
