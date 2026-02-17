@@ -1605,13 +1605,13 @@ export default function TAOShipPage() {
                 </p>
                 <div className="flex flex-col sm:flex-row gap-4">
                   <a
-                    href="mailto:alec.schenning@civsail.com?subject=T-AO Photos Submission"
+                    href="mailto:support@civsail.com?subject=T-AO Photos Submission"
                     className="bg-yellow-600 hover:bg-yellow-700 text-white px-6 py-3 rounded-lg font-medium text-center transition-colors"
                   >
                     Submit Photos
                   </a>
                   <div className="text-yellow-300 text-sm flex items-center">
-                    <span>📧 alec.schenning@civsail.com</span>
+                    <span>📧 support@civsail.com</span>
                   </div>
                 </div>
               </div>

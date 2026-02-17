@@ -3,7 +3,7 @@ import { NextRequest, NextResponse } from 'next/server';
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
-const FEEDBACK_EMAIL = 'alec.schenning@civsail.com';
+const FEEDBACK_EMAIL = 'support@civsail.com';
 
 export async function POST(request: NextRequest) {
   try {

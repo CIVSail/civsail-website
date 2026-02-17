@@ -73,7 +73,7 @@ export default function NotFound() {
         <p className="mt-12 text-sm text-gray-400">
           Think this page should exist?{' '}
           <a 
-            href="mailto:alec.schenning@civsail.com" 
+            href="mailto:support@civsail.com" 
             className="text-blue-600 hover:underline"
           >
             Let us know

@@ -18,7 +18,7 @@ export async function POST(request: NextRequest) {
     // Send email to both recipients
     const { error } = await resend.emails.send({
       from: 'CIVSail <noreply@civsail.com>', // Update with your verified domain
-      to: ['markbrown@high3team.com', 'alec.schenning@civsail.com'],
+      to: ['markbrown@high3team.com', 'support@civsail.com'],
       subject: 'New Retirement Question from CIVSail',
       html: `
         <h2>New Question Submitted</h2>

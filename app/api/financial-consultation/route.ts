@@ -135,7 +135,7 @@ export async function POST(request: NextRequest) {
     // Send email
     const { error } = await resend.emails.send({
       from: 'CIVSail <noreply@civsail.com>',
-      to: ['alec.schenning@civsail.com'],
+      to: ['support@civsail.com'],
       subject: `New Financial Consultation Request — ${name}`,
       html: emailHtml,
       replyTo: email,

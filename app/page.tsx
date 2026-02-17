@@ -103,7 +103,7 @@ const FOOTER_LINKS = [
   { label: 'Tools', href: '/tools' },
   { label: 'Guides', href: '/maritime-101' },
   { label: 'About', href: '/about' },
-  { label: 'Contact', href: 'mailto:alec.schenning@civsail.com' },
+  { label: 'Contact', href: 'mailto:support@civsail.com' },
 ];
 
 /* ═══════════════════════════════════════════
@@ -456,7 +456,7 @@ export default function Home() {
                         {item.desc}
                       </p>
                       <a
-                        href="mailto:alec.schenning@civsail.com"
+                        href="mailto:support@civsail.com"
                         className="font-body text-yellow-400 text-[0.82rem] font-semibold hover:text-yellow-300 transition-colors"
                       >
                         {item.cta}
@@ -468,7 +468,7 @@ export default function Home() {
                 <p className="font-body text-[0.78rem] text-white/[0.28] mt-5 text-center">
                   Email contributions to{' '}
                   <span className="text-white/45">
-                    alec.schenning@civsail.com
+                    support@civsail.com
                   </span>{' '}
                   — all contributors are credited.
                 </p>

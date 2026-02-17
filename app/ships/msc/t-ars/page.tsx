@@ -1043,10 +1043,10 @@ export default function TARSShipPage() {
                 <p className="text-white/70 text-sm">
                   Send photos to:{' '}
                   <a
-                    href="mailto:alec.schenning@civsail.com"
+                    href="mailto:support@civsail.com"
                     className="text-purple-300 hover:text-purple-200 underline"
                   >
-                    alec.schenning@civsail.com
+                    support@civsail.com
                   </a>
                 </p>
               </div>
