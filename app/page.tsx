@@ -160,12 +160,32 @@ export default function Home() {
           </FadeIn>
 
           <FadeIn delay={240}>
-            <div className="flex gap-3 flex-wrap justify-center">
+            <div className="relative flex gap-4 flex-wrap justify-center">
+              {/* Shared glow backdrop */}
+              <div
+                className="absolute inset-0 -inset-x-8 -inset-y-4 rounded-3xl blur-2xl opacity-40 pointer-events-none"
+                style={{
+                  background:
+                    'radial-gradient(ellipse 80% 100% at 50% 50%, rgba(37,99,235,0.35), transparent 70%)',
+                }}
+              />
               <Link
                 href="/ships"
-                className="font-body bg-blue-600 text-white px-7 py-[13px] rounded-[9px] text-[0.92rem] font-semibold shadow-[0_2px_16px_rgba(37,99,235,0.35)] tracking-[0.01em] hover:bg-blue-700 transition-colors"
+                className="relative font-body bg-blue-600 text-white px-12 py-[13px] rounded-[9px] text-[0.92rem] font-semibold shadow-[0_4px_24px_rgba(37,99,235,0.45),0_0px_60px_rgba(37,99,235,0.15)] tracking-[0.01em] hover:bg-blue-500 hover:shadow-[0_4px_32px_rgba(37,99,235,0.6),0_0px_80px_rgba(37,99,235,0.25)] transition-all duration-300"
               >
-                Explore the Platform →
+                Ships
+              </Link>
+              <Link
+                href="/ports"
+                className="relative font-body bg-blue-600 text-white px-12 py-[13px] rounded-[9px] text-[0.92rem] font-semibold shadow-[0_4px_24px_rgba(37,99,235,0.45),0_0px_60px_rgba(37,99,235,0.15)] tracking-[0.01em] hover:bg-blue-500 hover:shadow-[0_4px_32px_rgba(37,99,235,0.6),0_0px_80px_rgba(37,99,235,0.25)] transition-all duration-300"
+              >
+                Ports
+              </Link>
+              <Link
+                href="/editorials/soundings"
+                className="relative font-body bg-blue-600 text-white px-12 py-[13px] rounded-[9px] text-[0.92rem] font-semibold shadow-[0_4px_24px_rgba(37,99,235,0.45),0_0px_60px_rgba(37,99,235,0.15)] tracking-[0.01em] hover:bg-blue-500 hover:shadow-[0_4px_32px_rgba(37,99,235,0.6),0_0px_80px_rgba(37,99,235,0.25)] transition-all duration-300"
+              >
+                Articles
               </Link>
             </div>
           </FadeIn>

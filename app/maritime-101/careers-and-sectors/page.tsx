@@ -47,11 +47,11 @@ const CAREER_CATEGORIES = [
   {
     id: 'licensed-deck',
     title: 'Licensed Deck',
-    subtitle: 'Officers of the Watch & Command',
+    subtitle: 'Officers of the Watch',
     icon: Compass,
     color: 'blue',
     description:
-      'Licensed deck officers hold USCG credentials authorizing them to serve as officers in charge of a navigational watch. This is the traditional path to command - from standing your first watch as Third Mate to ultimately taking responsibility for an entire vessel as Master.',
+      'Licensed deck officers hold USCG credentials authorizing them to serve as officers in charge of a navigational watch. This is the required path to become a Master.',
     requirements:
       'Maritime academy degree or hawsepipe progression, USCG license, STCW certification',
     roles: [
@@ -62,7 +62,7 @@ const CAREER_CATEGORIES = [
         description:
           'Your first licensed position. You have earned your credential and are now responsible for standing a navigational watch.',
         duties: [
-          'Stand 8-12 navigation watch',
+          'Stand navigational watch',
           'Maintain firefighting and lifesaving equipment',
           'Conduct safety drills and training',
           'Manage navigation charts and publications',
@@ -74,38 +74,39 @@ const CAREER_CATEGORIES = [
       {
         title: 'Second Mate / Second Officer',
         salary: '$90,000 - $140,000',
-        years: '5-10',
+        years: '4-6',
         description:
           'The navigation officer. You own the bridge equipment, charts, and publications. Safety and medical responsibilities expand.',
         duties: [
-          'Stand 12-4 navigation watch',
+          'Stand navigation watch',
           'Maintain all navigation equipment',
           'Update charts and voyage planning',
-          'Serve as ship medical officer (most vessels)',
+          'Increased general responsibility',
           'Manage safety equipment inventories',
         ],
-        nextStep: 'Build tonnage and experience for Chief Mate license',
+        nextStep: 'Take exams and accumulate sea time for Chief Mate license',
       },
       {
         title: 'Chief Mate / Chief Officer',
         salary: '$120,000 - $200,000',
-        years: '10-15',
+        years: '6-15',
         description:
           'Second in command. You run the deck department, oversee cargo operations, and are responsible for maintenance and crew management.',
         duties: [
-          'Stand 4-8 navigation watch',
+          'Stand navigation watch',
           'Supervise all cargo operations',
           'Manage deck department personnel',
           'Oversee vessel maintenance program',
           'Serve as safety officer',
           'Relieve Master as needed',
         ],
-        nextStep: 'Accumulate command time and prepare for Master license exam',
+        nextStep:
+          'Accumulate sea time to earn Masters license and command of a vessel',
       },
       {
         title: 'Master / Captain',
         salary: '$150,000 - $300,000+',
-        years: '15-20+',
+        years: '10-20+',
         description:
           'Ultimate authority aboard. You are responsible for the vessel, crew, cargo, and safe navigation. The buck stops with you.',
         duties: [
@@ -117,7 +118,7 @@ const CAREER_CATEGORIES = [
           'Navigate in restricted waters and during emergencies',
         ],
         nextStep:
-          'Continue building experience, mentor junior officers, or transition to shore-side leadership',
+          'Continue building experience, mentor junior officers, transition to shore-side leadership or retire.',
       },
     ],
   },
@@ -128,13 +129,13 @@ const CAREER_CATEGORIES = [
     icon: Anchor,
     color: 'sky',
     description:
-      'Unlicensed deck personnel are the backbone of deck operations. Starting as an Ordinary Seaman, you will learn seamanship fundamentals and can progress through the hawsepipe to licensed officer positions with enough sea time.',
+      'Unlicensed deck personnel are the backbone of deck operations. Starting as an Ordinary Seaman, you will learn seamanship fundamentals and can progress to officer positions or more advanced unlicensed roles like Bosun.',
     requirements:
       'MMC with appropriate endorsements, TWIC, Basic Safety Training (BST)',
     roles: [
       {
         title: 'Ordinary Seaman (OS)',
-        salary: '$40,000 - $60,000',
+        salary: '$40,000 - $80,000',
         years: '0-2',
         description:
           'Entry position. You are learning the fundamentals of seamanship while supporting the deck department in daily operations.',
@@ -146,11 +147,12 @@ const CAREER_CATEGORIES = [
           'Assist ABs with maintenance tasks',
           'Keep decks and spaces clean',
         ],
-        nextStep: 'Accumulate 180 days sea time to qualify for AB endorsement',
+        nextStep:
+          'Accumulate sea days and take classes necessary for AB endorsement',
       },
       {
         title: 'Able Seaman (AB)',
-        salary: '$50,000 - $80,000',
+        salary: '$60,000 - $100,000',
         years: '2-8',
         description:
           'Qualified rating. You can stand helm watches, work independently, and are proficient in all aspects of deck seamanship.',
@@ -163,11 +165,11 @@ const CAREER_CATEGORIES = [
           'Train and mentor Ordinary Seamen',
         ],
         nextStep:
-          'Build sea time toward Bosun or begin studying for Third Mate license',
+          'Build experience toward Bosun or begin studying for Third Mate license',
       },
       {
         title: 'Bosun (Boatswain)',
-        salary: '$65,000 - $95,000',
+        salary: '$85,000 - $120,000',
         years: '8-15',
         description:
           "Senior unlicensed deck position. You lead the deck gang, coordinate all maintenance, and are the Chief Mate's right hand.",
@@ -197,45 +199,45 @@ const CAREER_CATEGORIES = [
     roles: [
       {
         title: 'Third Assistant Engineer',
-        salary: '$65,000 - $100,000',
+        salary: '$70,000 - $110,000',
         years: '0-5',
         description:
           'Your first licensed engineering position. You stand watches, learn the plant, and build the foundation for your engineering career.',
         duties: [
-          'Stand 8-12 engine room watch',
+          'Stand engine room watch',
           'Monitor and log plant parameters',
           'Perform routine maintenance tasks',
           'Assist with repairs under supervision',
           'Maintain assigned machinery spaces',
           'Learn vessel-specific systems',
         ],
-        nextStep:
-          'Accumulate sea time and study for Second Assistant Engineer exam',
+        nextStep: 'Accumulate sea time for Second Assistant Engineer',
       },
       {
         title: 'Second Assistant Engineer',
-        salary: '$85,000 - $130,000',
-        years: '5-10',
+        salary: '$90,000 - $140,000',
+        years: '4-8',
         description:
           'Growing responsibility. You typically own auxiliary systems, boilers, or specific machinery groups depending on vessel type.',
         duties: [
-          'Stand 12-4 engine room watch',
+          'Stand engine room watch',
           'Maintain boilers and steam systems',
           'Manage auxiliary machinery maintenance',
           'Supervise engine room ratings',
           'Coordinate with deck on cargo systems',
           'Order parts and manage inventory',
         ],
-        nextStep: 'Build experience for First Assistant Engineer license',
+        nextStep:
+          'Build experience and take classes necessary for First Assistant Engineer license',
       },
       {
         title: 'First Assistant Engineer',
-        salary: '$110,000 - $180,000',
+        salary: '$120,000 - $200,000',
         years: '10-15',
         description:
           'Second in the engine department. You manage the main engine, coordinate all maintenance, and run the department day-to-day.',
         duties: [
-          'Stand 4-8 engine room watch',
+          'Stand engine room watch',
           'Maintain main propulsion machinery',
           'Supervise all engine department personnel',
           'Manage maintenance schedules and records',
@@ -247,20 +249,20 @@ const CAREER_CATEGORIES = [
       },
       {
         title: 'Chief Engineer',
-        salary: '$140,000 - $280,000',
-        years: '15-20+',
+        salary: '$150,000 - $280,000',
+        years: '10-20+',
         description:
           'Head of the engineering department. You are responsible for all machinery, fuel management, and your engineering team.',
         duties: [
           'Overall responsibility for engineering plant',
           'Manage department budget and repairs',
-          'Interface with office, class, and authorities',
+          'Interface with office, contractors and authorities',
           'Ensure regulatory compliance',
           'Lead major repairs and drydock planning',
           'Mentor and develop engineering officers',
         ],
         nextStep:
-          'Continue building expertise, transition to shore-side technical management, or fleet superintendent roles',
+          'Continue building expertise, transition to shore-side technical management, or retire.',
       },
     ],
   },
@@ -277,7 +279,7 @@ const CAREER_CATEGORIES = [
     roles: [
       {
         title: 'Wiper',
-        salary: '$38,000 - $55,000',
+        salary: '$40,000 - $80,000',
         years: '0-2',
         description:
           'Entry engine department position. You learn the machinery spaces while keeping them clean and assisting with basic maintenance.',
@@ -293,7 +295,7 @@ const CAREER_CATEGORIES = [
       },
       {
         title: 'Oiler',
-        salary: '$45,000 - $70,000',
+        salary: '$60,000 - $85,000',
         years: '2-5',
         description:
           'Engine room watchstander. You monitor machinery, take readings, and ensure proper lubrication of all equipment.',
@@ -310,7 +312,7 @@ const CAREER_CATEGORIES = [
       },
       {
         title: 'QMED (Qualified Member Engine Department)',
-        salary: '$55,000 - $90,000',
+        salary: '$70,000 - $100,000',
         years: '5-12',
         description:
           'Specialized engine rating. QMEDs hold endorsements in specific areas: Electrician, Refrigeration, Pumpman, Machinist, or Junior Engineer.',
@@ -341,7 +343,7 @@ const CAREER_CATEGORIES = [
     roles: [
       {
         title: 'Steward Utility (SU)',
-        salary: '$38,000 - $55,000',
+        salary: '$38,000 - $75,000',
         years: '0-3',
         description:
           'Entry steward department position. You support galley operations and maintain crew accommodations and common areas.',
@@ -357,7 +359,7 @@ const CAREER_CATEGORIES = [
       },
       {
         title: 'Chief Cook',
-        salary: '$55,000 - $80,000',
+        salary: '$55,000 - $85,000',
         years: '3-10',
         description:
           'Head of galley operations. You plan menus, prepare meals for the crew, and manage food inventory.',
@@ -374,7 +376,7 @@ const CAREER_CATEGORIES = [
       },
       {
         title: 'Chief Steward',
-        salary: '$65,000 - $95,000',
+        salary: '$75,000 - $105,000',
         years: '10-15',
         description:
           'Department head on larger vessels. You manage all hotel services including galley, accommodations, and stores.',
@@ -391,10 +393,10 @@ const CAREER_CATEGORIES = [
       },
       {
         title: 'Supply Officer / Storekeeper',
-        salary: '$55,000 - $85,000',
+        salary: '$85,000 - $135,000',
         years: '3-10',
         description:
-          'Manages vessel stores, spare parts, and procurement. Common on government vessels (MSC) and larger commercial ships.',
+          'Manages vessel stores, spare parts, and procurement. Common on government vessels (MSC).',
         duties: [
           'Maintain inventory of all ship stores',
           'Process requisitions and procurement',
@@ -407,7 +409,7 @@ const CAREER_CATEGORIES = [
       },
       {
         title: 'Purser',
-        salary: '$50,000 - $80,000',
+        salary: '$65,000 - $120,000',
         years: '3-10',
         description:
           'Administrative officer handling payroll, customs documentation, and passenger services. Common on passenger vessels and ferries.',
@@ -423,7 +425,7 @@ const CAREER_CATEGORIES = [
       },
       {
         title: 'Radio Officer / Communications',
-        salary: '$60,000 - $90,000',
+        salary: '$60,000 - $125,000',
         years: '3-12',
         description:
           'Electronics and communications specialist. Maintains GMDSS equipment and IT systems on modern vessels.',
@@ -443,7 +445,7 @@ const CAREER_CATEGORIES = [
         salary: '$100,000 - $180,000',
         years: '5-15',
         description:
-          'Operates helicopters on vessels with helidecks. Common on offshore support vessels, icebreakers, and research ships.',
+          'Operates helicopters on vessels with helidecks. Common on offshore support vessels, government vessels (MSC), icebreakers, and research ships.',
         duties: [
           'Conduct helicopter operations from vessel',
           'Personnel and cargo transfers',
@@ -588,11 +590,11 @@ const SECTORS = [
     icon: Waves,
     color: 'cyan',
     description:
-      'Articulated Tug-Barge (ATB) and Integrated Tug-Barge (ITB) units moving petroleum, chemicals, and dry cargo coastwise. Growing sector with modern tonnage.',
+      'Articulated Tug-Barge (ATB), Integrated Tug-Barge (ITB) units and Bunker Barges moving petroleum, chemicals, and dry cargo coastwise. Growing sector with modern tonnage.',
     stats: {
       rotation: '14/14 - 28/28',
       pay: '$60K-180K/year',
-      benefits: 'Union contracts',
+      benefits: 'Union contracts or company provided',
     },
     highlights: [
       'Modern ATB fleet',
@@ -697,7 +699,7 @@ const SECTORS = [
     },
     highlights: [
       'Highest maritime pay',
-      'Home every night',
+      'Home often with on-call schedule',
       '10+ year apprenticeship',
       'Limited positions',
     ],

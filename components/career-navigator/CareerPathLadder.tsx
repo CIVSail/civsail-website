@@ -1,9 +1,18 @@
 'use client';
 
 import React from 'react';
-import { CareerPathEvaluation, UpgradeProgress } from '@/types/career-navigator';
+import {
+  CareerPathEvaluation,
+  UpgradeProgress,
+} from '@/types/career-navigator';
 import { CheckCircle2, Circle, Clock, BookOpen, Ship } from 'lucide-react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
 
@@ -15,15 +24,20 @@ interface CareerPathLadderProps {
 /**
  * Visual ladder showing progression from current to target credential
  */
-export function CareerPathLadder({ evaluation, onStepClick }: CareerPathLadderProps) {
+export function CareerPathLadder({
+  evaluation,
+  onStepClick,
+}: CareerPathLadderProps) {
   const formatCredentialName = (cred: string) => {
     return cred
       .split('_')
-      .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+      .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
       .join(' ');
   };
 
-  const getStepStatus = (step: UpgradeProgress): 'complete' | 'in_progress' | 'not_started' => {
+  const getStepStatus = (
+    step: UpgradeProgress
+  ): 'complete' | 'in_progress' | 'not_started' => {
     if (step.sea_service_percentage >= 100 && step.courses_percentage >= 100) {
       return 'complete';
     }
@@ -40,7 +54,8 @@ export function CareerPathLadder({ evaluation, onStepClick }: CareerPathLadderPr
         <div>
           <h2 className="text-2xl font-bold">Your Career Path</h2>
           <p className="text-muted-foreground mt-1">
-            {formatCredentialName(evaluation.current_credential)} → {formatCredentialName(evaluation.target_credential)}
+            {formatCredentialName(evaluation.current_credential)} →{' '}
+            {formatCredentialName(evaluation.target_credential)}
           </p>
         </div>
         <div className="text-right">
@@ -62,11 +77,14 @@ export function CareerPathLadder({ evaluation, onStepClick }: CareerPathLadderPr
           const isInProgress = status === 'in_progress';
 
           return (
-            <Card 
+            <Card
               key={index}
               className={`cursor-pointer transition-all hover:shadow-md ${
-                isComplete ? 'border-green-500 bg-green-50' : 
-                isInProgress ? 'border-blue-500' : ''
+                isComplete
+                  ? 'border-green-500 bg-green-50'
+                  : isInProgress
+                    ? 'border-blue-500'
+                    : ''
               }`}
               onClick={() => onStepClick(step)}
             >
@@ -76,18 +94,21 @@ export function CareerPathLadder({ evaluation, onStepClick }: CareerPathLadderPr
                     {isComplete ? (
                       <CheckCircle2 className="h-6 w-6 text-green-500" />
                     ) : (
-                      <Circle className={`h-6 w-6 ${isInProgress ? 'text-blue-500' : 'text-gray-300'}`} />
+                      <Circle
+                        className={`h-6 w-6 ${isInProgress ? 'text-blue-500' : 'text-gray-300'}`}
+                      />
                     )}
                     <div>
                       <CardTitle className="text-lg">
-                        {formatCredentialName(step.step.from)} → {formatCredentialName(step.step.to)}
+                        {formatCredentialName(step.step.from)} →{' '}
+                        {formatCredentialName(step.step.to)}
                       </CardTitle>
                       <CardDescription className="text-xs mt-1">
                         {step.step.cfr_section}
                       </CardDescription>
                     </div>
                   </div>
-                  
+
                   {!isComplete && (
                     <Badge variant={isInProgress ? 'default' : 'secondary'}>
                       {isInProgress ? 'In Progress' : 'Not Started'}
@@ -105,16 +126,24 @@ export function CareerPathLadder({ evaluation, onStepClick }: CareerPathLadderPr
                       <span className="font-medium">Sea Service</span>
                     </div>
                     <span className="text-muted-foreground">
-                      {step.sea_service_completed_days} / {step.sea_service_required_days} days
+                      {step.sea_service_completed_days} /{' '}
+                      {step.sea_service_required_days} days
                     </span>
                   </div>
-                  <Progress value={Math.min(100, step.sea_service_percentage)} className="h-2" />
-                  
+                  <Progress
+                    value={Math.min(100, step.sea_service_percentage)}
+                    className="h-2"
+                  />
+
                   {!step.recency_met && (
-                    <p className="text-xs text-amber-600 mt-1">⚠️ Recency requirement not met</p>
+                    <p className="text-xs text-amber-600 mt-1">
+                      ⚠️ Recency requirement not met
+                    </p>
                   )}
                   {!step.tonnage_requirement_met && (
-                    <p className="text-xs text-amber-600 mt-1">⚠️ Need more time on 1600+ GRT vessels</p>
+                    <p className="text-xs text-amber-600 mt-1">
+                      ⚠️ Need more time on 1600+ GRT vessels
+                    </p>
                   )}
                 </div>
 
@@ -126,15 +155,24 @@ export function CareerPathLadder({ evaluation, onStepClick }: CareerPathLadderPr
                       <span className="font-medium">Required Courses</span>
                     </div>
                     <span className="text-muted-foreground">
-                      {step.courses_completed} / {step.courses_required} completed
+                      {step.courses_completed} / {step.courses_required}{' '}
+                      completed
                     </span>
                   </div>
-                  <Progress value={Math.min(100, step.courses_percentage)} className="h-2" />
-                  
+                  <Progress
+                    value={Math.min(100, step.courses_percentage)}
+                    className="h-2"
+                  />
+
                   {step.missing_courses.length > 0 && (
                     <p className="text-xs text-amber-600 mt-1">
-                      Missing: {step.missing_courses.slice(0, 2).map(c => c.display_name).join(', ')}
-                      {step.missing_courses.length > 2 && ` +${step.missing_courses.length - 2} more`}
+                      Missing:{' '}
+                      {step.missing_courses
+                        .slice(0, 2)
+                        .map((c) => c.display_name)
+                        .join(', ')}
+                      {step.missing_courses.length > 2 &&
+                        ` +${step.missing_courses.length - 2} more`}
                     </p>
                   )}
                 </div>
@@ -144,8 +182,9 @@ export function CareerPathLadder({ evaluation, onStepClick }: CareerPathLadderPr
                   <div className="flex items-center gap-2 text-sm text-muted-foreground pt-2 border-t">
                     <Clock className="h-4 w-4" />
                     <span>
-                      ~{step.estimated_days_remaining} days remaining 
-                      ({(step.estimated_days_remaining / 200).toFixed(1)} years at 200 days/year)
+                      ~{step.estimated_days_remaining} days remaining (
+                      {(step.estimated_days_remaining / 200).toFixed(1)} years
+                      at 200 days/year)
                     </span>
                   </div>
                 )}
@@ -153,7 +192,13 @@ export function CareerPathLadder({ evaluation, onStepClick }: CareerPathLadderPr
                 {/* Exam Status */}
                 <div className="text-sm">
                   <span className="font-medium">Exam: </span>
-                  <span className={step.exam_ready ? 'text-green-600' : 'text-muted-foreground'}>
+                  <span
+                    className={
+                      step.exam_ready
+                        ? 'text-green-600'
+                        : 'text-muted-foreground'
+                    }
+                  >
                     {step.exam_notes}
                   </span>
                 </div>

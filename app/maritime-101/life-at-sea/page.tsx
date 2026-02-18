@@ -187,8 +187,7 @@ export default function LifeAtSeaPage() {
           </p>
           <p className="text-lg text-slate-400 mb-8 leading-relaxed max-w-3xl mx-auto">
             Life at sea varies widely depending on the ship, company, route and mission. 
-            Many of the answers below start with &quot;it depends.&quot; That&apos;s not a dodge — 
-            it&apos;s the reality of a global, highly varied industry. This page provides quick, 
+            Many of the answers below start with &quot;it depends.&quot; This page provides quick, 
             honest explanations to common questions and helps set realistic expectations.
           </p>
 
@@ -228,7 +227,7 @@ export default function LifeAtSeaPage() {
           <div className="grid lg:grid-cols-2 gap-8">
             <div className="space-y-6">
               <p className="text-slate-300 leading-relaxed">
-                Life at sea starts with the ship — and ships vary widely. There is no single &quot;mariner experience.&quot;
+                Life at sea starts with the ship and ships vary widely. There is no single &quot;mariner experience.&quot;
               </p>
               <p className="text-slate-300 leading-relaxed">
                 Ships come in many sizes, designs and missions. Oil tankers operate differently than container ships. 
@@ -249,8 +248,8 @@ export default function LifeAtSeaPage() {
                     <h3 className="text-lg font-semibold text-white mb-2">Size Matters</h3>
                     <p className="text-slate-400 text-sm leading-relaxed">
                       Bigger ships move more slowly and steadily. Smaller ships move more sharply and more often. 
-                      Large ocean-going vessels tend to roll gradually and predictably. Smaller vessels — like tugboats, 
-                      fishing boats and some offshore vessels — react more quickly to wind and waves.
+                      Large oceangoing vessels tend to roll gradually and predictably. Smaller vessels — like tugboats, 
+                      fishing boats and some offshore vessels react more quickly to wind and waves.
                     </p>
                   </div>
                 </div>
@@ -486,7 +485,7 @@ export default function LifeAtSeaPage() {
                 <h3 className="text-lg font-semibold text-white mb-3">Mission Changes the Day</h3>
                 <p className="text-slate-400 text-sm">
                   A tanker transiting the ocean is different than discharging cargo. A tug towing offshore 
-                  is different than harbor assist. MSC UNREP operations differ from port loading. 
+                  is different than harbor assist. MSC UNREP operations differ from loading in port. 
                   NOAA research differs from offshore supply work.
                 </p>
                 <p className="text-amber-400 text-sm mt-3 font-medium">
@@ -568,8 +567,8 @@ export default function LifeAtSeaPage() {
               <Card className="p-6 bg-slate-900/50 border-slate-800">
                 <h3 className="text-lg font-semibold text-white mb-3">How Preferences Change</h3>
                 <p className="text-slate-400 text-sm">
-                  Many mariners sail longer rotations when young, save money and build sea time, 
-                  then transition to more predictable schedules — or leave sailing entirely.
+                  Many mariners sail longer rotations while young to save money and build sea time, 
+                  then transition to more predictable schedules or leave sailing entirely.
                 </p>
                 <p className="text-violet-400 text-sm mt-3 font-medium">
                   Rotations shape relationships, finances and long-term plans.
@@ -601,7 +600,7 @@ export default function LifeAtSeaPage() {
           </div>
 
           <p className="text-slate-300 leading-relaxed mb-8 max-w-3xl">
-            Connectivity varies widely. Many ships now use Starlink or similar systems, improving connectivity — but it&apos;s never guaranteed.
+            Connectivity varies widely. Many ships now use Starlink or similar systems, improving connectivity but it&apos;s never guaranteed.
           </p>
 
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -638,7 +637,7 @@ export default function LifeAtSeaPage() {
 
           <div className="mt-6 p-4 bg-cyan-500/10 border border-cyan-500/30 rounded-lg">
             <p className="text-slate-300 text-center">
-              <span className="font-semibold text-white">Reality:</span> Connectivity is better than ever — but never guaranteed.
+              <span className="font-semibold text-white">Reality:</span> Connectivity is better than ever but never guaranteed.
             </p>
           </div>
         </motion.div>
@@ -696,8 +695,8 @@ export default function LifeAtSeaPage() {
               <Card className="p-6 bg-slate-900/50 border-slate-800">
                 <h3 className="text-lg font-semibold text-white mb-3">Social Dynamics</h3>
                 <p className="text-slate-400 text-sm">
-                  If you love your crew, life is great. If there&apos;s one person you can&apos;t stand — 
-                  and every industry has one — confined spaces amplify that.
+                  If you love your crew, life is great. If there&apos;s one person you can&apos;t stand,
+                  it may be difficult and amplified by confined spaces.
                 </p>
               </Card>
 
@@ -710,7 +709,7 @@ export default function LifeAtSeaPage() {
 
               <Card className="p-6 bg-pink-500/10 border-pink-500/30">
                 <p className="text-slate-300 text-sm">
-                  <span className="font-semibold text-white">Bottom line:</span> You don&apos;t have to like everyone — 
+                  <span className="font-semibold text-white">Bottom line:</span> You don&apos;t have to like everyone 
                   but professionalism matters.
                 </p>
               </Card>
@@ -747,7 +746,7 @@ export default function LifeAtSeaPage() {
             <Card className="p-6 bg-slate-900/50 border-slate-800">
               <h3 className="text-lg font-semibold text-white mb-3">Commercial Shipping</h3>
               <p className="text-slate-400 text-sm">
-                Commercial ships often visit interesting places but stay briefly — 8 hours to 2 days is common. 
+                Commercial ships often visit interesting places but stay briefly. 8 hours to 2 days is common. 
                 Liberty depends on operations and watch schedules.
               </p>
             </Card>
@@ -789,7 +788,7 @@ export default function LifeAtSeaPage() {
         >
           <p className="text-xl text-slate-300 mb-4 max-w-3xl mx-auto">
             Life at sea is structured, demanding and highly variable. Understanding the tradeoffs early 
-            helps you choose paths that match your goals — both onboard and ashore.
+            helps you choose paths that match your goals.
           </p>
 
           <h2 className="text-3xl md:text-4xl font-bold text-white mb-12 mt-8">
