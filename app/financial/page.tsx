@@ -683,13 +683,13 @@ export default function FinancialPage() {
             Every rotation you wait is money left on the table. Get your plan
             started before your next hitch.
           </p>
-          <Link
-            href="/contact"
+          <a
+            href="mailto:support@civsail.com"
             className="inline-flex items-center text-emerald-400 hover:text-emerald-300 transition-colors"
           >
             Have questions? Contact us
             <ArrowRight className="ml-2 w-4 h-4" />
-          </Link>
+          </a>
         </div>
       </section>
     </div>

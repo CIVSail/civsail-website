@@ -496,7 +496,7 @@ function buildPopupHtml(props: Record<string, any>): string {
             <path d="M5 12h14M12 5l7 7-7 7"/>
           </svg>
         </a>
-        <a href="/contribute?port=${encodeURIComponent(displayName)}&country=${encodeURIComponent(country)}" class="popup-btn popup-btn-secondary">
+        <a href="mailto:support@civsail.com?subject=Port%20Contribution%3A%20${encodeURIComponent(displayName)}%2C%20${encodeURIComponent(country)}" class="popup-btn popup-btn-secondary">
           Help Improve This Page
         </a>
       </div>
@@ -508,7 +508,7 @@ function buildPopupHtml(props: Record<string, any>): string {
         <strong>Coordinates:</strong><br/>
         ${lat?.toFixed(4)}°${lat >= 0 ? 'N' : 'S'}, ${Math.abs(lng)?.toFixed(4)}°${lng >= 0 ? 'E' : 'W'}
       </div>
-      <a href="/contribute?port=${encodeURIComponent(displayName)}&country=${encodeURIComponent(country)}" class="popup-btn">
+      <a href="mailto:support@civsail.com?subject=Port%20Contribution%3A%20${encodeURIComponent(displayName)}%2C%20${encodeURIComponent(country)}" class="popup-btn">
         Contribute Info
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <path d="M5 12h14M12 5l7 7-7 7"/>

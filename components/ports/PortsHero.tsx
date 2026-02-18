@@ -85,7 +85,7 @@ export default function PortsHero({ counts }: PortsHeroProps) {
           <p className="mt-6 text-sm text-slate-500">
             {counts.none.toLocaleString()} ports need content —{' '}
             <a
-              href="/contribute"
+              href="mailto:support@civsail.com?subject=Port%20Guide%20Contribution"
               className="text-blue-400 hover:text-blue-300 underline underline-offset-2 transition-colors"
             >
               help us build guides

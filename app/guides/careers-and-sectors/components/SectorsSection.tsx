@@ -72,10 +72,10 @@ export function SectorsSection() {
               we'll point you toward a few sectors that match your goals.
             </p>
             <Link
-              href="/#quiz"
+              href="/maritime-101/careers-and-sectors"
               className="inline-block bg-blue-600 text-white font-semibold px-8 py-3 rounded-full hover:bg-blue-700 transition-colors shadow-sm hover:shadow-md"
             >
-              Take the Career Quiz
+              Explore Career Sectors
             </Link>
           </div>
         </ScrollReveal>
