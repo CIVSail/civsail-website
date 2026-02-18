@@ -48,13 +48,13 @@ export default function CareersAndSectorsPage() {
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link
                 href="/signup"
-                className="inline-block bg-white text-blue-800 font-semibold px-8 py-4 rounded-full hover:bg-blue-50 transition-colors shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-transform"
+                className="inline-block bg-blue-600 text-white font-semibold px-8 py-4 rounded-full hover:bg-blue-500 transition-all shadow-lg hover:shadow-xl hover:-translate-y-0.5"
               >
                 Create free account
               </Link>
               <Link
-                href="/guides/maritime-101"
-                className="inline-block bg-white/10 border-2 border-white/30 text-white font-semibold px-8 py-4 rounded-full hover:bg-white/20 transition-colors backdrop-blur-sm"
+                href="/maritime-101"
+                className="inline-block bg-blue-500/20 border-2 border-blue-400/30 text-blue-100 font-semibold px-8 py-4 rounded-full hover:bg-blue-500/30 transition-colors"
               >
                 Start with Maritime 101
               </Link>

@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { FadeIn } from '@/components/FadeIn';
+import { createClient } from '@/lib/supabase/client';
 
 /* ───────────────────────────────────────────
    Pain-point cards for "The maritime world is complex" section
@@ -111,6 +112,27 @@ const FOOTER_LINKS = [
    ═══════════════════════════════════════════ */
 export default function Home() {
   const [email, setEmail] = useState('');
+  const [newsletterStatus, setNewsletterStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
+
+  const handleNewsletterSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!email || !email.includes('@')) {
+      setNewsletterStatus('error');
+      return;
+    }
+    setNewsletterStatus('loading');
+    try {
+      const supabase = createClient();
+      const { error } = await supabase
+        .from('newsletter_subscribers')
+        .insert({ email: email.toLowerCase().trim(), source: 'homepage' });
+      if (error && error.code !== '23505') throw error;
+      setNewsletterStatus('success');
+      setEmail('');
+    } catch {
+      setNewsletterStatus('error');
+    }
+  };
 
   return (
     <div className="font-body text-slate-200 bg-[#0a0f1a] min-h-screen overflow-x-hidden">
@@ -636,21 +658,44 @@ export default function Home() {
             </p>
 
             <div className="bg-white/[0.025] border border-white/[0.07] rounded-xl p-6">
-              <div className="flex flex-col sm:flex-row gap-2">
-                <input
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="your.name@ship-email.com"
-                  className="font-body flex-1 px-[14px] py-3 rounded-lg bg-white/5 border border-white/[0.08] text-slate-100 text-[0.9rem] outline-none focus:border-blue-500/50 transition-colors placeholder:text-white/25"
-                />
-                <button className="font-body bg-blue-600 text-white px-[22px] py-3 rounded-lg border-none font-semibold text-[0.9rem] cursor-pointer whitespace-nowrap tracking-[0.01em] hover:bg-blue-700 transition-colors">
-                  Keep Me Posted
-                </button>
-              </div>
-              <p className="font-body text-[0.76rem] text-white/25 mt-3">
-                Updates only. No spam. Unsubscribe anytime.
-              </p>
+              {newsletterStatus === 'success' ? (
+                <div className="flex items-center justify-center gap-3 py-2">
+                  <svg className="h-5 w-5 text-emerald-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                  </svg>
+                  <p className="font-body text-emerald-300 text-[0.92rem]">
+                    You&apos;re in! We&apos;ll keep you posted.
+                  </p>
+                </div>
+              ) : (
+                <>
+                  <form onSubmit={handleNewsletterSubmit} className="flex flex-col sm:flex-row gap-2">
+                    <input
+                      type="email"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      placeholder="your.name@ship-email.com"
+                      disabled={newsletterStatus === 'loading'}
+                      className="font-body flex-1 px-[14px] py-3 rounded-lg bg-white/5 border border-white/[0.08] text-slate-100 text-[0.9rem] outline-none focus:border-blue-500/50 transition-colors placeholder:text-white/25 disabled:opacity-50"
+                    />
+                    <button
+                      type="submit"
+                      disabled={newsletterStatus === 'loading'}
+                      className="font-body bg-blue-600 text-white px-[22px] py-3 rounded-lg border-none font-semibold text-[0.9rem] cursor-pointer whitespace-nowrap tracking-[0.01em] hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      {newsletterStatus === 'loading' ? 'Subscribing...' : 'Keep Me Posted'}
+                    </button>
+                  </form>
+                  {newsletterStatus === 'error' && (
+                    <p className="font-body text-[0.8rem] text-red-400 mt-2">
+                      Please enter a valid email and try again.
+                    </p>
+                  )}
+                  <p className="font-body text-[0.76rem] text-white/25 mt-3">
+                    Updates only. No spam. Unsubscribe anytime.
+                  </p>
+                </>
+              )}
             </div>
           </FadeIn>
         </div>

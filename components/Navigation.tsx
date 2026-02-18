@@ -900,14 +900,6 @@ export default function Navigation() {
                     </div>
                   </div>
 
-                  <div className="border-t border-gray-100 mt-4 pt-4 px-6">
-                    <Link
-                      href="/network"
-                      className="text-sm font-medium text-blue-600 hover:text-blue-700"
-                    >
-                      Professional Network →
-                    </Link>
-                  </div>
                 </div>
               )}
             </div>

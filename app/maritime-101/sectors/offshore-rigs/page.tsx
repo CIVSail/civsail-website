@@ -6,6 +6,7 @@ import { Building2, ArrowLeft, Clock, DollarSign, Award } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { SectorFeedbackForm } from '@/components/sectors/SectorFeedbackForm';
 
 export default function OffshoreRigsSectorPage() {
   const sector = {
@@ -79,8 +80,10 @@ export default function OffshoreRigsSectorPage() {
             </div>
           </Card>
 
+          <SectorFeedbackForm sectorTitle="Offshore Oil Rigs" />
+
           <Link href="/maritime-101/careers-and-sectors">
-            <Button variant="outline" size="lg" className="border-slate-700 hover:bg-slate-800">
+            <Button size="lg" className="bg-slate-800/50 text-slate-300 border border-slate-700 hover:bg-slate-700">
               <ArrowLeft className="w-4 h-4 mr-2" />
               Back to Careers & Sectors
             </Button>

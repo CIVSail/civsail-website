@@ -226,34 +226,12 @@ export default function MobileNav({ open, setOpen }: MobileNavProps) {
                 >
                   MSC Fleet
                 </Link>
-                <Link
-                  href="/ships/noaa"
-                  onClick={() => setOpen(false)}
-                  className="block py-2 px-3 text-sm text-gray-700 hover:bg-gray-100 rounded transition"
-                >
-                  NOAA Fleet
-                </Link>
-                <Link
-                  href="/ships/deep-sea"
-                  onClick={() => setOpen(false)}
-                  className="block py-2 px-3 text-sm text-gray-700 hover:bg-gray-100 rounded transition"
-                >
-                  Deep Sea
-                </Link>
-                <Link
-                  href="/ships/tug-barge"
-                  onClick={() => setOpen(false)}
-                  className="block py-2 px-3 text-sm text-gray-700 hover:bg-gray-100 rounded transition"
-                >
-                  Tug and Barge
-                </Link>
-                <Link
-                  href="/ships/oil-rig"
-                  onClick={() => setOpen(false)}
-                  className="block py-2 px-3 text-sm text-gray-700 hover:bg-gray-100 rounded transition"
-                >
-                  Oil Rig
-                </Link>
+                <span className="block py-2 px-3 text-sm text-gray-400">
+                  NOAA Fleet <span className="text-xs">(Coming Soon)</span>
+                </span>
+                <span className="block py-2 px-3 text-sm text-gray-400">
+                  Commercial <span className="text-xs">(Coming Soon)</span>
+                </span>
               </div>
             )}
           </div>
@@ -482,13 +460,6 @@ export default function MobileNav({ open, setOpen }: MobileNavProps) {
                   className="block py-2 px-3 text-sm text-gray-700 hover:bg-gray-100 rounded transition"
                 >
                   Retirement
-                </Link>
-                <Link
-                  href="/network"
-                  onClick={() => setOpen(false)}
-                  className="block py-2 px-3 text-sm text-blue-600 font-medium hover:bg-blue-50 rounded transition mt-2"
-                >
-                  Professional Network →
                 </Link>
               </div>
             )}

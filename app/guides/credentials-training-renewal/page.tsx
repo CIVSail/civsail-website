@@ -54,7 +54,7 @@ const CredentialsTrainingRenewal = () => {
         <div className="grid md:grid-cols-3 gap-8 mb-12">
           {/* Credentials Card */}
           <Link
-            href="/guides/credentials"
+            href="/maritime-101/credentials"
             className="section-card bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-2 p-8 group border-l-4 border-red-500"
           >
             <div className="text-6xl mb-6">🆔</div>
@@ -100,7 +100,7 @@ const CredentialsTrainingRenewal = () => {
 
           {/* Training Card */}
           <Link
-            href="/guides/training"
+            href="/maritime-101/training-and-entry"
             className="section-card bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-2 p-8 group border-l-4 border-teal-500"
           >
             <div className="text-6xl mb-6">📚</div>
@@ -145,7 +145,7 @@ const CredentialsTrainingRenewal = () => {
 
           {/* Renewal Card */}
           <Link
-            href="/guides/renewal"
+            href="/maritime-101/credentials"
             className="section-card bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-2 p-8 group border-l-4 border-blue-500"
           >
             <div className="text-6xl mb-6">🔄</div>
@@ -218,25 +218,25 @@ const CredentialsTrainingRenewal = () => {
               TSA TWIC Program
             </a>
             <Link
-              href="/guides/training-providers"
+              href="/maritime-101/training-and-entry"
               className="bg-gradient-to-r from-purple-500 to-purple-600 text-white p-4 rounded-lg hover:from-purple-600 hover:to-purple-700 transition-all hover:-translate-y-1 text-sm font-medium"
             >
               Training Providers Directory
             </Link>
             <Link
-              href="/guides/renewal-calendar"
+              href="/maritime-101/credentials"
               className="bg-gradient-to-r from-purple-500 to-purple-600 text-white p-4 rounded-lg hover:from-purple-600 hover:to-purple-700 transition-all hover:-translate-y-1 text-sm font-medium"
             >
               Renewal Calendar
             </Link>
             <Link
-              href="/tools/cost-calculator"
+              href="/tools"
               className="bg-gradient-to-r from-purple-500 to-purple-600 text-white p-4 rounded-lg hover:from-purple-600 hover:to-purple-700 transition-all hover:-translate-y-1 text-sm font-medium"
             >
               Cost Calculator
             </Link>
             <Link
-              href="/guides/document-checklist"
+              href="/maritime-101/credentials"
               className="bg-gradient-to-r from-purple-500 to-purple-600 text-white p-4 rounded-lg hover:from-purple-600 hover:to-purple-700 transition-all hover:-translate-y-1 text-sm font-medium"
             >
               Document Checklist
