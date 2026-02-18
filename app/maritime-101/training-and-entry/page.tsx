@@ -1,19 +1,14 @@
 'use client';
 
-import { useState, useRef, useEffect, useCallback } from 'react';
-import Image from 'next/image';
+import { useState, useRef } from 'react';
 import Link from 'next/link';
-import { motion, AnimatePresence, useScroll, useInView } from 'framer-motion';
+import { motion, AnimatePresence, useInView } from 'framer-motion';
 import {
   Anchor,
   Wrench,
   GraduationCap,
   Ship,
-  Award,
   ChevronUp,
-  ChevronDown,
-  ChevronLeft,
-  ChevronRight,
   AlertTriangle,
   Info,
   ArrowRight,
@@ -21,13 +16,9 @@ import {
   BookOpen,
   FileCheck,
   Target,
-  Users,
   Shield,
   Zap,
-  MapPin,
-  Building2,
   Compass,
-  Star,
   Sparkles,
 } from 'lucide-react';
 import { Card } from '@/components/ui/card';
@@ -65,183 +56,6 @@ interface Rung {
   note?: string;
 }
 
-interface School {
-  id: string;
-  name: string;
-  location: string;
-  type: 'federal' | 'state' | 'union' | 'independent' | 'workboat';
-  focus: string[];
-  forWhom: string[];
-  notes?: string;
-  highlight?: boolean;
-}
-
-// ============================================================================
-// DATA: MARITIME ACADEMIES (4-year degree programs)
-// ============================================================================
-
-const MARITIME_ACADEMIES: School[] = [
-  {
-    id: 'usmma',
-    name: 'U.S. Merchant Marine Academy',
-    location: 'Kings Point, NY',
-    type: 'federal',
-    focus: ['Federal service academy', 'Dual Deck/Engine options', 'Military obligations'],
-    forWhom: ['Students seeking federal appointment', 'Those willing to serve'],
-    notes: 'Only federal maritime academy. Graduates have service obligations.',
-    highlight: true,
-  },
-  {
-    id: 'cal-maritime',
-    name: 'California State University Maritime Academy',
-    location: 'Vallejo, CA',
-    type: 'state',
-    focus: ['West Coast maritime hub', 'Strong industry connections', 'STEM focus'],
-    forWhom: ['West Coast students', 'Those seeking state university education'],
-    notes: 'Cal Maritime - the West Coast option.',
-  },
-  {
-    id: 'glma',
-    name: 'Great Lakes Maritime Academy',
-    location: 'Traverse City, MI',
-    type: 'state',
-    focus: ['Great Lakes shipping', 'Smaller class sizes', 'Regional focus'],
-    forWhom: ['Great Lakes region students', 'Those preferring smaller programs'],
-    notes: 'Part of Northwestern Michigan College.',
-  },
-  {
-    id: 'mma-maine',
-    name: 'Maine Maritime Academy',
-    location: 'Castine, ME',
-    type: 'state',
-    focus: ['Strong engineering program', 'Training ship cruises', 'Small town setting'],
-    forWhom: ['New England students', 'Engineering-focused mariners'],
-    notes: 'One of the oldest maritime academies.',
-  },
-  {
-    id: 'mass-maritime',
-    name: 'Massachusetts Maritime Academy',
-    location: 'Buzzards Bay, MA',
-    type: 'state',
-    focus: ['Emergency management programs', 'Strong regimental system', 'Cape Cod location'],
-    forWhom: ['New England students', 'Those seeking structured environment'],
-    notes: 'Offers unique emergency management degree.',
-  },
-  {
-    id: 'suny-maritime',
-    name: 'SUNY Maritime College',
-    location: 'Fort Schuyler, NY',
-    type: 'state',
-    focus: ['New York metro access', 'Diverse program offerings', 'Historic fort campus'],
-    forWhom: ['NY/NJ area students', 'Those wanting urban proximity'],
-    notes: 'Located in the Bronx with Manhattan access.',
-  },
-  {
-    id: 'tamug',
-    name: 'Texas A&M Maritime Academy',
-    location: 'Galveston, TX',
-    type: 'state',
-    focus: ['Gulf Coast industry ties', 'Part of Texas A&M system', 'Offshore connections'],
-    forWhom: ['Texas and Gulf Coast students', 'Those seeking A&M network'],
-    notes: 'Part of Texas A&M University at Galveston.',
-  },
-];
-
-// ============================================================================
-// DATA: HAWSEPIPER TRAINING SCHOOLS
-// ============================================================================
-
-const HAWSEPIPER_SCHOOLS: School[] = [
-  // Union-Affiliated
-  {
-    id: 'paul-hall',
-    name: 'Paul Hall Center (SIU)',
-    location: 'Piney Point, MD',
-    type: 'union',
-    focus: ['Entry-level unlicensed', 'AB, QMED, Tankerman', 'Officer upgrading'],
-    forWhom: ['Hawsepipers', 'SIU members', 'Career changers'],
-    notes: 'One of the largest maritime training pipelines in the U.S.',
-    highlight: true,
-  },
-  {
-    id: 'star-center',
-    name: 'STAR Center (AMO)',
-    location: 'Dania Beach, FL',
-    type: 'union',
-    focus: ['Licensed deck & engine officers', 'Unlimited license upgrades', 'Advanced STCW'],
-    forWhom: ['Officer-level mariners', 'Unlimited tonnage pathways'],
-    notes: 'Elite officer training. Not for entry-level.',
-    highlight: true,
-  },
-  {
-    id: 'calhoon-meba',
-    name: 'Calhoon MEBA Engineering School',
-    location: 'Easton, MD',
-    type: 'union',
-    focus: ['Engineering license upgrades', 'Steam, motor, gas turbine', 'Engine-only'],
-    forWhom: ['Hawsepiper engineers', 'Licensed engineers upgrading'],
-    notes: 'One of the most important engineering schools in the U.S.',
-    highlight: true,
-  },
-  // Independent / Commercial
-  {
-    id: 'maritime-institute',
-    name: 'Maritime Institute',
-    location: 'Norfolk, VA',
-    type: 'independent',
-    focus: ['Deck & engine exam prep', 'STCW courses', 'Entry & upgrade training'],
-    forWhom: ['Hawsepipers', 'MSC and commercial mariners', 'Exam prep'],
-    notes: 'Formerly Mid-Atlantic Maritime Academy. Well-known exam prep.',
-  },
-  {
-    id: 'mitags',
-    name: 'MITAGS',
-    location: 'Linthicum Heights, MD & Seattle, WA',
-    type: 'independent',
-    focus: ['Officer license upgrades', 'STCW and advanced navigation', 'Radar, BRM, ECDIS'],
-    forWhom: ['Deck & engine hawsepipers', 'MSC, NOAA, commercial officers'],
-    notes: 'Despite the name, not a college. One of the most widely used upgrade schools.',
-    highlight: true,
-  },
-  {
-    id: 'mpt',
-    name: 'Maritime Professional Training',
-    location: 'Fort Lauderdale, FL',
-    type: 'independent',
-    focus: ['STCW training', 'Yacht, offshore, commercial credentials'],
-    forWhom: ['Yacht sector', 'Offshore and international mariners'],
-    notes: 'Strong STCW catalog. Popular outside union ecosystem.',
-  },
-  {
-    id: 'hmts',
-    name: 'Houston Marine Training Services',
-    location: 'Houston, TX',
-    type: 'independent',
-    focus: ['Tankerman endorsements', 'Offshore and inland credentials'],
-    forWhom: ['Gulf Coast mariners', 'Inland and OSV sectors'],
-    notes: 'Practical, regionally focused training.',
-  },
-  // Tug / Inland / Workboat
-  {
-    id: 'msi',
-    name: 'Maritime Simulation Institute',
-    location: 'Newport, RI',
-    type: 'workboat',
-    focus: ['Towing officer assessments', 'Simulator-based training'],
-    forWhom: ['Tug and barge officers'],
-    notes: 'Highly respected in the towing sector.',
-  },
-  {
-    id: 'nemi',
-    name: 'Northeast Maritime Institute',
-    location: 'Fairhaven, MA',
-    type: 'workboat',
-    focus: ['Workboat credentials', 'Limited tonnage licenses'],
-    forWhom: ['Small vessel operators', 'Regional workboat sector'],
-    notes: 'Strong Northeast presence. Not focused on unlimited tonnage.',
-  },
-];
-
 // ============================================================================
 // DATA: CAREER LADDER RUNGS
 // ============================================================================
@@ -266,9 +80,9 @@ const DECK_RUNGS: Rung[] = [
     subtitle: 'Qualified Deck Rating',
     level: 'rating',
     isLicensed: false,
-    seaTime: { unlimited: '1,080 days (AB Unlimited) or 540 days (AB Limited/Special)', limited: '180 days minimum for AB-Limited' },
+    seaTime: { unlimited: '1,080 days for AB-Unlimited', limited: '540 days (AB-Limited), 360 days (AB-Special), 180 days (AB-OSV)' },
     training: ['Lifeboatman or Lifeboatman-Limited', 'Proficiency in Survival Craft (PSC)', 'Marlinespike Seamanship Demonstration'],
-    exams: { unlimited: ['Navigation and Rules of the Road', 'Deck General/Safety'], limited: ['Navigation and Rules of the Road', 'Deck General/Safety'] },
+    exams: { unlimited: ['Exams required to obtain credential'], limited: ['Exams required to obtain credential'] },
     scope: { unlimited: 'AB-Unlimited: Any vessel on any waters', limited: 'AB-Limited/Special/OSV: Specific vessel types or tonnages' },
     branches: ['AB-Unlimited', 'AB-Limited', 'AB-Special', 'AB-OSV', 'AB-Sail', 'AB-Fishing'],
   },
@@ -280,7 +94,7 @@ const DECK_RUNGS: Rung[] = [
     isLicensed: false,
     seaTime: { unlimited: 'No specific requirement - based on experience', limited: 'No specific requirement - based on experience' },
     training: ['All AB requirements', 'Leadership experience', 'Vessel-specific training'],
-    exams: { unlimited: ['No additional exam - position based'], limited: ['No additional exam - position based'] },
+    exams: { unlimited: ['No additional exam'], limited: ['No additional exam'] },
     scope: { unlimited: 'Supervises unlicensed deck crew', limited: 'Supervises unlicensed deck crew' },
     note: 'Bosun is a leadership position, not a credential. Many make this their career.',
   },
@@ -293,7 +107,7 @@ const DECK_RUNGS: Rung[] = [
     entryPoints: ['academy', 'hawsepipe', 'military'],
     seaTime: { unlimited: '1,080 days total, including specific watchstanding time', limited: '720 days for Mate <1600 GRT' },
     training: ['STCW Basic Training', 'STCW Advanced Firefighting', 'Proficiency in Survival Craft', 'ARPA', 'GMDSS', 'Medical PIC', 'Radar Observer'],
-    exams: { unlimited: ['Rules of the Road (90% passing)', 'Deck General', 'Deck Safety', 'Navigation General', 'Navigation Problems'], limited: ['Rules of the Road (90% passing)', 'Deck General', 'Deck Safety', 'Navigation General', 'Navigation Problems'] },
+    exams: { unlimited: ['Exams required to obtain credential'], limited: ['Exams required to obtain credential'] },
     scope: { unlimited: 'Oceans or Near Coastal, Unlimited Tonnage', limited: 'Near Coastal, <1600 GRT or <500 GRT' },
     note: 'Academy graduates enter here. Hawsepipers reach this after AB sea time + exams.',
   },
@@ -305,9 +119,8 @@ const DECK_RUNGS: Rung[] = [
     isLicensed: true,
     seaTime: { unlimited: '360 days as Third Mate', limited: '360 days as Mate <1600 GRT' },
     training: ['All Third Mate requirements maintained', 'Additional sea time documentation'],
-    exams: { unlimited: ['No additional exam from Third Mate to Second Mate'], limited: ['No additional exam for raise of grade'] },
+    exams: { unlimited: ['No additional exam'], limited: ['No additional exam'] },
     scope: { unlimited: 'Oceans or Near Coastal, Unlimited Tonnage', limited: 'Near Coastal, <1600 GRT' },
-    note: 'Raise of grade requires sea time only - no additional examination.',
   },
   {
     id: 'chief-mate',
@@ -317,7 +130,7 @@ const DECK_RUNGS: Rung[] = [
     isLicensed: true,
     seaTime: { unlimited: '360 days as Second Mate', limited: 'N/A - Limited path goes directly to Master' },
     training: ['All lower license requirements maintained', 'Advanced Stability (recommended)', 'Cargo Operations training'],
-    exams: { unlimited: ['Deck General Part I & II', 'Deck Safety', 'Stability Problems', 'Navigation General', 'Navigation Problems'], limited: ['N/A'] },
+    exams: { unlimited: ['Exams required to obtain credential'], limited: ['N/A'] },
     scope: { unlimited: 'Oceans or Near Coastal, Unlimited Tonnage', limited: 'Limited path does not include Chief Mate' },
   },
   {
@@ -328,7 +141,7 @@ const DECK_RUNGS: Rung[] = [
     isLicensed: true,
     seaTime: { unlimited: '360 days as Chief Mate', limited: '360 days as Mate for Master <1600 GRT' },
     training: ['All lower license requirements maintained', 'Company-specific training', 'Advanced certifications as required'],
-    exams: { unlimited: ['No additional exam from Chief Mate to Master'], limited: ['Deck General', 'Deck Safety', 'Stability Problems', 'Navigation Problems'] },
+    exams: { unlimited: ['No additional exam'], limited: ['Exams required to obtain credential'] },
     scope: { unlimited: 'Master Unlimited: Any tonnage, Oceans worldwide', limited: 'Master <1600 GRT, <500 GRT, <200 GRT, <100 GRT' },
     warning: 'Master 1600 GRT does NOT automatically convert to Third Mate Unlimited. Crossing over requires additional sea time, training, and examination.',
     limitations: ['Master <1600 GRT is tonnage-restricted', 'Route restrictions may apply', 'Not equivalent to unlimited officer progression'],
@@ -357,7 +170,7 @@ const ENGINE_RUNGS: Rung[] = [
     isLicensed: false,
     seaTime: { unlimited: '180 days in engine department for Oiler; varies by rating', limited: '180 days minimum' },
     training: ['Basic Safety Training', 'Rating-specific training courses available'],
-    exams: { unlimited: ['Oiler: Part I & II', 'Fireman-Watertender', 'Electrician', 'Refrigerating Engineer', 'Junior Engineer: Part I & II'], limited: ['Same as unlimited'] },
+    exams: { unlimited: ['Exams required to obtain credential'], limited: ['Exams required to obtain credential'] },
     scope: { unlimited: 'Various specializations available', limited: 'Various specializations available' },
     branches: ['Oiler', 'Fireman-Watertender', 'Electrician-Refrigerating Engineer', 'Machinist-Pumpman', 'Junior Engineer'],
     note: 'Multiple QMED ratings exist. Junior Engineer is often the path to licensed engineer.',
@@ -371,7 +184,7 @@ const ENGINE_RUNGS: Rung[] = [
     entryPoints: ['academy', 'hawsepipe', 'military'],
     seaTime: { unlimited: '1,080 days in engine department, including QMED time', limited: '540 days for DDE or Limited endorsements' },
     training: ['STCW Basic Training', 'STCW Advanced Firefighting', 'Proficiency in Survival Craft', 'Engine Room Resource Management', 'Propulsion plant-specific training'],
-    exams: { unlimited: ['Motor Plants I & II', 'Steam Plants I & II', 'Gas Turbine Plants', 'General Subjects', 'Engineering Safety', 'Electrical/Electronic'], limited: ['Motor Plants', 'General Subjects', 'Engineering Safety', 'Electrical/Electronic'] },
+    exams: { unlimited: ['Exams required to obtain credential'], limited: ['Exams required to obtain credential'] },
     scope: { unlimited: 'Unlimited Horsepower, Steam/Motor/Gas Turbine', limited: 'DDE-1000 HP, DDE-4000 HP, or specific limitations' },
     note: 'Academy graduates enter here. Hawsepipers advance through QMED first.',
   },
@@ -383,9 +196,8 @@ const ENGINE_RUNGS: Rung[] = [
     isLicensed: true,
     seaTime: { unlimited: '360 days as Third Assistant Engineer', limited: '360 days as Assistant Engineer-Limited' },
     training: ['All Third A/E requirements maintained', 'Continued professional development'],
-    exams: { unlimited: ['No additional exam from 3rd A/E to 2nd A/E'], limited: ['No additional exam for raise of grade'] },
+    exams: { unlimited: ['No additional exam'], limited: ['No additional exam'] },
     scope: { unlimited: 'Unlimited Horsepower', limited: 'Limited by original endorsement' },
-    note: 'Raise of grade requires sea time only.',
   },
   {
     id: 'first-ae',
@@ -395,7 +207,7 @@ const ENGINE_RUNGS: Rung[] = [
     isLicensed: true,
     seaTime: { unlimited: '360 days as Second Assistant Engineer', limited: 'N/A - Limited path structure differs' },
     training: ['All lower license requirements maintained', 'Management-level competencies'],
-    exams: { unlimited: ['General Subjects I & II', 'Steam Plants', 'Motor Plants', 'Gas Turbine Plants', 'Engineering Safety', 'Electrical/Electronic'], limited: ['N/A'] },
+    exams: { unlimited: ['Exams required to obtain credential'], limited: ['N/A'] },
     scope: { unlimited: 'Unlimited Horsepower, all plant types as endorsed', limited: 'Limited path uses Chief Engineer-Limited structure' },
   },
   {
@@ -406,7 +218,7 @@ const ENGINE_RUNGS: Rung[] = [
     isLicensed: true,
     seaTime: { unlimited: '360 days as First Assistant Engineer', limited: '360 days as Assistant Engineer-Limited for CE-Limited' },
     training: ['All lower license requirements maintained', 'Company-specific training', 'Management certifications as required'],
-    exams: { unlimited: ['No additional exam from 1st A/E to Chief'], limited: ['General Subjects', 'Motor/Steam/Gas Turbine Plants', 'Engineering Safety', 'Electrical/Electronic'] },
+    exams: { unlimited: ['No additional exam'], limited: ['Exams required to obtain credential'] },
     scope: { unlimited: 'Chief Engineer Unlimited: Any horsepower, all plant types', limited: 'Chief Engineer-Limited: Horsepower restricted' },
     warning: 'Limited propulsion or horsepower licenses do NOT automatically convert to unlimited. Crossover requires additional sea time, training, and examination.',
     limitations: ['CE-Limited is horsepower-restricted', 'DDE licenses have specific HP limits', 'Plant type limitations may apply'],
@@ -532,145 +344,6 @@ function CharacterCard({
         </span>
       </div>
     </motion.button>
-  );
-}
-
-// School Carousel Component
-function SchoolCarousel({ schools, type }: { schools: School[]; type: 'academy' | 'training' }) {
-  const [currentIndex, setCurrentIndex] = useState(0);
-  const [direction, setDirection] = useState(0);
-
-  const slideVariants = {
-    enter: (direction: number) => ({
-      x: direction > 0 ? 300 : -300,
-      opacity: 0,
-    }),
-    center: {
-      zIndex: 1,
-      x: 0,
-      opacity: 1,
-    },
-    exit: (direction: number) => ({
-      zIndex: 0,
-      x: direction < 0 ? 300 : -300,
-      opacity: 0,
-    }),
-  };
-
-  const paginate = (newDirection: number) => {
-    setDirection(newDirection);
-    setCurrentIndex((prev) => {
-      let next = prev + newDirection;
-      if (next < 0) next = schools.length - 1;
-      if (next >= schools.length) next = 0;
-      return next;
-    });
-  };
-
-  const school = schools[currentIndex];
-  const typeColors: Record<string, { bg: string; border: string; text: string }> = {
-    federal: { bg: 'bg-blue-500/20', border: 'border-blue-500/40', text: 'text-blue-400' },
-    state: { bg: 'bg-cyan-500/20', border: 'border-cyan-500/40', text: 'text-cyan-400' },
-    union: { bg: 'bg-amber-500/20', border: 'border-amber-500/40', text: 'text-amber-400' },
-    independent: { bg: 'bg-violet-500/20', border: 'border-violet-500/40', text: 'text-violet-400' },
-    workboat: { bg: 'bg-emerald-500/20', border: 'border-emerald-500/40', text: 'text-emerald-400' },
-  };
-
-  const colors = typeColors[school.type];
-
-  return (
-    <div className="relative">
-      {/* Navigation Arrows */}
-      <button
-        onClick={() => paginate(-1)}
-        className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-4 z-10 p-2 bg-slate-900 border border-slate-700 rounded-full hover:bg-slate-800 transition-colors"
-      >
-        <ChevronLeft className="w-5 h-5 text-slate-400" />
-      </button>
-      <button
-        onClick={() => paginate(1)}
-        className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-4 z-10 p-2 bg-slate-900 border border-slate-700 rounded-full hover:bg-slate-800 transition-colors"
-      >
-        <ChevronRight className="w-5 h-5 text-slate-400" />
-      </button>
-
-      {/* Card */}
-      <div className="overflow-hidden px-8">
-        <AnimatePresence initial={false} custom={direction} mode="wait">
-          <motion.div
-            key={currentIndex}
-            custom={direction}
-            variants={slideVariants}
-            initial="enter"
-            animate="center"
-            exit="exit"
-            transition={{ x: { type: 'spring', stiffness: 300, damping: 30 }, opacity: { duration: 0.2 } }}
-          >
-            <Card className={`p-6 ${colors.bg} border ${colors.border}`}>
-              <div className="flex items-start justify-between mb-4">
-                <div>
-                  <div className="flex items-center gap-2 mb-1">
-                    {school.highlight && <Star className="w-4 h-4 text-yellow-400 fill-yellow-400" />}
-                    <Badge className={`${colors.bg} ${colors.text} border ${colors.border} text-xs`}>
-                      {school.type === 'federal' ? 'Federal Academy' : 
-                       school.type === 'state' ? 'State Academy' :
-                       school.type === 'union' ? 'Union-Affiliated' :
-                       school.type === 'workboat' ? 'Workboat / Tug' : 'Independent'}
-                    </Badge>
-                  </div>
-                  <h4 className="text-xl font-bold text-white">{school.name}</h4>
-                  <div className="flex items-center gap-1.5 text-slate-400 text-sm mt-1">
-                    <MapPin className="w-3.5 h-3.5" />
-                    <span>{school.location}</span>
-                  </div>
-                </div>
-              </div>
-
-              <div className="grid md:grid-cols-2 gap-4 mb-4">
-                <div>
-                  <div className="text-xs text-slate-500 uppercase tracking-wide mb-1">Focus Areas</div>
-                  <ul className="text-sm text-slate-300 space-y-0.5">
-                    {school.focus.map((f, i) => (
-                      <li key={i}>• {f}</li>
-                    ))}
-                  </ul>
-                </div>
-                <div>
-                  <div className="text-xs text-slate-500 uppercase tracking-wide mb-1">Best For</div>
-                  <ul className="text-sm text-slate-300 space-y-0.5">
-                    {school.forWhom.map((w, i) => (
-                      <li key={i}>• {w}</li>
-                    ))}
-                  </ul>
-                </div>
-              </div>
-
-              {school.notes && (
-                <p className="text-xs text-slate-400 italic border-t border-slate-700/50 pt-3">
-                  {school.notes}
-                </p>
-              )}
-            </Card>
-          </motion.div>
-        </AnimatePresence>
-      </div>
-
-      {/* Dots */}
-      <div className="flex justify-center gap-2 mt-4">
-        {schools.map((_, idx) => (
-          <button
-            key={idx}
-            onClick={() => {
-              setDirection(idx > currentIndex ? 1 : -1);
-              setCurrentIndex(idx);
-            }}
-            className={`w-2 h-2 rounded-full transition-all ${
-              idx === currentIndex ? 'bg-white w-6' : 'bg-slate-600 hover:bg-slate-500'
-            }`}
-          />
-        ))}
-      </div>
-    </div>
   );
 }
 
@@ -963,7 +636,7 @@ export default function TrainingAndEntryPage() {
             Training & Career Entry
           </h1>
           <p className="text-xl text-slate-300 mb-4">
-            One system. Multiple entry points. Very different paths.
+            One system. Multiple entry points. Different paths.
           </p>
           <p className="text-slate-400 max-w-2xl mx-auto">
             How you enter the maritime industry should be guided by where you want to end up.
@@ -980,7 +653,7 @@ export default function TrainingAndEntryPage() {
           className="text-center mb-8"
         >
           <h2 className="text-2xl md:text-3xl font-bold text-white mb-3">Choose Your Path</h2>
-          <p className="text-slate-400">Select your entry point to see the relevant schools and career progression</p>
+          <p className="text-slate-400">Select your entry point to see the relevant career progression, or dive deeper into each path</p>
         </motion.div>
 
         {/* Character Cards */}
@@ -1029,145 +702,77 @@ export default function TrainingAndEntryPage() {
           />
         </div>
 
-        {/* ========== DYNAMIC CONTENT BASED ON SELECTION ========== */}
+        {/* ========== PATH SUMMARY + LEARN MORE ========== */}
         <AnimatePresence mode="wait">
-          {/* ACADEMY SELECTED */}
           {selectedPath === 'academy' && (
             <motion.div
-              key="academy-content"
+              key="academy-summary"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -20 }}
               transition={{ duration: 0.3 }}
+              className="max-w-2xl mx-auto mb-8"
             >
-              <div className="mb-8">
-                <div className="flex items-center justify-center gap-3 mb-4">
-                  <GraduationCap className="w-6 h-6 text-blue-400" />
-                  <h3 className="text-xl font-bold text-white">U.S. Maritime Academies</h3>
+              <Link href="/maritime-101/training-and-entry/academy" className="block">
+                <div className="relative p-6 rounded-2xl bg-blue-500/10 border border-blue-500/30 hover:border-blue-400/50 transition-all duration-300 shadow-lg shadow-blue-500/10 hover:shadow-xl hover:shadow-blue-500/20 text-center group">
+                  <div className="absolute inset-0 rounded-2xl bg-blue-500/5 blur-xl -z-10" />
+                  <p className="text-slate-300 mb-3">
+                    Four-year degree programs that include Coast Guard–approved curricula, training ship sea time,
+                    and direct licensure upon graduation. 7 academies across the U.S.
+                  </p>
+                  <span className="inline-flex items-center gap-1.5 text-blue-400 group-hover:text-blue-300 font-semibold transition-colors">
+                    All 7 academies, timelines, and what to expect <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                  </span>
                 </div>
-                <p className="text-slate-400 text-center max-w-2xl mx-auto mb-6">
-                  Four-year degree programs that include Coast Guard-approved curricula, training ship sea time, 
-                  and direct licensure upon graduation. Academy graduates enter the career ladder at the officer level.
-                </p>
-                <SchoolCarousel schools={MARITIME_ACADEMIES} type="academy" />
-              </div>
+              </Link>
             </motion.div>
           )}
 
-          {/* HAWSEPIPE SELECTED */}
           {selectedPath === 'hawsepipe' && (
             <motion.div
-              key="hawsepipe-content"
+              key="hawsepipe-summary"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -20 }}
               transition={{ duration: 0.3 }}
+              className="max-w-2xl mx-auto mb-8"
             >
-              {/* Hawsepipe Definition */}
-              <div className="p-6 bg-amber-500/10 border border-amber-500/30 rounded-xl mb-8">
-                <div className="flex items-start gap-4">
-                  <div className="p-3 bg-amber-500/20 border border-amber-500/40 rounded-lg">
-                    <Anchor className="w-6 h-6 text-amber-400" />
-                  </div>
-                  <div>
-                    <h3 className="text-lg font-bold text-white mb-2">What "Hawsepiping" Actually Means</h3>
-                    <p className="text-slate-300 mb-3">
-                      Hawsepiping is advancing from unlicensed to licensed roles by accumulating sea time, 
-                      completing required training, and passing Coast Guard exams — often while actively working.
-                    </p>
-                    <p className="text-slate-400 text-sm mb-3">
-                      <strong className="text-white">Hawsepiping does not mean avoiding school.</strong> Most hawsepipers 
-                      attend maritime training schools as they advance. The difference is they work between courses 
-                      rather than completing a degree program first.
-                    </p>
-                    <p className="text-slate-500 text-xs italic">
-                      The term comes from sailors boarding ships via the hawsepipe (anchor chain opening) rather than 
-                      the gangway — learning the ship from the deck up.
-                    </p>
-                  </div>
+              <Link href="/maritime-101/training-and-entry/hawsepipe" className="block">
+                <div className="relative p-6 rounded-2xl bg-amber-500/10 border border-amber-500/30 hover:border-amber-400/50 transition-all duration-300 shadow-lg shadow-amber-500/10 hover:shadow-xl hover:shadow-amber-500/20 text-center group">
+                  <div className="absolute inset-0 rounded-2xl bg-amber-500/5 blur-xl -z-10" />
+                  <p className="text-slate-300 mb-3">
+                    Start working immediately, earn while you learn, and advance through sea time + training + exams.
+                    No degree required. Most hawsepipers attend training schools between ship assignments.
+                  </p>
+                  <span className="inline-flex items-center gap-1.5 text-amber-400 group-hover:text-amber-300 font-semibold transition-colors">
+                    Step-by-step guide, training schools, and economics <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                  </span>
                 </div>
-              </div>
-
-              {/* Training Schools Carousel */}
-              <div className="mb-8">
-                <div className="flex items-center justify-center gap-3 mb-4">
-                  <Building2 className="w-6 h-6 text-amber-400" />
-                  <h3 className="text-xl font-bold text-white">Maritime Training Schools</h3>
-                </div>
-                <p className="text-slate-400 text-center max-w-2xl mx-auto mb-6">
-                  These are training institutions, not four-year colleges. They provide Coast Guard–approved courses, 
-                  exam prep, STCW training, and license upgrades for hawsepipers, career switchers, and upgrading officers.
-                </p>
-                <SchoolCarousel schools={HAWSEPIPER_SCHOOLS} type="training" />
-              </div>
+              </Link>
             </motion.div>
           )}
 
-          {/* MILITARY SELECTED */}
           {selectedPath === 'military' && (
             <motion.div
-              key="military-content"
+              key="military-summary"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -20 }}
               transition={{ duration: 0.3 }}
+              className="max-w-2xl mx-auto mb-8"
             >
-              <div className="p-6 bg-emerald-500/10 border border-emerald-500/30 rounded-xl mb-8">
-                <div className="flex items-start gap-4">
-                  <div className="p-3 bg-emerald-500/20 border border-emerald-500/40 rounded-lg">
-                    <Shield className="w-6 h-6 text-emerald-400" />
-                  </div>
-                  <div>
-                    <h3 className="text-lg font-bold text-white mb-2">Military to Mariner Pathway</h3>
-                    <p className="text-slate-300 mb-3">
-                      Military sea service may be credited toward merchant mariner credentials. The Coast Guard 
-                      evaluates military experience under CFR regulations on a case-by-case basis.
-                    </p>
-                    
-                    <div className="grid md:grid-cols-2 gap-4 mb-4">
-                      <div className="p-3 bg-slate-900/50 rounded-lg">
-                        <h4 className="text-sm font-semibold text-emerald-300 mb-2">What May Be Credited</h4>
-                        <ul className="text-xs text-slate-300 space-y-1">
-                          <li>• Sea time on military vessels</li>
-                          <li>• Engineering watch time</li>
-                          <li>• Navigation/deck watch time</li>
-                          <li>• Military training courses (some)</li>
-                        </ul>
-                      </div>
-                      <div className="p-3 bg-slate-900/50 rounded-lg">
-                        <h4 className="text-sm font-semibold text-amber-300 mb-2">Important Notes</h4>
-                        <ul className="text-xs text-slate-300 space-y-1">
-                          <li>• Credits are NOT automatic</li>
-                          <li>• Documentation is essential</li>
-                          <li>• Some exams still required</li>
-                          <li>• STCW training typically needed</li>
-                        </ul>
-                      </div>
-                    </div>
-                    
-                    <p className="text-slate-400 text-sm">
-                      <strong className="text-white">Entry point varies:</strong> Depending on your military role, 
-                      vessel type, and documented experience, you may enter anywhere from entry-level ratings 
-                      to licensed officer positions.
-                    </p>
-                  </div>
+              <Link href="/maritime-101/training-and-entry/military" className="block">
+                <div className="relative p-6 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 hover:border-emerald-400/50 transition-all duration-300 shadow-lg shadow-emerald-500/10 hover:shadow-xl hover:shadow-emerald-500/20 text-center group">
+                  <div className="absolute inset-0 rounded-2xl bg-emerald-500/5 blur-xl -z-10" />
+                  <p className="text-slate-300 mb-3">
+                    Military sea service may be credited toward merchant mariner credentials. The Coast Guard
+                    evaluates experience on a case-by-case basis. Entry point varies by role and documentation.
+                  </p>
+                  <span className="inline-flex items-center gap-1.5 text-emerald-400 group-hover:text-emerald-300 font-semibold transition-colors">
+                    Credit evaluation, documentation, and entry points by branch <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                  </span>
                 </div>
-              </div>
-
-              {/* MSC Note */}
-              <div className="p-4 bg-slate-900/50 border border-slate-700 rounded-xl mb-8">
-                <div className="flex items-start gap-3">
-                  <Ship className="w-5 h-5 text-slate-400 flex-shrink-0 mt-0.5" />
-                  <div>
-                    <h4 className="text-sm font-bold text-white mb-1">Military Sealift Command (MSC)</h4>
-                    <p className="text-xs text-slate-400">
-                      MSC operates as a civilian-crewed naval auxiliary. Veterans often find MSC a natural transition 
-                      point, combining military familiarity with civilian mariner credentials. MSC positions require 
-                      the same Coast Guard credentials as commercial shipping.
-                    </p>
-                  </div>
-                </div>
-              </div>
+              </Link>
             </motion.div>
           )}
         </AnimatePresence>
@@ -1185,25 +790,67 @@ export default function TrainingAndEntryPage() {
         >
           <Badge className="mb-4 bg-slate-800 text-slate-300 border-slate-700">The Ladder</Badge>
           <h2 className="text-2xl md:text-3xl font-bold text-white mb-3">
-            {selectedPath === 'academy' ? 'Officer Career Progression' : 
+            {selectedPath === 'academy' ? 'Officer Career Progression' :
              selectedPath === 'hawsepipe' ? 'Full Career Ladder' :
              'Career Progression (Variable Entry)'}
           </h2>
-          <p className="text-slate-400 max-w-2xl mx-auto mb-6">
-            {selectedPath === 'academy' 
+          <p className="text-slate-400 max-w-2xl mx-auto mb-4">
+            {selectedPath === 'academy'
               ? 'Academy graduates enter at the licensed officer level. Your degree and sea time get you here.'
               : selectedPath === 'hawsepipe'
               ? 'Start from the bottom, climb every rung. This is the full hawsepiper journey.'
               : 'Military experience determines your entry point. The ladder shows the full progression.'}
           </p>
+          <p className="text-slate-500 text-sm max-w-2xl mx-auto mb-8">
+            This ladder covers <strong className="text-slate-300">Deck</strong> and <strong className="text-slate-300">Engine</strong> department positions — the two core shipboard departments found on every vessel. Specialized endorsements (tankerman, towing, DP, etc.) branch off from specific rungs and are listed below the ladder.
+          </p>
+
+          {/* Info Callouts */}
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 max-w-4xl mx-auto mb-8 text-left">
+            {/* Sea Days Explainer */}
+            <div className="p-4 bg-slate-900/50 border border-slate-700 rounded-xl">
+              <div className="flex items-center gap-2 mb-2">
+                <Clock className="w-4 h-4 text-blue-400" />
+                <span className="text-sm font-semibold text-white">What Are "Sea Days"?</span>
+              </div>
+              <p className="text-xs text-slate-400">
+                Sea days are days of <strong className="text-slate-300">documented sea service</strong> — actual time aboard a vessel, not calendar days. A mariner working 6 months on / 6 months off earns roughly 180 sea days per year.
+              </p>
+            </div>
+
+            {/* Unlimited vs Limited Explainer */}
+            <div className="p-4 bg-slate-900/50 border border-slate-700 rounded-xl">
+              <div className="flex items-center gap-2 mb-2">
+                <Compass className="w-4 h-4 text-blue-400" />
+                <span className="text-sm font-semibold text-white">Unlimited vs. Limited</span>
+              </div>
+              <p className="text-xs text-slate-400">
+                <strong className="text-slate-300">Unlimited</strong> credentials have no tonnage or horsepower restrictions — valid for any size vessel. <strong className="text-slate-300">Limited</strong> credentials are restricted by vessel size (GRT) or engine power (HP) and route.
+              </p>
+            </div>
+
+            {/* Universal Requirements Link */}
+            <div className="p-4 bg-slate-900/50 border border-slate-700 rounded-xl sm:col-span-2 lg:col-span-1">
+              <div className="flex items-center gap-2 mb-2">
+                <FileCheck className="w-4 h-4 text-blue-400" />
+                <span className="text-sm font-semibold text-white">Universal Requirements</span>
+              </div>
+              <p className="text-xs text-slate-400 mb-2">
+                Every mariner needs a TWIC card, medical certificate, passport, and drug testing — regardless of position or department.
+              </p>
+              <Link href="/maritime-101/credentials" className="text-xs text-blue-400 hover:text-blue-300 font-medium inline-flex items-center gap-1">
+                View all on Credentials & Licensing <ArrowRight className="w-3 h-3" />
+              </Link>
+            </div>
+          </div>
 
           {/* Unlimited / Limited Toggle */}
           <div className="inline-flex items-center gap-2 p-1 bg-slate-900 border border-slate-700 rounded-full">
             <button
               onClick={() => setShowUnlimited(true)}
               className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${
-                showUnlimited 
-                  ? 'bg-blue-600 text-white' 
+                showUnlimited
+                  ? 'bg-blue-600 text-white'
                   : 'text-slate-400 hover:text-white'
               }`}
             >
@@ -1212,18 +859,18 @@ export default function TrainingAndEntryPage() {
             <button
               onClick={() => setShowUnlimited(false)}
               className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${
-                !showUnlimited 
-                  ? 'bg-amber-600 text-white' 
+                !showUnlimited
+                  ? 'bg-amber-600 text-white'
                   : 'text-slate-400 hover:text-white'
               }`}
             >
               Limited
             </button>
           </div>
-          
+
           {!showUnlimited && (
             <p className="text-amber-400 text-sm mt-3">
-              ⚠️ Viewing Limited pathway — note restrictions and non-transferability warnings
+              Viewing Limited pathway — note restrictions and non-transferability warnings
             </p>
           )}
         </motion.div>
@@ -1351,7 +998,7 @@ export default function TrainingAndEntryPage() {
               </Button>
             </Link>
             <Link href="/maritime-101/credentials">
-              <Button size="lg" variant="outline" className="border-slate-600 text-slate-300 hover:bg-slate-800">
+              <Button size="lg" className="bg-blue-600 hover:bg-blue-700">
                 View Credential Requirements
                 <ArrowRight className="w-4 h-4 ml-2" />
               </Button>
