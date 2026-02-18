@@ -163,29 +163,35 @@ export default function Home() {
             <div className="relative flex gap-4 flex-wrap justify-center">
               {/* Shared glow backdrop */}
               <div
-                className="absolute inset-0 -inset-x-8 -inset-y-4 rounded-3xl blur-2xl opacity-40 pointer-events-none"
+                className="absolute inset-0 -inset-x-6 -inset-y-3 rounded-2xl blur-xl opacity-25 pointer-events-none"
                 style={{
                   background:
-                    'radial-gradient(ellipse 80% 100% at 50% 50%, rgba(37,99,235,0.35), transparent 70%)',
+                    'radial-gradient(ellipse 70% 80% at 50% 50%, rgba(37,99,235,0.3), transparent 65%)',
                 }}
               />
               <Link
                 href="/ships"
-                className="relative font-body bg-blue-600 text-white px-12 py-[13px] rounded-[9px] text-[0.92rem] font-semibold shadow-[0_4px_24px_rgba(37,99,235,0.45),0_0px_60px_rgba(37,99,235,0.15)] tracking-[0.01em] hover:bg-blue-500 hover:shadow-[0_4px_32px_rgba(37,99,235,0.6),0_0px_80px_rgba(37,99,235,0.25)] transition-all duration-300"
+                className="relative font-body bg-blue-600 text-white px-12 py-[13px] rounded-[9px] text-[0.92rem] font-semibold shadow-[0_2px_12px_rgba(37,99,235,0.35),0_0px_30px_rgba(37,99,235,0.1)] tracking-[0.01em] hover:bg-blue-500 hover:shadow-[0_2px_16px_rgba(37,99,235,0.5),0_0px_40px_rgba(37,99,235,0.15)] transition-all duration-300"
               >
                 Ships
               </Link>
               <Link
                 href="/ports"
-                className="relative font-body bg-blue-600 text-white px-12 py-[13px] rounded-[9px] text-[0.92rem] font-semibold shadow-[0_4px_24px_rgba(37,99,235,0.45),0_0px_60px_rgba(37,99,235,0.15)] tracking-[0.01em] hover:bg-blue-500 hover:shadow-[0_4px_32px_rgba(37,99,235,0.6),0_0px_80px_rgba(37,99,235,0.25)] transition-all duration-300"
+                className="relative font-body bg-blue-600 text-white px-12 py-[13px] rounded-[9px] text-[0.92rem] font-semibold shadow-[0_2px_12px_rgba(37,99,235,0.35),0_0px_30px_rgba(37,99,235,0.1)] tracking-[0.01em] hover:bg-blue-500 hover:shadow-[0_2px_16px_rgba(37,99,235,0.5),0_0px_40px_rgba(37,99,235,0.15)] transition-all duration-300"
               >
                 Ports
               </Link>
               <Link
                 href="/editorials/soundings"
-                className="relative font-body bg-blue-600 text-white px-12 py-[13px] rounded-[9px] text-[0.92rem] font-semibold shadow-[0_4px_24px_rgba(37,99,235,0.45),0_0px_60px_rgba(37,99,235,0.15)] tracking-[0.01em] hover:bg-blue-500 hover:shadow-[0_4px_32px_rgba(37,99,235,0.6),0_0px_80px_rgba(37,99,235,0.25)] transition-all duration-300"
+                className="relative font-body bg-blue-600 text-white px-12 py-[13px] rounded-[9px] text-[0.92rem] font-semibold shadow-[0_2px_12px_rgba(37,99,235,0.35),0_0px_30px_rgba(37,99,235,0.1)] tracking-[0.01em] hover:bg-blue-500 hover:shadow-[0_2px_16px_rgba(37,99,235,0.5),0_0px_40px_rgba(37,99,235,0.15)] transition-all duration-300"
               >
                 Articles
+              </Link>
+              <Link
+                href="/maritime-101"
+                className="relative font-body bg-blue-600 text-white px-12 py-[13px] rounded-[9px] text-[0.92rem] font-semibold shadow-[0_2px_12px_rgba(37,99,235,0.35),0_0px_30px_rgba(37,99,235,0.1)] tracking-[0.01em] hover:bg-blue-500 hover:shadow-[0_2px_16px_rgba(37,99,235,0.5),0_0px_40px_rgba(37,99,235,0.15)] transition-all duration-300"
+              >
+                Maritime 101
               </Link>
             </div>
           </FadeIn>

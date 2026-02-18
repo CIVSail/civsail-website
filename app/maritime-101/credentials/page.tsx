@@ -1086,8 +1086,7 @@ export default function CredentialsPage() {
               <Link href="/maritime-101/training-and-entry">
                 <Button
                   size="lg"
-                  variant="outline"
-                  className="border-slate-600 text-slate-300 hover:bg-slate-800"
+                  className="bg-blue-500/20 text-blue-400 border border-blue-500/50 hover:bg-blue-500/30"
                 >
                   Explore Training Paths
                   <ArrowRight className="w-4 h-4 ml-2" />

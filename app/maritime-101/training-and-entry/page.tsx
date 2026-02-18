@@ -998,7 +998,7 @@ export default function TrainingAndEntryPage() {
               </Button>
             </Link>
             <Link href="/maritime-101/credentials">
-              <Button size="lg" className="bg-blue-600 hover:bg-blue-700">
+              <Button size="lg" className="bg-blue-500/20 text-blue-400 border border-blue-500/50 hover:bg-blue-500/30">
                 View Credential Requirements
                 <ArrowRight className="w-4 h-4 ml-2" />
               </Button>
