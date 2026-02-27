@@ -521,14 +521,19 @@ export default function OnboardingPage() {
         </div>
 
         {/* Skip Option */}
-        <div className="text-center mt-6">
-          <button
-            onClick={() => router.push('/dashboard')}
-            className="text-sm text-gray-500 hover:text-gray-700"
-          >
+        {currentStep > 1 && (
+          <div className="text-center mt-6">
+            <button
+              onClick={(e) => {
+                setCurrentStep(3);
+                handleSubmit(e);
+              }}
+              className="text-sm text-gray-500 hover:text-gray-700"
+            >
             Skip for now →
           </button>
         </div>
+        )}
       </div>
     </div>
   );
