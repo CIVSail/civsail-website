@@ -6,6 +6,7 @@
  * Styled for dark theme to match the globe visualization.
  */
 
+import Link from 'next/link';
 import { MapPin, Globe, Compass } from 'lucide-react';
 import { PortFilterCounts } from '@/types/ports';
 
@@ -84,12 +85,12 @@ export default function PortsHero({ counts }: PortsHeroProps) {
         {counts.none > 0 && (
           <p className="mt-6 text-sm text-slate-500">
             {counts.none.toLocaleString()} ports need content —{' '}
-            <a
-              href="mailto:support@civsail.com?subject=Port%20Guide%20Contribution"
+            <Link
+              href="/ports/submit"
               className="text-blue-400 hover:text-blue-300 underline underline-offset-2 transition-colors"
             >
               help us build guides
-            </a>
+            </Link>
           </p>
         )}
       </div>
