@@ -282,22 +282,13 @@ export default function Navigation() {
                   </a>
                 </div>
 
-                {/* Auth Button - Dynamic based on login state */}
-                {user ? (
-                  <Link
-                    href="/dashboard"
-                    className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg transition-colors font-medium"
-                  >
-                    Dashboard
-                  </Link>
-                ) : (
-                  <Link
-                    href="/login"
-                    className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg transition-colors font-medium"
-                  >
-                    Sign In
-                  </Link>
-                )}
+                {/* Auth Button - Portal coming soon */}
+                <Link
+                  href="/portal"
+                  className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg transition-colors font-medium"
+                >
+                  Portal
+                </Link>
               </div>
             </div>
           </div>
@@ -904,15 +895,13 @@ export default function Navigation() {
               )}
             </div>
 
-            {/* Shop - External Link */}
-            <a
-              href="https://civsail.com/products"
+            {/* Marketplace */}
+            <Link
+              href="/marketplace"
               className="text-gray-700 hover:text-blue-600 transition-colors font-medium"
-              target="_blank"
-              rel="noopener noreferrer"
             >
-              Shop
-            </a>
+              Marketplace
+            </Link>
           </nav>
 
           {/* Mobile Menu Button - Larger touch target */}

@@ -29,30 +29,20 @@ export async function updateSession(request: NextRequest) {
     }
   );
 
-  // Refresh session if expired
+  // Refresh session if expired — keep for when portal goes live
   const {
-    data: { user },
+    data: { user: _user },
   } = await supabase.auth.getUser();
 
-  // Protected routes - redirect to login if not authenticated
-  if (
-    !user &&
-    (request.nextUrl.pathname.startsWith('/dashboard') ||
-      request.nextUrl.pathname.startsWith('/onboarding'))
-  ) {
-    const url = request.nextUrl.clone();
-    url.pathname = '/login';
-    return NextResponse.redirect(url);
-  }
+  // Portal lockdown: redirect all auth-related routes to the portal coming-soon page
+  const lockedPaths = ['/dashboard', '/onboarding', '/login', '/signup', '/reset-password'];
+  const isLocked = lockedPaths.some((p) =>
+    request.nextUrl.pathname === p || request.nextUrl.pathname.startsWith(p + '/')
+  );
 
-  // Redirect to dashboard if already logged in and visiting auth pages
-  if (
-    user &&
-    (request.nextUrl.pathname === '/login' ||
-      request.nextUrl.pathname === '/signup')
-  ) {
+  if (isLocked) {
     const url = request.nextUrl.clone();
-    url.pathname = '/dashboard';
+    url.pathname = '/portal';
     return NextResponse.redirect(url);
   }
 

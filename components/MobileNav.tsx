@@ -465,31 +465,23 @@ export default function MobileNav({ open, setOpen }: MobileNavProps) {
             )}
           </div>
 
-          {/* Shop */}
-          <a
-            href="https://civsail.com/products"
-            target="_blank"
-            rel="noopener noreferrer"
+          {/* Marketplace */}
+          <Link
+            href="/marketplace"
+            onClick={() => setOpen(false)}
             className="py-3 px-4 text-base font-medium text-gray-700 hover:bg-gray-100 rounded transition"
           >
-            Shop
-          </a>
+            Marketplace
+          </Link>
 
-          {/* Auth buttons */}
+          {/* Auth button - Portal coming soon */}
           <div className="border-t border-gray-100 mt-4 pt-4">
             <Link
-              href="/dashboard"
+              href="/portal"
               onClick={() => setOpen(false)}
               className="block py-3 px-4 text-center bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition"
             >
-              Dashboard
-            </Link>
-            <Link
-              href="/login"
-              onClick={() => setOpen(false)}
-              className="block py-3 px-4 mt-2 text-center border-2 border-blue-600 text-blue-600 hover:bg-blue-50 rounded-lg font-medium transition"
-            >
-              Sign In
+              Portal
             </Link>
           </div>
         </nav>
