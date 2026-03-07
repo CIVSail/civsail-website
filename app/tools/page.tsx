@@ -10,9 +10,21 @@ import {
 } from 'lucide-react';
 import ToolDisclaimer from '@/components/tools/ToolDisclaimer';
 
-export const metadata = {
+import { Metadata } from 'next';
+
+export const metadata: Metadata = {
   title: 'Tools | CIVSail',
-  description: 'Interactive tools for CIVMARs - calculators, generators, and more.',
+  description:
+    'Interactive tools for MSC CIVMARs — pay calculators, leave chit generator, travel claim builder, and pay comparison across ship classes.',
+  openGraph: {
+    title: 'Tools | CIVSail',
+    description:
+      'Pay calculators, leave chit generator, travel claims, and more for MSC mariners.',
+    url: 'https://civsail.com/tools',
+  },
+  alternates: {
+    canonical: 'https://civsail.com/tools',
+  },
 };
 
 const tools = [
