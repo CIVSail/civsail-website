@@ -35,17 +35,52 @@ const dmSans = DM_Sans({
 });
 
 export const metadata: Metadata = {
-  title: 'CIVSail — One Hub for Your Life as a Mariner',
+  title: {
+    default: 'CIVSail — Tools, Guides & Career Resources for U.S. Merchant Mariners',
+    template: '%s | CIVSail',
+  },
   description:
-    'Tools, intelligence, and career infrastructure for U.S. merchant mariners. Ship guides, port pages, pay calculators, and career resources — all in one place.',
+    'CIVSail is the leading career platform for U.S. merchant mariners and MSC CIVMARs. Pay calculators, ship class guides, interactive port maps, credential tracking, Maritime 101 career guides, and tools built by mariners for mariners. Covers Military Sealift Command, commercial shipping, NOAA, tugboats, offshore, and all sectors of the U.S. Merchant Marine.',
+  keywords: [
+    'merchant mariner',
+    'CIVMAR',
+    'MSC',
+    'Military Sealift Command',
+    'mariner pay calculator',
+    'ship class guide',
+    'port guide',
+    'maritime career',
+    'merchant marine',
+    'USCG credentials',
+    'MMC',
+    'STCW',
+    'TWIC',
+    'sea time',
+    'maritime jobs',
+    'mariner tools',
+    'CIVSail',
+  ],
   openGraph: {
-    title: 'CIVSail — One Hub for Your Life as a Mariner',
+    type: 'website',
+    siteName: 'CIVSail',
+    title: 'CIVSail — Tools, Guides & Career Resources for U.S. Merchant Mariners',
     description:
-      'Tools, intelligence, and career infrastructure for U.S. merchant mariners.',
+      'Pay calculators, ship class guides, interactive port maps, and career resources for MSC CIVMARs and all U.S. merchant mariners.',
     url: 'https://civsail.com',
+    locale: 'en_US',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'CIVSail — Tools & Career Resources for U.S. Merchant Mariners',
+    description:
+      'Pay calculators, ship class guides, port maps, and career resources for MSC CIVMARs and all U.S. merchant mariners.',
   },
   alternates: {
     canonical: 'https://civsail.com',
+  },
+  robots: {
+    index: true,
+    follow: true,
   },
 };
 
@@ -54,8 +89,61 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const jsonLd = {
+    '@context': 'https://schema.org',
+    '@graph': [
+      {
+        '@type': 'WebSite',
+        '@id': 'https://civsail.com/#website',
+        url: 'https://civsail.com',
+        name: 'CIVSail',
+        description:
+          'Tools, guides, and career resources for U.S. merchant mariners and MSC CIVMARs.',
+        potentialAction: {
+          '@type': 'SearchAction',
+          target: 'https://civsail.com/search?q={search_term_string}',
+          'query-input': 'required name=search_term_string',
+        },
+      },
+      {
+        '@type': 'Organization',
+        '@id': 'https://civsail.com/#organization',
+        name: 'CIVSail',
+        url: 'https://civsail.com',
+        description:
+          'CIVSail is an independent, mariner-first platform providing pay calculators, ship class guides, port maps, credential tools, and career resources for U.S. merchant mariners. Built by mariners, for mariners. Covers MSC CIVMARs, commercial shipping, NOAA, tugboats, offshore, and all sectors of the U.S. Merchant Marine.',
+        sameAs: [],
+        knowsAbout: [
+          'U.S. Merchant Marine',
+          'Military Sealift Command',
+          'CIVMAR careers',
+          'Maritime credentials',
+          'MMC',
+          'STCW',
+          'TWIC',
+          'Merchant mariner pay',
+          'Ship class guides',
+          'Port guides for mariners',
+          'Maritime career paths',
+          'Sea time tracking',
+          'Commercial shipping careers',
+          'Tugboat careers',
+          'Offshore maritime careers',
+          'NOAA Corps',
+          'Maritime training and licensing',
+        ],
+      },
+    ],
+  };
+
   return (
     <html lang="en">
+      <head>
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        />
+      </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} ${dmSerif.variable} ${sora.variable} ${dmSans.variable} antialiased`}
       >

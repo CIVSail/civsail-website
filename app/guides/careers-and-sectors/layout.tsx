@@ -1,12 +1,12 @@
 import { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'Careers & Sectors Guide | CIVSail',
+  title: 'Maritime Careers & Sectors Guide — Compare Every Path',
   description:
-    'Comprehensive guide to maritime career sectors: compare pay, lifestyle, rotation, advancement, and entry requirements across the entire industry.',
+    'Interactive guide to maritime career sectors: compare pay, lifestyle, time at home, rotation schedules, advancement speed, and entry requirements across MSC, commercial deep sea, tugboats, offshore, cruise, ferries, barges, yachts, pilots, and more. Find the right sector for your priorities and credentials.',
   openGraph: {
-    title: 'Careers & Sectors Guide | CIVSail',
-    description: 'Compare maritime career sectors — pay, rotation, and how to get started.',
+    title: 'Maritime Careers & Sectors Guide | CIVSail',
+    description: 'Compare every maritime career sector — pay, rotation, lifestyle, and how to get started.',
     url: 'https://civsail.com/guides/careers-and-sectors',
   },
   alternates: { canonical: 'https://civsail.com/guides/careers-and-sectors' },

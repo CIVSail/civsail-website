@@ -1,13 +1,13 @@
 import { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'Ships | CIVSail',
+  title: 'Ship Class Guides — MSC & Merchant Marine Vessels',
   description:
-    'Explore ship class guides with pay rates, life aboard, deployment patterns, and crew-sourced details across MSC, commercial, and government fleets.',
+    'Detailed guides to MSC and merchant marine ship classes: T-AKE, T-AO, T-AOE, T-AH, T-EPF, ESB, LCC, and more. Pay rates by position, crew sizes, berthing, deployment patterns, and honest crew-sourced details on what life is actually like aboard each class. Built for CIVMARs and U.S. merchant mariners.',
   openGraph: {
-    title: 'Ships | CIVSail',
+    title: 'Ship Class Guides — MSC & Merchant Marine Vessels | CIVSail',
     description:
-      'Ship class guides with pay, life aboard, and crew-sourced details for U.S. merchant mariners.',
+      'Crew-sourced guides to MSC ship classes: pay rates, life aboard, deployment patterns, and what to expect on T-AKE, T-AO, T-AOE, and more.',
     url: 'https://civsail.com/ships',
   },
   alternates: {

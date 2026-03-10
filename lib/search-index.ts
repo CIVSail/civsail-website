@@ -238,7 +238,7 @@ export const SEARCH_INDEX: SearchEntry[] = [
   {
     title: 'T-AS Class',
     description: 'Submarine tenders — supporting submarine operations.',
-    url: '/ships/msc/t-as',
+    url: '/ships/msc/as',
     category: 'Ships',
     keywords: ['T-AS', 'submarine', 'tender', 'support'],
   },

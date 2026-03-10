@@ -1,13 +1,13 @@
 import { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'What Is the Merchant Marine? | CIVSail',
+  title: 'What Is the U.S. Merchant Marine? — Explained for Beginners',
   description:
-    'An introduction to the U.S. Merchant Marine: what it is, who sails, what the work looks like, and why it matters to national defense and global trade.',
+    'What is the U.S. Merchant Marine? A clear explanation of civilian maritime careers: who merchant mariners are, what they do, the difference between the Merchant Marine and the Navy, how ships support global trade and national defense, major employers (MSC, commercial lines, tugboats, offshore), and why this career path exists. Written for prospective mariners, families, and career changers.',
   openGraph: {
-    title: 'What Is the Merchant Marine? | CIVSail',
+    title: 'What Is the U.S. Merchant Marine? | CIVSail',
     description:
-      'Learn what the U.S. Merchant Marine is, who sails, and why it matters.',
+      'What the Merchant Marine is, who sails, the difference from the Navy, and why it matters to national defense and global trade.',
     url: 'https://civsail.com/maritime-101/what-is-merchant-marine',
   },
   alternates: {
