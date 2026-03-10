@@ -76,13 +76,6 @@ export default function RegionLandingPage({
   const inProgressPorts = ports.filter((p) => p.status === 'coming-soon').length;
   const progressPercentage = totalPorts > 0 ? (completePorts / totalPorts) * 100 : 0;
 
-  // Email subjects
-  const shareIntelSubject = `Port Intel for ${regionName} Region`;
-  const shareIntelBody = `I'd like to share information about a port in ${regionName}:%0D%0A%0D%0APort Name:%0D%0AWhat I'd like to share:%0D%0A`;
-
-  const suggestPortSubject = `Suggest New Port in ${regionName}`;
-  const suggestPortBody = `I'd like to suggest adding this port to ${regionName}:%0D%0A%0D%0APort Name:%0D%0ACountry:%0D%0AWhy this port matters:%0D%0A`;
-
   // Navigate to port page
   const navigateToPort = (countrySlug: string, portSlug: string) => {
     router.push(`/ports/${regionSlug}/${countrySlug}/${portSlug}`);
@@ -252,20 +245,20 @@ export default function RegionLandingPage({
             </p>
 
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <a
-                href={`mailto:support@civsail.com?subject=${encodeURIComponent(shareIntelSubject)}&body=${shareIntelBody}`}
+              <Link
+                href="/ports/submit"
                 className="inline-flex items-center justify-center gap-2 bg-white text-blue-600 hover:bg-blue-50 px-8 py-4 rounded-lg font-semibold transition-colors shadow-lg"
               >
                 <Send className="w-5 h-5" />
                 Share Port Intel
-              </a>
-              <a
-                href={`mailto:support@civsail.com?subject=${encodeURIComponent(suggestPortSubject)}&body=${suggestPortBody}`}
+              </Link>
+              <Link
+                href="/ports/submit"
                 className="inline-flex items-center justify-center gap-2 bg-blue-700 hover:bg-blue-800 text-white px-8 py-4 rounded-lg font-semibold transition-colors border-2 border-white/20"
               >
                 <Send className="w-5 h-5" />
                 Suggest a New Port
-              </a>
+              </Link>
             </div>
           </div>
         </div>

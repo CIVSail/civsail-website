@@ -47,6 +47,30 @@ export interface Profile {
   academy_program: string | null;
   military_branch: string | null;
   sea_days_per_year: number;
+
+  // Onboarding revamp fields (added 2026-03-06)
+
+  // Maritime sector — governs which tools/content are shown.
+  // Enum: 'civmar' | 'conmar' | 'noaa' | 'commercial_deep_sea' | 'offshore_rigs' |
+  //       'offshore_supply' | 'tugboats' | 'barges' | 'ferries' | 'cruise' |
+  //       'yachts' | 'fishing' | 'pilots' | 'not_sailing'
+  sector: string | null;
+
+  // Department within sector. Required for CIVMARs.
+  // Enum: 'deck' | 'engine' | 'steward'
+  department: string | null;
+
+  // Free-text contracting company name. Only for CONMAR users.
+  contracting_company: string | null;
+
+  // User's self-declared career track (the "intent" layer NMC data can't provide).
+  // Enum: 'licensed_deck' | 'licensed_engine' | 'unlicensed_deck' | 'unlicensed_engine' |
+  //       'steward' | 'cadet' | 'not_sure' | 'other'
+  career_track: string | null;
+
+  // Set when the user completes onboarding. NULL = onboarding not finished.
+  // Dashboard access is gated on this being non-null.
+  onboarding_completed_at: string | null;
 }
 
 export interface Credential {

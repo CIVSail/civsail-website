@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
@@ -12,21 +12,21 @@ import { searchIndex, type SearchEntry } from '@/lib/search-index';
 // Category → color mapping for search result badges
 const CATEGORY_COLORS: Record<string, string> = {
   'Maritime 101': 'bg-blue-100 text-blue-700',
-  'Sectors': 'bg-emerald-100 text-emerald-700',
-  'Tools': 'bg-amber-100 text-amber-700',
-  'Ships': 'bg-slate-200 text-slate-700',
-  'Ports': 'bg-purple-100 text-purple-700',
-  'Editorials': 'bg-pink-100 text-pink-700',
+  Sectors: 'bg-emerald-100 text-emerald-700',
+  Tools: 'bg-amber-100 text-amber-700',
+  Ships: 'bg-slate-200 text-slate-700',
+  Ports: 'bg-purple-100 text-purple-700',
+  Editorials: 'bg-pink-100 text-pink-700',
   'MSC Hub': 'bg-indigo-100 text-indigo-700',
-  'Professional': 'bg-teal-100 text-teal-700',
-  'About': 'bg-gray-100 text-gray-600',
+  Professional: 'bg-teal-100 text-teal-700',
+  About: 'bg-gray-100 text-gray-600',
 };
 
 export default function Navigation() {
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [user, setUser] = useState<User | null>(null);
-  const supabase = createClient();
+  const supabase = useMemo(() => createClient(), []);
 
   // Search state
   const router = useRouter();
@@ -54,51 +54,61 @@ export default function Navigation() {
   }, []);
 
   // Navigate to a search result
-  const handleSelect = useCallback((url: string) => {
-    setSearchQuery('');
-    setSearchResults([]);
-    setIsSearchOpen(false);
-    setMobileSearchOpen(false);
-    router.push(url);
-  }, [router]);
+  const handleSelect = useCallback(
+    (url: string) => {
+      setSearchQuery('');
+      setSearchResults([]);
+      setIsSearchOpen(false);
+      setMobileSearchOpen(false);
+      router.push(url);
+    },
+    [router]
+  );
 
   // Keyboard navigation for search results
-  const handleSearchKeyDown = useCallback((e: React.KeyboardEvent) => {
-    if (!isSearchOpen || searchResults.length === 0) {
-      if (e.key === 'Escape') {
-        setIsSearchOpen(false);
-        setMobileSearchOpen(false);
-        inputRef.current?.blur();
-        mobileInputRef.current?.blur();
-      }
-      return;
-    }
-
-    switch (e.key) {
-      case 'ArrowDown':
-        e.preventDefault();
-        setSelectedIndex((prev) => (prev < searchResults.length - 1 ? prev + 1 : 0));
-        break;
-      case 'ArrowUp':
-        e.preventDefault();
-        setSelectedIndex((prev) => (prev > 0 ? prev - 1 : searchResults.length - 1));
-        break;
-      case 'Enter':
-        e.preventDefault();
-        if (selectedIndex >= 0) {
-          handleSelect(searchResults[selectedIndex].url);
-        } else if (searchResults.length > 0) {
-          handleSelect(searchResults[0].url);
+  const handleSearchKeyDown = useCallback(
+    (e: React.KeyboardEvent) => {
+      if (!isSearchOpen || searchResults.length === 0) {
+        if (e.key === 'Escape') {
+          setIsSearchOpen(false);
+          setMobileSearchOpen(false);
+          inputRef.current?.blur();
+          mobileInputRef.current?.blur();
         }
-        break;
-      case 'Escape':
-        setIsSearchOpen(false);
-        setMobileSearchOpen(false);
-        inputRef.current?.blur();
-        mobileInputRef.current?.blur();
-        break;
-    }
-  }, [isSearchOpen, searchResults, selectedIndex, handleSelect]);
+        return;
+      }
+
+      switch (e.key) {
+        case 'ArrowDown':
+          e.preventDefault();
+          setSelectedIndex((prev) =>
+            prev < searchResults.length - 1 ? prev + 1 : 0
+          );
+          break;
+        case 'ArrowUp':
+          e.preventDefault();
+          setSelectedIndex((prev) =>
+            prev > 0 ? prev - 1 : searchResults.length - 1
+          );
+          break;
+        case 'Enter':
+          e.preventDefault();
+          if (selectedIndex >= 0) {
+            handleSelect(searchResults[selectedIndex].url);
+          } else if (searchResults.length > 0) {
+            handleSelect(searchResults[0].url);
+          }
+          break;
+        case 'Escape':
+          setIsSearchOpen(false);
+          setMobileSearchOpen(false);
+          inputRef.current?.blur();
+          mobileInputRef.current?.blur();
+          break;
+      }
+    },
+    [isSearchOpen, searchResults, selectedIndex, handleSelect]
+  );
 
   // Close search dropdown when clicking outside
   useEffect(() => {
@@ -116,9 +126,12 @@ export default function Navigation() {
   }, []);
 
   useEffect(() => {
-    // Get initial session
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setUser(session?.user ?? null);
+    let isMounted = true;
+
+    // getUser validates auth with Supabase and avoids stale local session state
+    supabase.auth.getUser().then(({ data, error }) => {
+      if (!isMounted) return;
+      setUser(error ? null : (data.user ?? null));
     });
 
     // Listen for auth changes
@@ -128,7 +141,10 @@ export default function Navigation() {
       setUser(session?.user ?? null);
     });
 
-    return () => subscription.unsubscribe();
+    return () => {
+      isMounted = false;
+      subscription.unsubscribe();
+    };
   }, [supabase]);
 
   const handleDropdownToggle = (dropdownName: string) => {
@@ -167,7 +183,9 @@ export default function Navigation() {
                     type="text"
                     value={searchQuery}
                     onChange={(e) => handleSearchChange(e.target.value)}
-                    onFocus={() => { if (searchQuery.trim()) setIsSearchOpen(true); }}
+                    onFocus={() => {
+                      if (searchQuery.trim()) setIsSearchOpen(true);
+                    }}
                     onKeyDown={handleSearchKeyDown}
                     placeholder="Search guides, tools, ports..."
                     className="w-80 pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
@@ -188,7 +206,7 @@ export default function Navigation() {
 
                   {/* Search Results Dropdown */}
                   {isSearchOpen && (
-                    <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-200 rounded-lg shadow-lg overflow-hidden z-[60]">
+                    <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-200 rounded-lg shadow-lg overflow-hidden z-60">
                       {searchResults.length > 0 ? (
                         <ul>
                           {searchResults.map((result, i) => (
@@ -197,24 +215,35 @@ export default function Navigation() {
                                 onClick={() => handleSelect(result.url)}
                                 onMouseEnter={() => setSelectedIndex(i)}
                                 className={`w-full text-left px-4 py-3 flex items-start gap-3 transition-colors ${
-                                  i === selectedIndex ? 'bg-blue-50' : 'hover:bg-gray-50'
+                                  i === selectedIndex
+                                    ? 'bg-blue-50'
+                                    : 'hover:bg-gray-50'
                                 }`}
                               >
-                                <span className={`shrink-0 mt-0.5 text-xs font-medium px-2 py-0.5 rounded-full ${
-                                  CATEGORY_COLORS[result.category] || 'bg-gray-100 text-gray-600'
-                                }`}>
+                                <span
+                                  className={`shrink-0 mt-0.5 text-xs font-medium px-2 py-0.5 rounded-full ${
+                                    CATEGORY_COLORS[result.category] ||
+                                    'bg-gray-100 text-gray-600'
+                                  }`}
+                                >
                                   {result.category}
                                 </span>
                                 <div className="min-w-0">
-                                  <div className="text-sm font-medium text-gray-900 truncate">{result.title}</div>
-                                  <div className="text-xs text-gray-500 truncate">{result.description}</div>
+                                  <div className="text-sm font-medium text-gray-900 truncate">
+                                    {result.title}
+                                  </div>
+                                  <div className="text-xs text-gray-500 truncate">
+                                    {result.description}
+                                  </div>
                                 </div>
                               </button>
                             </li>
                           ))}
                         </ul>
                       ) : (
-                        <div className="px-4 py-3 text-sm text-gray-500">No results found</div>
+                        <div className="px-4 py-3 text-sm text-gray-500">
+                          No results found
+                        </div>
                       )}
                     </div>
                   )}
@@ -306,7 +335,10 @@ export default function Navigation() {
 
       {/* Mobile Search Panel */}
       {mobileSearchOpen && (
-        <div ref={mobileSearchRef} className="md:hidden border-b border-gray-200 bg-white px-4 py-3">
+        <div
+          ref={mobileSearchRef}
+          className="md:hidden border-b border-gray-200 bg-white px-4 py-3"
+        >
           <div className="relative">
             <input
               ref={mobileInputRef}
@@ -342,24 +374,35 @@ export default function Navigation() {
                       <button
                         onClick={() => handleSelect(result.url)}
                         className={`w-full text-left px-4 py-3 flex items-start gap-3 transition-colors ${
-                          i === selectedIndex ? 'bg-blue-50' : 'hover:bg-gray-50'
+                          i === selectedIndex
+                            ? 'bg-blue-50'
+                            : 'hover:bg-gray-50'
                         }`}
                       >
-                        <span className={`shrink-0 mt-0.5 text-xs font-medium px-2 py-0.5 rounded-full ${
-                          CATEGORY_COLORS[result.category] || 'bg-gray-100 text-gray-600'
-                        }`}>
+                        <span
+                          className={`shrink-0 mt-0.5 text-xs font-medium px-2 py-0.5 rounded-full ${
+                            CATEGORY_COLORS[result.category] ||
+                            'bg-gray-100 text-gray-600'
+                          }`}
+                        >
                           {result.category}
                         </span>
                         <div className="min-w-0">
-                          <div className="text-sm font-medium text-gray-900 truncate">{result.title}</div>
-                          <div className="text-xs text-gray-500 truncate">{result.description}</div>
+                          <div className="text-sm font-medium text-gray-900 truncate">
+                            {result.title}
+                          </div>
+                          <div className="text-xs text-gray-500 truncate">
+                            {result.description}
+                          </div>
                         </div>
                       </button>
                     </li>
                   ))}
                 </ul>
               ) : (
-                <div className="px-4 py-3 text-sm text-gray-500">No results found</div>
+                <div className="px-4 py-3 text-sm text-gray-500">
+                  No results found
+                </div>
               )}
             </div>
           )}
@@ -899,7 +942,6 @@ export default function Navigation() {
                       </Link>
                     </div>
                   </div>
-
                 </div>
               )}
             </div>
@@ -941,7 +983,11 @@ export default function Navigation() {
       </div>
 
       {/* Mobile Navigation Drawer */}
-      <MobileNav open={mobileMenuOpen} setOpen={setMobileMenuOpen} />
+      <MobileNav
+        open={mobileMenuOpen}
+        setOpen={setMobileMenuOpen}
+        user={user}
+      />
     </header>
   );
 }

@@ -14,6 +14,8 @@
 
 import { Metadata } from 'next';
 import { Suspense } from 'react';
+import Link from 'next/link';
+import { Send } from 'lucide-react';
 import { fetchAllPorts, calculateFilterCounts } from '@/lib/ports/queries';
 import { PortFilterOption } from '@/types/ports';
 import PortsHero from '@/components/ports/PortsHero';
@@ -95,11 +97,18 @@ export default async function AllPortsPage({ searchParams }: PageProps) {
         />
       </Suspense>
 
-      {/* Help text */}
+      {/* Help text + contribution CTA */}
       <section className="max-w-7xl mx-auto px-4 pb-16 text-center">
-        <p className="text-slate-500 text-sm">
-          Click a port marker to see details • Scroll to zoom • Drag to rotate
+        <p className="text-slate-500 text-sm mb-6">
+          Click a port marker to see details &bull; Scroll to zoom &bull; Drag to rotate
         </p>
+        <Link
+          href="/ports/submit"
+          className="inline-flex items-center gap-2 px-6 py-3 bg-blue-600/20 hover:bg-blue-600/30 border border-blue-500/30 text-blue-400 hover:text-blue-300 rounded-lg text-sm font-medium transition-colors"
+        >
+          <Send className="w-4 h-4" />
+          Share port tips or suggest a new guide
+        </Link>
       </section>
     </main>
   );

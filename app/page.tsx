@@ -68,10 +68,10 @@ const STATUS_COLORS = {
    Contribution cards
    ─────────────────────────────────────────── */
 const CONTRIBUTION_CARDS = [
-  { icon: '📸', title: 'Ship Photos', desc: 'Rooms, gyms, mess decks, common areas — the stuff people want to see before they sign on.', cta: 'Send photos →' },
-  { icon: '🗺️', title: 'Port Tips', desc: 'Where to eat, what to do, how to get around. Your knowledge helps the next crew that pulls in.', cta: 'Share a tip →' },
-  { icon: '🚢', title: 'Ship Info & Corrections', desc: 'Ops details, crew culture, life aboard — or corrections to existing pages. If you sailed it, you know it best.', cta: 'Contribute info →' },
-  { icon: '💼', title: 'Work With Mariners?', desc: 'If you have a product or service mariners need — financial, legal, gear, training — let\'s talk about how to get it in front of them.', cta: 'Reach out →' },
+  { icon: '📸', title: 'Ship Photos', desc: 'Rooms, gyms, mess decks, common areas — the stuff people want to see before they sign on.', cta: 'Send photos →', href: 'mailto:support@civsail.com' },
+  { icon: '🗺️', title: 'Port Tips', desc: 'Where to eat, what to do, how to get around. Your knowledge helps the next crew that pulls in.', cta: 'Share a tip →', href: '/ports/submit' },
+  { icon: '🚢', title: 'Ship Info & Corrections', desc: 'Ops details, crew culture, life aboard — or corrections to existing pages. If you sailed it, you know it best.', cta: 'Contribute info →', href: 'mailto:support@civsail.com' },
+  { icon: '💼', title: 'Work With Mariners?', desc: 'If you have a product or service mariners need — financial, legal, gear, training — let\'s talk about how to get it in front of them.', cta: 'Reach out →', href: 'mailto:support@civsail.com' },
 ];
 
 /* ───────────────────────────────────────────
@@ -503,22 +503,33 @@ export default function Home() {
                       <p className="font-body text-[0.82rem] text-white/45 leading-[1.7] mb-[14px]">
                         {item.desc}
                       </p>
-                      <a
-                        href="mailto:support@civsail.com"
-                        className="font-body text-yellow-400 text-[0.82rem] font-semibold hover:text-yellow-300 transition-colors"
-                      >
-                        {item.cta}
-                      </a>
+                      {item.href.startsWith('/') ? (
+                        <Link
+                          href={item.href}
+                          className="font-body text-yellow-400 text-[0.82rem] font-semibold hover:text-yellow-300 transition-colors"
+                        >
+                          {item.cta}
+                        </Link>
+                      ) : (
+                        <a
+                          href={item.href}
+                          className="font-body text-yellow-400 text-[0.82rem] font-semibold hover:text-yellow-300 transition-colors"
+                        >
+                          {item.cta}
+                        </a>
+                      )}
                     </div>
                   ))}
                 </div>
 
                 <p className="font-body text-[0.78rem] text-white/[0.28] mt-5 text-center">
                   Email contributions to{' '}
-                  <span className="text-white/45">
-                    support@civsail.com
-                  </span>{' '}
-                  — all contributors are credited.
+                  <span className="text-white/45">support@civsail.com</span>
+                  {' '}or{' '}
+                  <Link href="/ports/submit" className="text-white/45 hover:text-white/60 underline underline-offset-2 transition-colors">
+                    use the port submission form
+                  </Link>
+                  {' '}— all contributors are credited.
                 </p>
               </div>
             </div>

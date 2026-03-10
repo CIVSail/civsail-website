@@ -3,13 +3,15 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { Menu, X, ChevronDown, ChevronRight } from 'lucide-react';
+import { User } from '@supabase/supabase-js';
 
 interface MobileNavProps {
   open: boolean;
   setOpen: (open: boolean) => void;
+  user: User | null;
 }
 
-export default function MobileNav({ open, setOpen }: MobileNavProps) {
+export default function MobileNav({ open, setOpen, user }: MobileNavProps) {
   const [expandedSection, setExpandedSection] = useState<string | null>(null);
 
   // Reset expanded sections when menu closes
@@ -147,7 +149,7 @@ export default function MobileNav({ open, setOpen }: MobileNavProps) {
               </div>
             )}
           </div>
-{/* Tools - Expandable */}
+          {/* Tools - Expandable */}
           <div>
             <button
               onClick={() => toggleSection('tools')}
@@ -478,18 +480,11 @@ export default function MobileNav({ open, setOpen }: MobileNavProps) {
           {/* Auth buttons */}
           <div className="border-t border-gray-100 mt-4 pt-4">
             <Link
-              href="/dashboard"
+              href={user ? '/dashboard' : '/login'}
               onClick={() => setOpen(false)}
               className="block py-3 px-4 text-center bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition"
             >
-              Dashboard
-            </Link>
-            <Link
-              href="/login"
-              onClick={() => setOpen(false)}
-              className="block py-3 px-4 mt-2 text-center border-2 border-blue-600 text-blue-600 hover:bg-blue-50 rounded-lg font-medium transition"
-            >
-              Sign In
+              {user ? 'Dashboard' : 'Sign In'}
             </Link>
           </div>
         </nav>

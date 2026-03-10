@@ -6,8 +6,6 @@ import { createClient } from '@/lib/supabase/client';
 import CredentialModal from './CredentialModal';
 import {
   getCredentialDisplayInfo,
-  getDepartmentIcon,
-  getDepartmentName,
   getQualificationBadgeColor,
   getQualificationLevelName,
 } from '@/lib/utils/credential-display';
@@ -32,12 +30,28 @@ interface Credential {
 interface CredentialsTabProps {
   userId: string;
   nmcVerifiedAt?: string | null;
+  hasMmc?: boolean;
+  refNumber?: string | null;
+  lastName?: string | null;
 }
 
-export default function CredentialsTab({ userId, nmcVerifiedAt }: CredentialsTabProps) {
+export default function CredentialsTab({
+  userId,
+  nmcVerifiedAt,
+  hasMmc = false,
+  refNumber,
+  lastName,
+}: CredentialsTabProps) {
   const [credentials, setCredentials] = useState<Credential[]>([]);
   const [loading, setLoading] = useState(true);
-  const [selectedCredential, setSelectedCredential] = useState<Credential | null>(null);
+  const [selectedCredential, setSelectedCredential] =
+    useState<Credential | null>(null);
+  const [reverifyStatus, setReverifyStatus] = useState<
+    'idle' | 'checking' | 'done' | 'no_change'
+  >('idle');
+  const [reverifyMessage, setReverifyMessage] = useState('');
+  // Track credential IDs present before the re-verify so we can highlight new ones after
+  const [preReverifyIds, setPreReverifyIds] = useState<Set<string>>(new Set());
   const supabase = createClient();
 
   useEffect(() => {
@@ -49,7 +63,7 @@ export default function CredentialsTab({ userId, nmcVerifiedAt }: CredentialsTab
       .from('credentials')
       .select('*')
       .eq('user_id', userId)
-      .order('rank', { ascending: false }) // Highest rank first
+      .order('rank', { ascending: false })
       .order('endorsement_name', { ascending: true });
 
     if (error) {
@@ -60,14 +74,125 @@ export default function CredentialsTab({ userId, nmcVerifiedAt }: CredentialsTab
     setLoading(false);
   }
 
+  async function handleReverify() {
+    if (!refNumber) return;
+
+    // Capture current credential IDs so we can highlight new ones after the lookup
+    setPreReverifyIds(new Set(credentials.map((c) => c.id)));
+    setReverifyStatus('checking');
+    setReverifyMessage('');
+
+    const res = await fetch('/api/nmc-lookup', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        refNumber,
+        lastName,
+        verificationType: 're-verification',
+      }),
+    });
+
+    if (!res.ok) {
+      setReverifyStatus('idle');
+      setReverifyMessage('Failed to start verification. Please try again.');
+      return;
+    }
+
+    // Poll for completion — check the nmc_verifications status
+    pollForCompletion(userId);
+  }
+
+  async function pollForCompletion(userId: string) {
+    const maxAttempts = 60; // 5 minutes at 5-second intervals
+    let attempts = 0;
+
+    const interval = setInterval(async () => {
+      attempts++;
+
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('nmc_verification_status, nmc_verified_at')
+        .eq('user_id', userId)
+        .single();
+
+      if (!profile) {
+        clearInterval(interval);
+        setReverifyStatus('idle');
+        return;
+      }
+
+      if (
+        profile.nmc_verification_status === 'verified' ||
+        profile.nmc_verification_status === 'verified_needs_review'
+      ) {
+        clearInterval(interval);
+
+        // Reload credentials to find new ones
+        const { data: newCreds } = await supabase
+          .from('credentials')
+          .select('*')
+          .eq('user_id', userId)
+          .order('rank', { ascending: false });
+
+        const newCredList = newCreds || [];
+        const newIds = new Set(newCredList.map((c: Credential) => c.id));
+
+        // Find credentials that weren't in the pre-reverify set
+        const newlyAdded = newCredList.filter(
+          (c: Credential) => !preReverifyIds.has(c.id)
+        );
+
+        setCredentials(newCredList);
+        setReverifyStatus('done');
+
+        if (newlyAdded.length > 0) {
+          setReverifyMessage(
+            `${newlyAdded.length} new credential${newlyAdded.length > 1 ? 's' : ''} detected: ${newlyAdded.map((c: Credential) => c.short_name || c.endorsement_name).join(', ')}`
+          );
+        } else if (profile.nmc_verified_at) {
+          setReverifyMessage('Your credentials are up to date and verified.');
+        }
+
+        return;
+      }
+
+      if (profile.nmc_verification_status === 'timeout') {
+        clearInterval(interval);
+        setReverifyStatus('idle');
+        setReverifyMessage(
+          'Verification timed out. Please check your reference number and try again.'
+        );
+        return;
+      }
+
+      if (attempts >= maxAttempts) {
+        clearInterval(interval);
+        setReverifyStatus('checking'); // Leave it showing so user knows it's still in progress
+        setReverifyMessage(
+          'Still waiting for NMC response. Check back in a few minutes.'
+        );
+      }
+    }, 5000);
+  }
+
   // Group credentials
-  const nationalCredentials = credentials.filter(c => c.endorsement_system === 'national');
-  const stcwCredentials = credentials.filter(c => c.endorsement_system === 'stcw');
+  const nationalCredentials = credentials.filter(
+    (c) => c.endorsement_system === 'national'
+  );
+  const stcwCredentials = credentials.filter(
+    (c) => c.endorsement_system === 'stcw'
+  );
 
   // Group national by department
-  const deckCredentials = nationalCredentials.filter(c => c.department === 'deck');
-  const engineCredentials = nationalCredentials.filter(c => c.department === 'engine');
-  const otherCredentials = nationalCredentials.filter(c => c.department === 'other');
+  const deckCredentials = nationalCredentials.filter(
+    (c) => c.department === 'deck'
+  );
+  const engineCredentials = nationalCredentials.filter(
+    (c) => c.department === 'engine'
+  );
+  const otherCredentials = nationalCredentials.filter(
+    (c) => c.department !== 'deck' && c.department !== 'engine'
+  );
 
   if (loading) {
     return (
@@ -80,22 +205,82 @@ export default function CredentialsTab({ userId, nmcVerifiedAt }: CredentialsTab
     );
   }
 
+  // No MMC empty state — different from "MMC but no credentials yet"
+  if (!hasMmc) {
+    return (
+      <div className="bg-white rounded-2xl shadow-lg p-12 text-center">
+        <div className="text-6xl mb-4">📜</div>
+        <h3 className="text-xl font-semibold text-gray-900 mb-2">
+          No MMC on File
+        </h3>
+        <p className="text-gray-600 max-w-md mx-auto">
+          When you receive your Merchant Mariner Credential, enter your
+          reference number in Settings and we&apos;ll automatically pull your
+          credentials from the Coast Guard.
+        </p>
+      </div>
+    );
+  }
+
   if (credentials.length === 0) {
     return (
       <div className="bg-white rounded-2xl shadow-lg p-12 text-center">
         <div className="text-6xl mb-4">📜</div>
         <h3 className="text-xl font-semibold text-gray-900 mb-2">
-          No Credentials Found
+          No Credentials Found Yet
         </h3>
-        <p className="text-gray-600">
-          Your NMC credentials will appear here once verified.
+        <p className="text-gray-600 max-w-md mx-auto mb-6">
+          Your NMC endorsements will appear here once verified. If you just
+          submitted your reference number, this may take a few minutes.
         </p>
+        {refNumber && (
+          <button
+            onClick={handleReverify}
+            disabled={reverifyStatus === 'checking'}
+            className="px-5 py-2.5 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 disabled:opacity-50 transition-colors"
+          >
+            {reverifyStatus === 'checking'
+              ? 'Checking...'
+              : 'Check for Credentials'}
+          </button>
+        )}
       </div>
     );
   }
 
   return (
     <div className="space-y-6">
+      {/* Re-verify header row */}
+      {refNumber && (
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            {reverifyStatus === 'checking' && (
+              <div className="flex items-center gap-2 text-sm text-blue-700">
+                <div className="animate-spin h-4 w-4 rounded-full border-b-2 border-blue-600" />
+                Checking for updated credentials...
+              </div>
+            )}
+            {reverifyStatus === 'done' && reverifyMessage && (
+              <p className="text-sm text-green-700 font-medium">
+                {reverifyMessage}
+              </p>
+            )}
+            {reverifyStatus === 'idle' && reverifyMessage && (
+              <p className="text-sm text-red-600">{reverifyMessage}</p>
+            )}
+          </div>
+          <button
+            onClick={handleReverify}
+            disabled={reverifyStatus === 'checking'}
+            className="px-4 py-2 text-sm font-medium text-blue-700 bg-blue-50 border border-blue-200 rounded-lg hover:bg-blue-100 disabled:opacity-50 transition-colors"
+          >
+            {reverifyStatus === 'checking'
+              ? 'Checking...'
+              : 'Re-verify with NMC'}
+          </button>
+        </div>
+      )}
+
       {/* National Credentials Section */}
       {nationalCredentials.length > 0 && (
         <div className="bg-white rounded-2xl shadow-lg p-6">
@@ -112,33 +297,33 @@ export default function CredentialsTab({ userId, nmcVerifiedAt }: CredentialsTab
           </div>
 
           <div className="space-y-6">
-            {/* Deck Department */}
             {deckCredentials.length > 0 && (
               <DepartmentSection
                 title="Deck Department"
                 icon="🎖️"
                 credentials={deckCredentials}
                 onCredentialClick={setSelectedCredential}
+                newIds={reverifyStatus === 'done' ? preReverifyIds : new Set()}
               />
             )}
 
-            {/* Engine Department */}
             {engineCredentials.length > 0 && (
               <DepartmentSection
                 title="Engine Department"
                 icon="⚙️"
                 credentials={engineCredentials}
                 onCredentialClick={setSelectedCredential}
+                newIds={reverifyStatus === 'done' ? preReverifyIds : new Set()}
               />
             )}
 
-            {/* Other Departments */}
             {otherCredentials.length > 0 && (
               <DepartmentSection
                 title="Other Departments"
                 icon="🍽️"
                 credentials={otherCredentials}
                 onCredentialClick={setSelectedCredential}
+                newIds={reverifyStatus === 'done' ? preReverifyIds : new Set()}
               />
             )}
           </div>
@@ -163,6 +348,7 @@ export default function CredentialsTab({ userId, nmcVerifiedAt }: CredentialsTab
           <CredentialTable
             credentials={stcwCredentials}
             onCredentialClick={setSelectedCredential}
+            newIds={reverifyStatus === 'done' ? preReverifyIds : new Set()}
           />
         </div>
       )}
@@ -173,8 +359,7 @@ export default function CredentialsTab({ userId, nmcVerifiedAt }: CredentialsTab
           <div className="flex items-center space-x-2">
             <span className="text-green-600 text-xl">✓</span>
             <p className="text-sm text-green-900">
-              <span className="font-semibold">Last verified by NMC</span>
-              {' '}on{' '}
+              <span className="font-semibold">Last verified by NMC</span> on{' '}
               {new Date(nmcVerifiedAt).toLocaleDateString('en-US', {
                 year: 'numeric',
                 month: 'long',
@@ -204,14 +389,15 @@ function DepartmentSection({
   icon,
   credentials,
   onCredentialClick,
+  newIds,
 }: {
   title: string;
   icon: string;
   credentials: Credential[];
   onCredentialClick: (credential: Credential) => void;
+  newIds: Set<string>;
 }) {
-  // Find highest rank credential
-  const highestRank = Math.max(...credentials.map(c => c.rank));
+  const highestRank = Math.max(...credentials.map((c) => c.rank));
 
   return (
     <div>
@@ -227,6 +413,7 @@ function DepartmentSection({
         credentials={credentials}
         onCredentialClick={onCredentialClick}
         highestRank={highestRank}
+        newIds={newIds}
       />
     </div>
   );
@@ -237,10 +424,12 @@ function CredentialTable({
   credentials,
   onCredentialClick,
   highestRank,
+  newIds,
 }: {
   credentials: Credential[];
   onCredentialClick: (credential: Credential) => void;
   highestRank?: number;
+  newIds: Set<string>;
 }) {
   return (
     <div className="overflow-x-auto">
@@ -270,20 +459,36 @@ function CredentialTable({
               credential.raw_nmc_text || credential.endorsement_name,
               credential.short_name || credential.endorsement_name
             );
-            const isHighestRank = highestRank !== undefined && credential.rank === highestRank && credential.rank > 0;
+            const isHighestRank =
+              highestRank !== undefined &&
+              credential.rank === highestRank &&
+              credential.rank > 0;
+            // A credential is "new" if it was in pre-reverify ids — meaning it wasn't there before
+            // (newIds holds the IDs that were present BEFORE the re-verify)
+            const isNew = newIds.size > 0 && !newIds.has(credential.id);
 
             return (
               <tr
                 key={credential.id}
-                className="border-b border-gray-100 hover:bg-gray-50 transition-colors cursor-pointer"
+                className={`border-b border-gray-100 hover:bg-gray-50 transition-colors cursor-pointer ${
+                  isNew ? 'bg-green-50' : ''
+                }`}
                 onClick={() => onCredentialClick(credential)}
               >
                 {/* Official Name */}
                 <td className="py-4 px-4">
                   <div className="flex items-center space-x-2">
                     {isHighestRank && (
-                      <span className="text-yellow-500 text-lg" title="Highest rank credential">
+                      <span
+                        className="text-yellow-500 text-lg"
+                        title="Highest rank credential"
+                      >
                         ⭐
+                      </span>
+                    )}
+                    {isNew && (
+                      <span className="inline-block px-1.5 py-0.5 text-xs font-bold bg-green-500 text-white rounded">
+                        NEW
                       </span>
                     )}
                     <span className="text-sm text-gray-900 font-mono">

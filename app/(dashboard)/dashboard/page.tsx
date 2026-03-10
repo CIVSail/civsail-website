@@ -4,13 +4,18 @@ import { useEffect, useState } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
+import Link from 'next/link';
 import type { Profile } from '@/types/database';
 import { calculateExpiration } from '@/lib/utils/dates';
 import CredentialsTab from '@/components/dashboard/CredentialsTab';
+import WelcomeBanner from '@/components/dashboard/WelcomeBanner';
+import NmcStatusIndicator from '@/components/dashboard/NmcStatusIndicator';
 import SeaServiceEntryModal from '@/components/dashboard/SeaServiceEntryModal';
 import PDFRejectionModal from '@/components/dashboard/PDFRejectionModal';
+import SectorSelect from '@/components/onboarding/SectorSelect';
 import type { SeaServicePeriod } from '@/types/sea-service';
 import CareerPathPage from '@/app/(dashboard)/career-path/page';
+import { isMscSector, type Sector } from '@/lib/constants/sectors';
 import {
   CAREER_GOAL_ARCHETYPES,
   type CareerGoalType,
@@ -24,6 +29,7 @@ type TabType =
   | 'documents'
   | 'seaService'
   | 'careerPath'
+  | 'tools'
   | 'settings';
 
 // Type for OCR results from the API
@@ -383,7 +389,8 @@ export default function DashboardPage() {
           </div>
 
           <h1 className="text-3xl font-bold text-gray-900">
-            Welcome back, {profile?.full_name || 'Mariner'}!
+            Welcome back,{' '}
+            {profile?.first_name || profile?.full_name || 'Mariner'}!
           </h1>
           <p className="text-gray-600 mt-1">
             Manage your maritime credentials and documents
@@ -443,6 +450,19 @@ export default function DashboardPage() {
             >
               Career Path
             </button>
+            {/* MSC Tools tab — only visible for CIVMARs */}
+            {isMscSector(profile?.sector) && (
+              <button
+                onClick={() => setActiveTab('tools')}
+                className={`pb-4 px-2 font-medium transition-colors border-b-2 ${
+                  activeTab === 'tools'
+                    ? 'text-blue-600 border-blue-600'
+                    : 'text-gray-600 border-transparent hover:text-gray-900'
+                }`}
+              >
+                MSC Tools
+              </button>
+            )}
             <button
               onClick={() => setActiveTab('settings')}
               className={`pb-4 px-2 font-medium transition-colors border-b-2 ${
@@ -458,6 +478,11 @@ export default function DashboardPage() {
 
         {/* Tab Content */}
         <div className="max-w-6xl mx-auto px-4 py-8">
+          {/* Welcome Banner — always shown above tabs */}
+          <WelcomeBanner
+            firstName={profile.first_name}
+            sector={profile.sector}
+          />
           {/* Personal Info Tab */}
           {activeTab === 'info' && (
             <div className="space-y-6">
@@ -578,16 +603,16 @@ export default function DashboardPage() {
                             ? profile.industry_entry_route === 'hawsepiper'
                               ? 'Hawsepiper (worked my way up)'
                               : profile.industry_entry_route === 'academy'
-                              ? `Maritime Academy Graduate${
-                                  profile.academy_name
-                                    ? ` - ${profile.academy_name}`
-                                    : ''
-                                }`
-                              : `Former Military${
-                                  profile.military_branch
-                                    ? ` - ${profile.military_branch}`
-                                    : ''
-                                }`
+                                ? `Maritime Academy Graduate${
+                                    profile.academy_name
+                                      ? ` - ${profile.academy_name}`
+                                      : ''
+                                  }`
+                                : `Former Military${
+                                    profile.military_branch
+                                      ? ` - ${profile.military_branch}`
+                                      : ''
+                                  }`
                             : 'Not set'}
                         </p>
                       </div>
@@ -705,10 +730,25 @@ export default function DashboardPage() {
 
           {/* Credentials Tab */}
           {activeTab === 'credentials' && (
-            <CredentialsTab
-              userId={profile.user_id}
-              nmcVerifiedAt={profile.nmc_verified_at}
-            />
+            <div className="space-y-4">
+              <NmcStatusIndicator
+                userId={profile.user_id}
+                initialStatus={profile.nmc_verification_status}
+                refNumber={profile.ref_number}
+                lastName={profile.last_name}
+                onVerified={() => {
+                  // Reload the profile so nmc_verified_at refreshes
+                  loadProfile();
+                }}
+              />
+              <CredentialsTab
+                userId={profile.user_id}
+                nmcVerifiedAt={profile.nmc_verified_at}
+                hasMmc={profile.has_mmc}
+                refNumber={profile.ref_number}
+                lastName={profile.last_name}
+              />
+            </div>
           )}
 
           {/* Sea Service Tab */}
@@ -752,16 +792,162 @@ export default function DashboardPage() {
               <CareerPathPage />
             </div>
           )}
+          {/* MSC Tools Tab — civmar only */}
+          {activeTab === 'tools' && isMscSector(profile.sector) && (
+            <div className="space-y-4">
+              <div className="bg-white rounded-2xl shadow-lg p-6">
+                <h2 className="text-2xl font-semibold text-gray-900 mb-2">
+                  MSC Tools
+                </h2>
+                <p className="text-gray-600 mb-6 text-sm">
+                  Purpose-built tools for Military Sealift Command mariners.
+                </p>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <Link
+                    href="/tools/leave-chit"
+                    className="flex items-start gap-4 p-5 border border-gray-200 rounded-xl hover:border-blue-300 hover:bg-blue-50 transition-colors"
+                  >
+                    <span className="text-3xl">📋</span>
+                    <div>
+                      <p className="font-semibold text-gray-900">
+                        Leave Chit Generator
+                      </p>
+                      <p className="text-sm text-gray-500 mt-0.5">
+                        Auto-fill MSC leave request forms and calculate leave
+                        balances.
+                      </p>
+                    </div>
+                  </Link>
+                  <Link
+                    href="/tools/travel-claim"
+                    className="flex items-start gap-4 p-5 border border-gray-200 rounded-xl hover:border-blue-300 hover:bg-blue-50 transition-colors"
+                  >
+                    <span className="text-3xl">✈️</span>
+                    <div>
+                      <p className="font-semibold text-gray-900">
+                        Travel Claim Calculator
+                      </p>
+                      <p className="text-sm text-gray-500 mt-0.5">
+                        Generate DD 1351-2 travel claims for faster
+                        reimbursement.
+                      </p>
+                    </div>
+                  </Link>
+                  <Link
+                    href="/tools/pay-comparison"
+                    className="flex items-start gap-4 p-5 border border-gray-200 rounded-xl hover:border-blue-300 hover:bg-blue-50 transition-colors"
+                  >
+                    <span className="text-3xl">💰</span>
+                    <div>
+                      <p className="font-semibold text-gray-900">
+                        Pay Comparison
+                      </p>
+                      <p className="text-sm text-gray-500 mt-0.5">
+                        Compare pay across ship classes and routes.
+                      </p>
+                    </div>
+                  </Link>
+                  <Link
+                    href="/tools/ship-pay-calculator"
+                    className="flex items-start gap-4 p-5 border border-gray-200 rounded-xl hover:border-blue-300 hover:bg-blue-50 transition-colors"
+                  >
+                    <span className="text-3xl">🧮</span>
+                    <div>
+                      <p className="font-semibold text-gray-900">
+                        Ship Pay Calculator
+                      </p>
+                      <p className="text-sm text-gray-500 mt-0.5">
+                        Estimate your total earnings for a deployment.
+                      </p>
+                    </div>
+                  </Link>
+                </div>
+              </div>
+            </div>
+          )}
           {/* Settings Tab */}
           {activeTab === 'settings' && (
-            <div className="bg-white rounded-2xl shadow-lg p-6">
-              <h2 className="text-2xl font-semibold mb-6">Account Settings</h2>
-              <p className="text-gray-600">Settings panel coming soon...</p>
+            <div className="space-y-6">
+              {/* Sector / Career Setting */}
+              <div className="bg-white rounded-2xl shadow-lg p-6">
+                <h2 className="text-2xl font-semibold mb-1">Maritime Sector</h2>
+                <p className="text-sm text-gray-500 mb-5">
+                  Your sector determines which tools and content are shown on
+                  your dashboard. Changing it takes effect immediately — no
+                  reload needed.
+                </p>
+                <div className="max-w-sm">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Current Sector
+                  </label>
+                  <SectorSelect
+                    value={profile.sector || ''}
+                    onChange={async (newSector: Sector) => {
+                      await handleUpdateField('sector', newSector);
+                    }}
+                  />
+                </div>
+                {profile.sector === 'civmar' && (
+                  <div className="mt-4 max-w-sm">
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Department
+                    </label>
+                    <select
+                      value={profile.department || ''}
+                      onChange={(e) =>
+                        handleUpdateField('department', e.target.value || null)
+                      }
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg bg-white focus:ring-2 focus:ring-blue-500"
+                    >
+                      <option value="">Select department...</option>
+                      <option value="deck">Deck</option>
+                      <option value="engine">Engine</option>
+                      <option value="steward">Steward</option>
+                      <option value="other">Other</option>
+                    </select>
+                  </div>
+                )}
+              </div>
+
+              {/* Alert Preferences */}
+              <div className="bg-white rounded-2xl shadow-lg p-6">
+                <h2 className="text-2xl font-semibold mb-1">
+                  Alert Preferences
+                </h2>
+                <p className="text-sm text-gray-500 mb-5">
+                  Choose how you receive credential expiration reminders.
+                </p>
+                <div className="space-y-3">
+                  <label className="flex items-center gap-3 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={profile.alert_email}
+                      onChange={(e) =>
+                        handleUpdateField('alert_email', e.target.checked)
+                      }
+                      className="w-4 h-4 text-blue-600 rounded"
+                    />
+                    <div>
+                      <p className="font-medium text-gray-900">Email Alerts</p>
+                      <p className="text-xs text-gray-500">
+                        Receive email reminders when credentials are approaching
+                        expiration.
+                      </p>
+                    </div>
+                  </label>
+                </div>
+              </div>
+
+              {saveMessage && (
+                <div className="text-sm text-green-700 font-medium">
+                  {saveMessage}
+                </div>
+              )}
             </div>
           )}
         </div>
       </div>
-      .{/* Modals */}
+      {/* Modals */}
       <SeaServiceEntryModal
         isOpen={showSeaServiceEntry}
         onClose={() => setShowSeaServiceEntry(false)}
@@ -956,8 +1142,8 @@ function ServicePeriodCard({
         period.needs_manual_review
           ? 'bg-amber-50 border-amber-200'
           : period.verified
-          ? 'bg-green-50 border-green-200'
-          : 'bg-blue-50 border-blue-200'
+            ? 'bg-green-50 border-green-200'
+            : 'bg-blue-50 border-blue-200'
       }`}
     >
       {/* Header */}
