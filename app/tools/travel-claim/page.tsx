@@ -450,6 +450,7 @@ export default function TravelClaimGenerator() {
   const [completedSteps, setCompletedSteps] = useState<WizardStep[]>([]);
   const [isGenerating, setIsGenerating] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [showUpdateNotice, setShowUpdateNotice] = useState(true);
 
   // Leg editing state
   const [editingLegId, setEditingLegId] = useState<string | null>(null);
@@ -2149,6 +2150,29 @@ useEffect(() => {
           </div>
         </div>
       </div>
+
+      {/* Update Notice Modal */}
+      {showUpdateNotice && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+          <div className="bg-white rounded-2xl shadow-2xl max-w-lg w-full p-8 text-center">
+            <div className="w-16 h-16 bg-amber-100 rounded-full flex items-center justify-center mx-auto mb-5">
+              <AlertCircle className="w-8 h-8 text-amber-600" />
+            </div>
+            <h2 className="text-xl font-bold text-gray-900 mb-3">
+              Updated Travel Claim Form
+            </h2>
+            <p className="text-gray-600 mb-6 leading-relaxed">
+              It has come to our attention that there is an updated travel claim form. The CIVSail team is aware and working to update the calculator to use the new form.
+            </p>
+            <button
+              onClick={() => setShowUpdateNotice(false)}
+              className="bg-violet-600 hover:bg-violet-700 text-white font-semibold px-8 py-3 rounded-lg transition-colors"
+            >
+              Got it
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Main Content */}
       <div className="max-w-5xl mx-auto px-4 py-8">
