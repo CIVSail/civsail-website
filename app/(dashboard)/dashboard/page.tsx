@@ -418,7 +418,17 @@ export default function DashboardPage() {
                   : 'text-gray-600 border-transparent hover:text-gray-900'
               }`}
             >
-              📋 Information
+              Credentials
+            </button>
+            <button
+              onClick={() => setActiveTab('seaService')}
+              className={`pb-4 px-2 font-medium transition-colors border-b-2 ${
+                activeTab === 'seaService'
+                  ? 'text-blue-600 border-blue-600'
+                  : 'text-gray-600 border-transparent hover:text-gray-900'
+              }`}
+            >
+              Sea Service
             </button>
             <button
               onClick={() => setActiveTab('documents')}
@@ -928,25 +938,184 @@ export default function DashboardPage() {
                 </div>
               </div>
 
-            <div className="bg-white rounded-2xl shadow-lg p-6">
-              <h2 className="text-xl font-semibold text-gray-900 mb-4">
-                Account Actions
-              </h2>
-              <div className="space-y-3">
-                <button
-                  onClick={() => router.push('/onboarding')}
-                  className="w-full text-left px-4 py-3 bg-gray-50 hover:bg-gray-100 rounded-lg transition-colors"
-                >
-                  ← Back to Onboarding
-                </button>
-                <button
-                  onClick={() => router.push('/reset-profile')}
-                  className="w-full text-left px-4 py-3 bg-gray-50 hover:bg-gray-100 rounded-lg transition-colors text-gray-700"
-                >
-                  🔄 Reset Profile (Testing)
-                </button>
-              </div>
+              {saveMessage && (
+                <div className="text-sm text-green-700 font-medium">
+                  {saveMessage}
+                </div>
+              )}
             </div>
+          )}
+        </div>
+      </div>
+      {/* Modals */}
+      <SeaServiceEntryModal
+        isOpen={showSeaServiceEntry}
+        onClose={() => setShowSeaServiceEntry(false)}
+        onSave={handleSeaServiceSaved}
+        mode={entryMode}
+        initialData={reviewData}
+      />
+      <PDFRejectionModal
+        isOpen={showPDFRejection}
+        fileName={rejectedPDFName}
+        onClose={() => setShowPDFRejection(false)}
+        onManualEntry={handleManualEntry}
+        onReupload={handleReupload}
+      />
+      {/* Save message toast */}
+      {saveMessage && (
+        <div className="fixed bottom-4 right-4 bg-white px-6 py-3 rounded-lg shadow-lg border border-gray-200">
+          {saveMessage}
+        </div>
+      )}
+    </div>
+  );
+}
+
+// Sea Service Tab Component
+function SeaServiceTab({
+  periods,
+  loading,
+  onRefresh,
+  onAddManual,
+}: {
+  periods: SeaServicePeriod[];
+  loading: boolean;
+  onRefresh: () => void;
+  onAddManual: () => void;
+}) {
+  // Calculate summary statistics
+  const totalDays = periods.reduce((sum, p) => sum + (p.days_served || 0), 0);
+  const deckDays = periods
+    .filter((p) => p.department === 'deck')
+    .reduce((sum, p) => sum + (p.days_served || 0), 0);
+  const mostRecentPeriod = periods[0]; // Already sorted by sign_on_date desc
+  const needsReview = periods.filter((p) => p.needs_manual_review).length;
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center py-12">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-6">
+      {/* Summary Stats */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        {/* Total Days */}
+        <div className="bg-linear-to-br from-blue-500 to-blue-600 rounded-2xl shadow-lg p-6 text-white">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-blue-100 text-sm font-medium">
+                Total Sea Days
+              </p>
+              <p className="text-4xl font-bold mt-2">{totalDays}</p>
+              <p className="text-blue-100 text-sm mt-1">days served</p>
+            </div>
+            <span className="text-5xl opacity-20">⚓</span>
+          </div>
+        </div>
+
+        {/* Deck Days */}
+        <div className="bg-linear-to-br from-green-500 to-green-600 rounded-2xl shadow-lg p-6 text-white">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-green-100 text-sm font-medium">Deck Days</p>
+              <p className="text-4xl font-bold mt-2">{deckDays}</p>
+              <p className="text-green-100 text-sm mt-1">deck department</p>
+            </div>
+            <span className="text-5xl opacity-20">🧭</span>
+          </div>
+        </div>
+
+        {/* Most Recent */}
+        <div className="bg-linear-to-br from-teal-500 to-teal-600 rounded-2xl shadow-lg p-6 text-white">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-teal-100 text-sm font-medium">Most Recent</p>
+              <p className="text-xl font-bold mt-2">
+                {mostRecentPeriod
+                  ? new Date(mostRecentPeriod.sign_off_date).toLocaleDateString(
+                      'en-US',
+                      {
+                        month: 'short',
+                        year: 'numeric',
+                      }
+                    )
+                  : 'N/A'}
+              </p>
+              <p className="text-teal-100 text-sm mt-1">
+                {mostRecentPeriod?.vessel_name || 'No records'}
+              </p>
+            </div>
+            <span className="text-5xl opacity-20">🚢</span>
+          </div>
+        </div>
+
+        {/* Needs Review Count */}
+        <div className="bg-linear-to-br from-amber-500 to-amber-600 rounded-2xl shadow-lg p-6 text-white">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-amber-100 text-sm font-medium">Needs Review</p>
+              <p className="text-4xl font-bold mt-2">{needsReview}</p>
+              <p className="text-amber-100 text-sm mt-1">periods</p>
+            </div>
+            <span className="text-5xl opacity-20">⚠️</span>
+          </div>
+        </div>
+      </div>
+
+      {/* Service Periods Timeline */}
+      <div className="bg-white rounded-2xl shadow-lg p-6">
+        <div className="flex items-center justify-between mb-6">
+          <h2 className="text-xl font-semibold text-gray-900">
+            Service History
+          </h2>
+          <div className="flex items-center space-x-3">
+            <button
+              onClick={onAddManual}
+              className="px-4 py-2 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium transition-colors"
+            >
+              ✏️ Add Manual Entry
+            </button>
+            <button
+              onClick={onRefresh}
+              className="px-4 py-2 text-sm text-blue-600 hover:text-blue-800 font-medium"
+            >
+              🔄 Refresh
+            </button>
+          </div>
+        </div>
+
+        {periods.length === 0 ? (
+          <div className="text-center py-12">
+            <span className="text-6xl mb-4 block">📋</span>
+            <h3 className="text-lg font-semibold text-gray-900 mb-2">
+              No Sea Service Records
+            </h3>
+            <p className="text-gray-600 mb-6">
+              Upload a sea service letter or add an entry manually to get
+              started.
+            </p>
+            <button
+              onClick={onAddManual}
+              className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium"
+            >
+              Add Your First Entry
+            </button>
+          </div>
+        ) : (
+          <div className="space-y-4">
+            {periods.map((period, index) => (
+              <ServicePeriodCard
+                key={period.id}
+                period={period}
+                index={index}
+                totalCount={periods.length}
+              />
+            ))}
           </div>
         )}
       </div>
