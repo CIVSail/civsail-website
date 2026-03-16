@@ -56,6 +56,13 @@ export default function DashboardPage() {
   const [editing, setEditing] = useState<string | null>(null);
   const [saveMessage, setSaveMessage] = useState('');
   const [careerGoal, setCareerGoal] = useState<any>(null);
+  // Temporary draft state for the Contact Information edit form in Settings
+  const [contactDraft, setContactDraft] = useState({
+    first_name: '',
+    last_name: '',
+    email: '',
+    phone: '',
+  });
   const [loadingGoal, setLoadingGoal] = useState(false);
 
   const router = useRouter();
@@ -138,6 +145,12 @@ export default function DashboardPage() {
     }
 
     setProfile(profileData);
+    setContactDraft({
+      first_name: profileData.first_name || '',
+      last_name: profileData.last_name || '',
+      email: profileData.email || '',
+      phone: profileData.phone || '',
+    });
     setLoading(false);
   }
 
@@ -488,9 +501,17 @@ export default function DashboardPage() {
             <div className="space-y-6">
               {/* Contact Information */}
               <div className="bg-white rounded-2xl shadow-lg p-6">
-                <h2 className="text-2xl font-semibold mb-6">
-                  Contact Information
-                </h2>
+                <div className="flex items-center justify-between mb-6">
+                  <h2 className="text-2xl font-semibold">
+                    Contact Information
+                  </h2>
+                  <button
+                    onClick={() => setActiveTab('settings')}
+                    className="text-blue-600 hover:text-blue-800 text-sm font-medium"
+                  >
+                    Edit
+                  </button>
+                </div>
                 <div className="space-y-4">
                   <div className="p-4 bg-gray-50 rounded-lg">
                     <p className="font-medium text-gray-900">Full Name</p>
@@ -868,6 +889,111 @@ export default function DashboardPage() {
           {/* Settings Tab */}
           {activeTab === 'settings' && (
             <div className="space-y-6">
+              {/* Contact Information */}
+              <div className="bg-white rounded-2xl shadow-lg p-6">
+                <h2 className="text-2xl font-semibold mb-1">
+                  Contact Information
+                </h2>
+                <p className="text-sm text-gray-500 mb-5">
+                  Update your name, email address, and phone number.
+                </p>
+                <div className="space-y-4 max-w-lg">
+                  <div className="flex gap-4">
+                    <div className="flex-1">
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        First Name
+                      </label>
+                      <input
+                        type="text"
+                        value={contactDraft.first_name}
+                        onChange={(e) =>
+                          setContactDraft({ ...contactDraft, first_name: e.target.value })
+                        }
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                        placeholder="First name"
+                      />
+                    </div>
+                    <div className="flex-1">
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Last Name
+                      </label>
+                      <input
+                        type="text"
+                        value={contactDraft.last_name}
+                        onChange={(e) =>
+                          setContactDraft({ ...contactDraft, last_name: e.target.value })
+                        }
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                        placeholder="Last name"
+                      />
+                    </div>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Email
+                    </label>
+                    <input
+                      type="email"
+                      value={contactDraft.email}
+                      onChange={(e) =>
+                        setContactDraft({ ...contactDraft, email: e.target.value })
+                      }
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                      placeholder="Email address"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Phone
+                    </label>
+                    <input
+                      type="tel"
+                      value={contactDraft.phone}
+                      onChange={(e) =>
+                        setContactDraft({ ...contactDraft, phone: e.target.value })
+                      }
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                      placeholder="Phone number"
+                    />
+                  </div>
+                  <button
+                    onClick={async () => {
+                      if (!profile) return;
+                      const fullName = [contactDraft.first_name.trim(), contactDraft.last_name.trim()]
+                        .filter(Boolean)
+                        .join(' ');
+                      const { error } = await supabase
+                        .from('profiles')
+                        .update({
+                          first_name: contactDraft.first_name.trim() || null,
+                          last_name: contactDraft.last_name.trim() || null,
+                          full_name: fullName || null,
+                          email: contactDraft.email.trim() || null,
+                          phone: contactDraft.phone.trim() || null,
+                        })
+                        .eq('user_id', profile.user_id);
+                      if (error) {
+                        setSaveMessage('❌ Failed to save');
+                      } else {
+                        setProfile({
+                          ...profile,
+                          first_name: contactDraft.first_name.trim() || null,
+                          last_name: contactDraft.last_name.trim() || null,
+                          full_name: fullName || null,
+                          email: contactDraft.email.trim() || null,
+                          phone: contactDraft.phone.trim() || null,
+                        });
+                        setSaveMessage('✅ Saved!');
+                        setTimeout(() => setSaveMessage(''), 2000);
+                      }
+                    }}
+                    className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium text-sm"
+                  >
+                    Save Changes
+                  </button>
+                </div>
+              </div>
+
               {/* Sector / Career Setting */}
               <div className="bg-white rounded-2xl shadow-lg p-6">
                 <h2 className="text-2xl font-semibold mb-1">Maritime Sector</h2>
