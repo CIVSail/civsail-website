@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase/server';
 import { NextRequest, NextResponse } from 'next/server';
+import { submitNMCForm } from '@/lib/utils/nmc-form';
 
 /**
  * POST /api/nmc-lookup
@@ -11,6 +12,9 @@ import { NextRequest, NextResponse } from 'next/server';
  *   verificationType: 'onboarding' | 're-verification' | 'upgrade'
  * }
  */
+
+const SEND_TO_EMAIL = 'credentials@civsail.com';
+
 export async function POST(request: NextRequest) {
   try {
     const supabase = await createClient();
@@ -82,9 +86,14 @@ export async function POST(request: NextRequest) {
       })
       .eq('user_id', user.id);
     
-    // TODO: Submit to NMC form (implement later - for now just monitor email)
-    // For MVP, user will manually submit the NMC form
-    
+    // Submit the NMC credential verification form automatically.
+    // Non-fatal: the pending record is already in the DB, so the cron job
+    // will still pick up the email whenever the submission eventually succeeds.
+    const formResult = await submitNMCForm(lastName, refNumber, SEND_TO_EMAIL);
+    if (!formResult.ok) {
+      console.error('[nmc-lookup] NMC form submission failed:', formResult.error);
+    }
+
     return NextResponse.json({
       ok: true,
       message: 'Verification requested. We\'ll check for your credentials in the next few minutes.',
