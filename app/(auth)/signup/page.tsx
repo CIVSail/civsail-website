@@ -6,6 +6,38 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 
+function getErrorMessage(error: unknown, fallback: string) {
+  return error instanceof Error ? error.message : fallback;
+}
+
+function isAlreadyRegisteredError(error: { message?: string; code?: string }) {
+  const message = error.message?.toLowerCase() ?? '';
+
+  return (
+    message.includes('user already registered') ||
+    message.includes('already registered') ||
+    message.includes('already exists') ||
+    error.code === 'user_already_exists'
+  );
+}
+
+function isLikelyObfuscatedDuplicate(data: {
+  user: {
+    identities?: Array<unknown>;
+  } | null;
+  session: unknown;
+}) {
+  // Supabase can return a fake user object for duplicate signups to prevent
+  // account enumeration. In that case, user is present, session is null, and
+  // identities is usually empty.
+  return (
+    data.user != null &&
+    data.session == null &&
+    Array.isArray(data.user.identities) &&
+    data.user.identities.length === 0
+  );
+}
+
 export default function SignupPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -13,7 +45,7 @@ export default function SignupPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
-  
+
   const router = useRouter();
   const supabase = createClient();
 
@@ -21,6 +53,8 @@ export default function SignupPage() {
     e.preventDefault();
     setError('');
     setLoading(true);
+
+    const normalizedEmail = email.trim().toLowerCase();
 
     // Validation
     if (password !== confirmPassword) {
@@ -38,14 +72,28 @@ export default function SignupPage() {
     try {
       // Create auth user
       const { data, error: signUpError } = await supabase.auth.signUp({
-        email,
+        email: normalizedEmail,
         password,
         options: {
           emailRedirectTo: `${window.location.origin}/onboarding`,
         },
       });
 
-      if (signUpError) throw signUpError;
+      if (signUpError) {
+        if (isAlreadyRegisteredError(signUpError)) {
+          throw new Error(
+            'An account with this email already exists. Log in or reset your password instead.'
+          );
+        }
+
+        throw signUpError;
+      }
+
+      if (isLikelyObfuscatedDuplicate(data)) {
+        throw new Error(
+          'An account with this email already exists. Log in or reset your password instead.'
+        );
+      }
 
       // Check if email confirmation is required
       if (data.user && !data.session) {
@@ -55,8 +103,8 @@ export default function SignupPage() {
         // Auto-logged in, redirect to onboarding
         router.push('/onboarding');
       }
-    } catch (err: any) {
-      setError(err.message || 'Failed to create account');
+    } catch (error) {
+      setError(getErrorMessage(error, 'Failed to create account'));
     } finally {
       setLoading(false);
     }
@@ -68,17 +116,29 @@ export default function SignupPage() {
         <div className="max-w-md w-full bg-white rounded-2xl shadow-lg p-8 text-center">
           <div className="mb-6">
             <div className="mx-auto w-16 h-16 bg-green-100 rounded-full flex items-center justify-center">
-              <svg className="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+              <svg
+                className="w-8 h-8 text-green-600"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M5 13l4 4L19 7"
+                />
               </svg>
             </div>
           </div>
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">Check Your Email</h2>
+          <h2 className="text-2xl font-bold text-gray-900 mb-4">
+            Check Your Email
+          </h2>
           <p className="text-gray-600 mb-6">
-            We've sent a confirmation link to <strong>{email}</strong>. 
-            Click the link to verify your account and complete setup.
+            We've sent a confirmation link to <strong>{email}</strong>. Click
+            the link to verify your account and complete setup.
           </p>
-          <Link 
+          <Link
             href="/login"
             className="inline-block bg-blue-600 hover:bg-blue-700 text-white font-medium px-6 py-3 rounded-lg transition-colors"
           >
@@ -103,8 +163,12 @@ export default function SignupPage() {
               className="mx-auto mb-4"
             />
           </Link>
-          <h1 className="text-2xl font-bold text-gray-900">Create Your Account</h1>
-          <p className="text-gray-600 mt-2">Start managing your maritime credentials</p>
+          <h1 className="text-2xl font-bold text-gray-900">
+            Create Your Account
+          </h1>
+          <p className="text-gray-600 mt-2">
+            Start managing your maritime credentials
+          </p>
         </div>
 
         {/* Error Message */}
@@ -114,10 +178,12 @@ export default function SignupPage() {
           </div>
         )}
 
-        {/* Signup Form */}
         <form onSubmit={handleSignup} className="space-y-6">
           <div>
-            <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
+            <label
+              htmlFor="email"
+              className="block text-sm font-medium text-gray-700 mb-2"
+            >
               Email Address
             </label>
             <input
@@ -132,7 +198,10 @@ export default function SignupPage() {
           </div>
 
           <div>
-            <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
+            <label
+              htmlFor="password"
+              className="block text-sm font-medium text-gray-700 mb-2"
+            >
               Password
             </label>
             <input
@@ -147,7 +216,10 @@ export default function SignupPage() {
           </div>
 
           <div>
-            <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 mb-2">
+            <label
+              htmlFor="confirmPassword"
+              className="block text-sm font-medium text-gray-700 mb-2"
+            >
               Confirm Password
             </label>
             <input
@@ -173,7 +245,10 @@ export default function SignupPage() {
         {/* Login Link */}
         <p className="text-center text-sm text-gray-600 mt-6">
           Already have an account?{' '}
-          <Link href="/login" className="text-blue-600 hover:text-blue-700 font-medium">
+          <Link
+            href="/login"
+            className="text-blue-600 hover:text-blue-700 font-medium"
+          >
             Log In
           </Link>
         </p>
