@@ -1,5 +1,5 @@
 export interface Profile {
-  user_id: string;
+  user_id: string; // FK to auth.users.id
   first_name: string | null;
   last_name: string | null;
   full_name: string | null; // Keep for backwards compatibility
