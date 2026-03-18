@@ -13,7 +13,7 @@ import { submitNMCForm } from '@/lib/utils/nmc-form';
  * }
  */
 
-const SEND_TO_EMAIL = 'credentials@civsail.com';
+const SEND_TO_EMAIL = 'credentials@mail.civsail.com';
 
 export async function POST(request: NextRequest) {
   try {
