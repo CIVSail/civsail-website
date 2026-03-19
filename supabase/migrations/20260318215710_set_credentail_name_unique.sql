@@ -1,0 +1,2 @@
+alter table public.credential_checklists
+  add constraint credential_checklists_name_unique unique (name);
