@@ -13,7 +13,8 @@ import { submitNMCForm } from '@/lib/utils/nmc-form';
  * }
  */
 
-const SEND_TO_EMAIL = 'credentials@mail.civsail.com';
+// Use default resend receiving address bc it cost money to add the subdomain to resend
+const SEND_TO_EMAIL = 'credentials@uuseluagra.resend.app'; 
 
 export async function POST(request: NextRequest) {
   try {
