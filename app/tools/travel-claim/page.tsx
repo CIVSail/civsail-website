@@ -465,7 +465,6 @@ export default function TravelClaimGenerator() {
       lastName: '',
       grade: 7,
       position: '',
-      ssnLast4: '',
       dodId: '',
       email: '',
       phone: '',
@@ -809,7 +808,7 @@ useEffect(() => {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
           <div>
             <label
               htmlFor="position"
@@ -840,23 +839,6 @@ useEffect(() => {
                 value: i + 1,
                 label: `GS-${i + 1}`,
               }))}
-            />
-          </div>
-          <div>
-            <label
-              htmlFor="ssnLast4"
-              className="block text-sm font-medium text-gray-700 mb-1"
-            >
-              Last 4 of SSN *
-            </label>
-            <Input
-              id="ssnLast4"
-              value={formData.traveler.ssnLast4}
-              onChange={(v) =>
-                updateTraveler({ ssnLast4: v.replace(/\D/g, '').slice(0, 4) })
-              }
-              placeholder="1234"
-              required
             />
           </div>
         </div>

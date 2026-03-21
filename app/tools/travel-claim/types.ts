@@ -174,8 +174,6 @@ export interface TravelerInfo {
   grade: number;
   /** Position title from jobs table */
   position: string;
-  /** Last 4 of SSN */
-  ssnLast4: string;
   /** DoD ID Number (10 digits) */
   dodId: string;
   /** Email address */

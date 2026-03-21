@@ -54,11 +54,7 @@ export async function generateDD1351PDF(
   });
 
   try {
-    const identityValue = formData.traveler.dodId
-      ? formData.traveler.dodId
-      : formData.traveler.ssnLast4
-      ? `XXX-XX-${formData.traveler.ssnLast4}`
-      : '';
+    const identityValue = formData.traveler.dodId || '';
 
     const departureFieldNames = [
       'form1[0].#subform[0].#subform[3].#subform[8].TextField5[0]',
@@ -194,19 +190,11 @@ export async function generateDD1351PDF(
       );
     }
 
-    if (formData.traveler.dodId) {
-      tryCheckBox(
-        form,
-        'form1[0].#subform[0].#subform[3].four[0].CheckBox3[1]',
-        true
-      );
-    } else if (formData.traveler.ssnLast4) {
-      tryCheckBox(
-        form,
-        'form1[0].#subform[0].#subform[3].four[0].CheckBox3[0]',
-        true
-      );
-    }
+    tryCheckBox(
+      form,
+      'form1[0].#subform[0].#subform[3].four[0].CheckBox3[1]',
+      true
+    );
 
     // === TEXT FIELDS ===
     const fullName =
