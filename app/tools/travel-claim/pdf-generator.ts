@@ -54,51 +54,206 @@ export async function generateDD1351PDF(
   });
 
   try {
+    const identityValue = formData.traveler.dodId
+      ? formData.traveler.dodId
+      : formData.traveler.ssnLast4
+      ? `XXX-XX-${formData.traveler.ssnLast4}`
+      : '';
+
+    const departureFieldNames = [
+      'form1[0].#subform[0].#subform[3].#subform[8].TextField5[0]',
+      'form1[0].#subform[0].#subform[3].#subform[9].#subform[10].TextField7[0]',
+      'form1[0].#subform[0].#subform[3].#subform[14].#subform[15].TextField9[0]',
+      'form1[0].#subform[0].#subform[3].#subform[19].#subform[20].TextField11[0]',
+      'form1[0].#subform[0].#subform[3].#subform[24].#subform[25].TextField13[0]',
+      'form1[0].#subform[0].#subform[3].#subform[29].#subform[30].TextField15[0]',
+      'form1[0].#subform[0].#subform[3].#subform[34].#subform[35].TextField17[0]',
+    ];
+    const arrivalFieldNames = [
+      '',
+      'form1[0].#subform[0].#subform[3].#subform[9].#subform[10].TextField6[0]',
+      'form1[0].#subform[0].#subform[3].#subform[14].#subform[15].TextField8[0]',
+      'form1[0].#subform[0].#subform[3].#subform[19].#subform[20].TextField10[0]',
+      'form1[0].#subform[0].#subform[3].#subform[24].#subform[25].TextField12[0]',
+      'form1[0].#subform[0].#subform[3].#subform[29].#subform[30].TextField14[0]',
+      'form1[0].#subform[0].#subform[3].#subform[34].#subform[35].TextField16[0]',
+      'form1[0].#subform[0].#subform[3].#subform[39].TextField18[0]',
+    ];
+    const placeFieldNames = [
+      'form1[0].#subform[0].#subform[3].#subform[8].TextField3[1]',
+      'form1[0].#subform[0].#subform[3].#subform[9].TextField3[3]',
+      'form1[0].#subform[0].#subform[3].#subform[14].TextField3[7]',
+      'form1[0].#subform[0].#subform[3].#subform[19].TextField3[11]',
+      'form1[0].#subform[0].#subform[3].#subform[24].TextField3[15]',
+      'form1[0].#subform[0].#subform[3].#subform[29].TextField3[19]',
+      'form1[0].#subform[0].#subform[3].#subform[34].TextField3[23]',
+      'form1[0].#subform[0].#subform[3].#subform[39].TextField3[27]',
+    ];
+    const modeFieldNames = [
+      'form1[0].#subform[0].#subform[3].#subform[8].TextField3[2]',
+      'form1[0].#subform[0].#subform[3].#subform[9].#subform[11].#subform[12].TextField3[5]',
+      'form1[0].#subform[0].#subform[3].#subform[14].#subform[16].#subform[17].TextField3[9]',
+      'form1[0].#subform[0].#subform[3].#subform[19].#subform[21].#subform[22].TextField3[13]',
+      'form1[0].#subform[0].#subform[3].#subform[24].#subform[26].#subform[27].TextField3[17]',
+      'form1[0].#subform[0].#subform[3].#subform[29].#subform[31].#subform[32].TextField3[21]',
+      'form1[0].#subform[0].#subform[3].#subform[34].#subform[36].#subform[37].TextField3[25]',
+    ];
+    const reasonFieldNames = [
+      '',
+      'form1[0].#subform[0].#subform[3].#subform[9].#subform[11].#subform[12].TextField3[4]',
+      'form1[0].#subform[0].#subform[3].#subform[14].#subform[16].#subform[17].TextField3[8]',
+      'form1[0].#subform[0].#subform[3].#subform[19].#subform[21].#subform[22].TextField3[12]',
+      'form1[0].#subform[0].#subform[3].#subform[24].#subform[26].#subform[27].TextField3[16]',
+      'form1[0].#subform[0].#subform[3].#subform[29].#subform[31].#subform[32].TextField3[20]',
+      'form1[0].#subform[0].#subform[3].#subform[34].#subform[36].#subform[37].TextField3[24]',
+      'form1[0].#subform[0].#subform[3].#subform[39].TextField3[28]',
+    ];
+    const milesFieldNames = [
+      '',
+      'form1[0].#subform[0].#subform[3].#subform[9].#subform[11].#subform[13].TextField3[6]',
+      'form1[0].#subform[0].#subform[3].#subform[14].#subform[16].#subform[18].TextField3[10]',
+      'form1[0].#subform[0].#subform[3].#subform[19].#subform[21].#subform[23].TextField3[14]',
+      'form1[0].#subform[0].#subform[3].#subform[24].#subform[26].#subform[28].TextField3[18]',
+      'form1[0].#subform[0].#subform[3].#subform[29].#subform[31].#subform[33].TextField3[22]',
+      'form1[0].#subform[0].#subform[3].#subform[34].#subform[36].#subform[38].TextField3[26]',
+      'form1[0].#subform[0].#subform[3].#subform[39].TextField3[29]',
+    ];
+    const lodgingFieldNames = [
+      '',
+      'form1[0].#subform[0].#subform[3].#subform[9].#subform[11].DecimalField4[0]',
+      'form1[0].#subform[0].#subform[3].#subform[14].#subform[16].DecimalField4[1]',
+      'form1[0].#subform[0].#subform[3].#subform[19].#subform[21].DecimalField4[2]',
+      'form1[0].#subform[0].#subform[3].#subform[24].#subform[26].DecimalField4[3]',
+      'form1[0].#subform[0].#subform[3].#subform[29].#subform[31].DecimalField4[4]',
+      'form1[0].#subform[0].#subform[3].#subform[34].#subform[36].DecimalField4[5]',
+      'form1[0].#subform[0].#subform[3].#subform[39].DecimalField4[6]',
+    ];
+
+    const expenseDateFieldNames = [
+      'form1[0].#subform[0].#subform[3].#subform[40].DateField1[1]',
+      'form1[0].#subform[0].#subform[3].#subform[40].DateField1[2]',
+      'form1[0].#subform[0].#subform[3].#subform[40].DateField1[3]',
+      'form1[0].#subform[0].#subform[3].#subform[40].DateField1[4]',
+      'form1[0].#subform[0].#subform[3].#subform[45].DateField1[5]',
+      'form1[0].#subform[0].#subform[3].#subform[45].DateField1[6]',
+      'form1[0].#subform[0].#subform[3].#subform[45].DateField1[7]',
+      'form1[0].#subform[0].#subform[3].#subform[45].DateField1[8]',
+      'form1[0].#subform[0].#subform[3].#subform[45].DateField1[9]',
+    ];
+    const expenseDescFieldNames = [
+      'form1[0].#subform[0].#subform[3].#subform[40].TextField3[30]',
+      'form1[0].#subform[0].#subform[3].#subform[40].TextField3[31]',
+      'form1[0].#subform[0].#subform[3].#subform[40].TextField3[32]',
+      'form1[0].#subform[0].#subform[3].#subform[40].TextField3[33]',
+      'form1[0].#subform[0].#subform[3].#subform[45].TextField3[34]',
+      'form1[0].#subform[0].#subform[3].#subform[45].TextField3[35]',
+      'form1[0].#subform[0].#subform[3].#subform[45].TextField3[36]',
+      'form1[0].#subform[0].#subform[3].#subform[45].TextField3[37]',
+      'form1[0].#subform[0].#subform[3].#subform[45].TextField3[38]',
+    ];
+    const expenseAmountFieldNames = [
+      'form1[0].#subform[0].#subform[3].#subform[40].DecimalField5[0]',
+      'form1[0].#subform[0].#subform[3].#subform[40].DecimalField5[1]',
+      'form1[0].#subform[0].#subform[3].#subform[40].DecimalField5[2]',
+      'form1[0].#subform[0].#subform[3].#subform[40].DecimalField5[3]',
+      'form1[0].#subform[0].#subform[3].#subform[45].DecimalField5[4]',
+      'form1[0].#subform[0].#subform[3].#subform[45].DecimalField5[5]',
+      'form1[0].#subform[0].#subform[3].#subform[45].DecimalField5[6]',
+      'form1[0].#subform[0].#subform[3].#subform[45].DecimalField5[7]',
+      'form1[0].#subform[0].#subform[3].#subform[45].DecimalField5[8]',
+    ];
+
     // === CHECKBOXES ===
-    tryCheckBox(form, 'xeft[0]', true); // EFT payment
-    tryCheckBox(form, 'xtdy[0]', true); // TDY travel
-    tryCheckBox(form, 'xunacc[0]', true); // Unaccompanied
+    tryCheckBox(form, 'form1[0].#subform[0].#subform[1].CheckBox1[0]', true); // EFT payment
+    tryCheckBox(
+      form,
+      'form1[0].#subform[0].#subform[42].#subform[43].CheckBox2[7]',
+      true
+    ); // TDY travel
+    tryCheckBox(
+      form,
+      'form1[0].#subform[0].#subform[3].#subform[5].CheckBox2[1]',
+      true
+    ); // Unaccompanied
 
     if (gtccTotal > 0) {
-      tryCheckBox(form, 'xsplit[0]', true); // Split disbursement
+      tryCheckBox(form, 'form1[0].#subform[0].#subform[2].CheckBox1[2]', true); // Split disbursement
     }
 
     if (formData.travelType === 'CONUS') {
-      tryCheckBox(form, 'xless12[0]', true);
+      tryCheckBox(
+        form,
+        'form1[0].#subform[0].#subform[3].#subform[41].CheckBox2[4]',
+        true
+      );
     } else {
-      tryCheckBox(form, 'xmore12[0]', true);
+      tryCheckBox(
+        form,
+        'form1[0].#subform[0].#subform[3].#subform[41].CheckBox2[5]',
+        true
+      );
+    }
+
+    if (formData.traveler.dodId) {
+      tryCheckBox(
+        form,
+        'form1[0].#subform[0].#subform[3].four[0].CheckBox3[1]',
+        true
+      );
+    } else if (formData.traveler.ssnLast4) {
+      tryCheckBox(
+        form,
+        'form1[0].#subform[0].#subform[3].four[0].CheckBox3[0]',
+        true
+      );
     }
 
     // === TEXT FIELDS ===
     const fullName =
       `${formData.traveler.lastName}, ${formData.traveler.firstName} ${formData.traveler.middleInitial}`.trim();
-    trySetTextField(form, 'FormField[0]', fullName);
-    trySetTextField(form, 'GRADE[0]', `GS-${formData.traveler.grade}`);
-    trySetTextField(form, 'SSN[0]', `XXX-XX-${formData.traveler.ssnLast4}`);
-    trySetTextField(form, 'ADDRESS_NUMBER_AND_ST[0]', formData.traveler.street);
-    trySetTextField(form, 'CITY[0]', formData.traveler.city);
-    trySetTextField(form, 'STATE[0]', formData.traveler.state);
-    trySetTextField(form, 'zipcode[0]', formData.traveler.zip);
-    trySetTextField(form, 'email[0]', formData.traveler.email);
-    trySetTextField(form, 'DAYPHONE[0]', formData.traveler.phone);
+    trySetTextField(form, 'form1[0].#subform[0].#subform[3].TextField2[0]', fullName);
     trySetTextField(
       form,
-      'travel_order_number[0]',
+      'form1[0].#subform[0].#subform[3].TextField2[1]',
+      `GS-${formData.traveler.grade}`
+    );
+    trySetTextField(
+      form,
+      'form1[0].#subform[0].#subform[3].four[0].TextField2[0]',
+      identityValue
+    );
+    trySetTextField(form, 'form1[0].#subform[0].#subform[3].TextField2[2]', formData.traveler.street);
+    trySetTextField(form, 'form1[0].#subform[0].#subform[3].TextField2[3]', formData.traveler.city);
+    trySetTextField(form, 'form1[0].#subform[0].#subform[3].TextField2[4]', formData.traveler.state);
+    trySetTextField(form, 'form1[0].#subform[0].#subform[3].TextField2[5]', formData.traveler.zip);
+    trySetTextField(form, 'form1[0].#subform[0].#subform[3].TextField2[6]', formData.traveler.email);
+    trySetTextField(
+      form,
+      'form1[0].#subform[0].#subform[3].#subform[5].TextField2[7]',
+      formData.traveler.phone
+    );
+    trySetTextField(
+      form,
+      'form1[0].#subform[0].#subform[3].#subform[5].TextField2[8]',
       formData.authorizationNumber
     );
     trySetTextField(
       form,
-      'prev_pay[0]',
+      'form1[0].#subform[0].#subform[3].#subform[6].DecimalField2[0]',
       formData.receivedAdvance ? `$${formData.advanceAmount?.toFixed(2)}` : '$0'
     );
     trySetTextField(
       form,
-      'ORGANIZATION_AND_STAT[0]',
+      'form1[0].#subform[0].#subform[3].#subform[5].TextField2[9]',
       'Military Sealift Command'
     );
 
     if (gtccTotal > 0) {
-      trySetTextField(form, 'splitamt[0]', gtccTotal.toFixed(2));
+      trySetTextField(
+        form,
+        'form1[0].#subform[0].#subform[2].DecimalField1[0]',
+        gtccTotal.toFixed(2)
+      );
     }
 
     // === ITINERARY ===
@@ -108,13 +263,13 @@ export async function generateDD1351PDF(
         const firstDate = new Date(firstLeg.departureDate);
         trySetTextField(
           form,
-          'itinyear[0]',
+          'form1[0].#subform[0].#subform[3].#subform[7].DecimalField2[1]',
           firstDate.getFullYear().toString()
         );
       }
 
       formData.itinerary.forEach((leg, index) => {
-        const rowNum = index + 1;
+        if (index >= placeFieldNames.length) return;
 
         // Departure date (MM/DD format)
         if (leg.departureDate) {
@@ -126,13 +281,9 @@ export async function generateDD1351PDF(
             .toString()
             .padStart(2, '0')}`;
 
-          if (index === 0) {
-            trySetTextField(form, 'dep1[0]', depDateStr, 8);
-            const fromDetails =
-              leg.from.type === 'HOR'
-                ? `HOR - ${leg.from.details}`
-                : leg.from.details || leg.from.type;
-            trySetTextField(form, 'place1[0]', fromDetails);
+          const departureFieldName = departureFieldNames[index];
+          if (departureFieldName) {
+            trySetTextField(form, departureFieldName, depDateStr, 8);
           }
         }
 
@@ -145,57 +296,70 @@ export async function generateDD1351PDF(
             .getDate()
             .toString()
             .padStart(2, '0')}`;
-          trySetTextField(form, `arr${rowNum}[0]`, arrDateStr, 8);
+          const arrivalFieldName = arrivalFieldNames[index];
+          if (arrivalFieldName) {
+            trySetTextField(form, arrivalFieldName, arrDateStr, 8);
+          }
         }
 
-        // Destination (place)
-        const toDetails =
-          leg.to.type === 'HOR'
-            ? `HOR - ${leg.to.details}`
-            : leg.to.details || leg.to.type;
-        trySetTextField(form, `place${rowNum + 1}[0]`, toDetails);
+        if (index === 0) {
+          const fromDetails =
+            leg.from.type === 'HOR'
+              ? `HOR - ${leg.from.details}`
+              : leg.from.details || leg.from.type;
+          trySetTextField(form, placeFieldNames[0], fromDetails);
+        }
+
+        const destinationFieldName = placeFieldNames[index + 1];
+        if (destinationFieldName) {
+          const toDetails =
+            leg.to.type === 'HOR'
+              ? `HOR - ${leg.to.details}`
+              : leg.to.details || leg.to.type;
+          trySetTextField(form, destinationFieldName, toDetails);
+        }
 
         // Mode of transport
-        trySetTextField(
-          form,
-          `mode${rowNum}[0]`,
-          getTransportModeCode(leg.transport.type)
-        );
+        const modeFieldName = modeFieldNames[index];
+        if (modeFieldName) {
+          trySetTextField(form, modeFieldName, getTransportModeCode(leg.transport.type));
+        }
 
         // Reason for stop
-        trySetTextField(form, `reason${rowNum}[0]`, getStopReasonCode(leg.reason));
+        const reasonFieldName = reasonFieldNames[index + 1];
+        if (reasonFieldName) {
+          trySetTextField(form, reasonFieldName, getStopReasonCode(leg.reason));
+        }
 
         // Miles (for POV)
         if (leg.transport.miles) {
-          trySetTextField(
-            form,
-            `miles${rowNum}[0]`,
-            leg.transport.miles.toString()
-          );
+          const milesFieldName = milesFieldNames[index + 1];
+          if (milesFieldName) {
+            trySetTextField(form, milesFieldName, leg.transport.miles.toString());
+          }
         }
 
         // Lodging cost
         if (leg.delayHotelCost) {
-          trySetTextField(
-            form,
-            `lodging${rowNum}[0]`,
-            leg.delayHotelCost.toFixed(2)
-          );
+          const lodgingFieldName = lodgingFieldNames[index + 1];
+          if (lodgingFieldName) {
+            trySetTextField(form, lodgingFieldName, leg.delayHotelCost.toFixed(2));
+          }
         }
       });
     }
 
     // === ADDITIONAL EXPENSES ===
-    let expenseRow = 1;
+    let expenseRow = 0;
     formData.additionalExpenses.forEach((expense) => {
-      if (!expense.paidWithGTCC && expenseRow <= 10) {
+      if (!expense.paidWithGTCC && expenseRow < expenseDateFieldNames.length) {
         const expDate = new Date(expense.date);
-        const dateStr = `${(expDate.getMonth() + 1)
+        const dateStr = `${expDate.getFullYear()}${(expDate.getMonth() + 1)
           .toString()
-          .padStart(2, '0')}/${expDate.getDate().toString().padStart(2, '0')}`;
-        trySetTextField(form, `date${expenseRow}[0]`, dateStr);
-        trySetTextField(form, `exp${expenseRow}[0]`, expense.description);
-        trySetTextField(form, `amt${expenseRow}[0]`, expense.amount.toFixed(2));
+          .padStart(2, '0')}${expDate.getDate().toString().padStart(2, '0')}`;
+        trySetTextField(form, expenseDateFieldNames[expenseRow], dateStr);
+        trySetTextField(form, expenseDescFieldNames[expenseRow], expense.description);
+        trySetTextField(form, expenseAmountFieldNames[expenseRow], expense.amount.toFixed(2));
         expenseRow++;
       }
     });
