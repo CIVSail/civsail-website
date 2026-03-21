@@ -29,7 +29,7 @@ import {
 export async function generateDD1351PDF(
   formData: TravelClaimForm
 ): Promise<Uint8Array> {
-  const pdfUrl = '/forms/DD1351-2.pdf';
+  const pdfUrl = '/forms/Travel-Claim-Form-Nov-25.pdf';
   const existingPdfBytes = await fetch(pdfUrl).then((res) => res.arrayBuffer());
   const pdfDoc = await PDFDocument.load(existingPdfBytes);
   const form = pdfDoc.getForm();
