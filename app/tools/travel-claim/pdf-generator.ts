@@ -29,9 +29,9 @@ import {
 export async function generateDD1351PDF(
   formData: TravelClaimForm
 ): Promise<Uint8Array> {
-  const pdfUrl = '/forms/Travel-Claim-Form-Nov-25.pdf';
+  const pdfUrl = '/forms/DD1351-2(2026).pdf';
   const existingPdfBytes = await fetch(pdfUrl).then((res) => res.arrayBuffer());
-  const pdfDoc = await PDFDocument.load(existingPdfBytes);
+  const pdfDoc = await PDFDocument.load(existingPdfBytes, {ignoreEncryption: true});
   const form = pdfDoc.getForm();
 
   // Calculate GTCC total for split disbursement
