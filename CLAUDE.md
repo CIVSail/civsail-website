@@ -36,6 +36,147 @@ When assisting with CIVSail, follow these principles:
 
 ---
 
+## 🤖 AI Service (Python) — Critical Context
+
+This repo contains TWO runtimes. Never mix them.
+
+| Service | Language | Deploys To | Port |
+|---|---|---|---|
+| Next.js app | TypeScript | Vercel | 3000 |
+| Python AI service | Python | Railway | 8000 |
+
+Both share the same Supabase database.
+Next.js uses anon key + RLS.
+Python uses service_role key (server-side only, never expose).
+
+### The ai-service/ Folder
+All Python code lives in `ai-service/` in this repo.
+Read `ai-service/CLAUDE.md` when working in that folder —
+it contains full architecture context for the LangGraph agents,
+RAG pipeline, rules engine, and NMC monitor.
+
+### Three Agents Being Built
+1. **AI Career Advisor** — LangGraph agent, answers credential/career
+   questions using RAG + rules engine + user profile
+2. **NMC Monitor** — Scheduled pipeline, watches NMC website for
+   changes, sends personalized alerts to affected mariners
+3. **Course Enrollment Sub-agent** — Fills and submits training
+   enrollment forms (Phase 5, not yet started)
+
+### How Next.js and Python Talk
+Next.js calls Python via HTTP POST to `/advisor/chat`.
+Auth: shared secret in `Authorization: Bearer` header.
+Never call Supabase directly from Python with the anon key.
+
+### Model Agnosticism
+LLM is selected via `MODEL_PROVIDER` env var.
+Options: `anthropic` | `openai` | `huggingface`
+Never hardcode model names in agent files — always use `get_llm()`.
+
+### What NOT To Do (Python Service)
+- Do not add LLM calls inside `rules/` — must stay deterministic
+- Do not hardcode model names
+- Do not use synchronous HTTP (`requests`) — use `httpx` async
+- Do not commit `.env` — only `.env.example`
+- Do not skip the `AI_SERVICE_SECRET` check on any endpoint
+
+---
+
+## 🗄️ Database Schema (Current — 20 Tables)
+
+### User-Specific Tables
+| Table | Purpose |
+|-------|---------|
+| **profiles** | Core user data — name, contact, credential expirations, NMC ref number, sector, department, onboarding status |
+| **credentials** | Individual NMC endorsements per user (national, STCW, license) |
+| **nmc_verifications** | NMC verification request tracking & parsed email results |
+| **credential_reminders** | Expiration alert history & delivery status |
+| **sea_service** | Sea time logs by vessel, position, route, dates, tonnage |
+| **training_certificates** | Safety/operational/management course completions |
+| **career_goals** | Current credential → target credential, primary/secondary goals |
+| **documents** | User document storage (file name, type, storage path) |
+| **leave_chits** | Saved leave chit PDF paths per user |
+
+### Public/Admin Data Tables
+| Table | Purpose |
+|-------|---------|
+| **ports** | Port locations, regions, coordinates, emission regulation zones |
+| **ships** | Ship names, classes, operators, specs, home port, slug |
+| **retirement_reviews** | User-submitted reviews with approval flag and rating |
+| **newsletter_subscribers** | Email signups with confirmation & unsubscribe tracking |
+
+### NMC Exam & Course Reference Tables
+| Table | Purpose |
+|-------|---------|
+| **nmc_exams** | NMC exam catalog (exam code, endorsement, department, waterway type) |
+| **nmc_exam_modules** | Exam module definitions (module code, topics, question count, passing score) |
+| **nmc_courses** | NMC course catalog (provider, satisfies modules/endorsements, validity) |
+| **credential_checklists** | Credential requirement checklists by department/role |
+| **checklist_exams** | Links checklists to required exams |
+| **course_exam_alternatives** | Links courses to exams they can substitute for |
+| **exam_module_assignments** | Links exams to their component modules |
+
+### New Tables (AI Service — migrations not yet written)
+- **document_chunks** — RAG knowledge base with pgvector embeddings
+- **nmc_updates** — classified NMC website changes
+- **nmc_page_snapshots** — raw page snapshots for diff detection
+- **nmc_update_alerts** — alert history per user
+
+### RLS Rule
+Every table has RLS enabled. Always write RLS policies with migrations.
+Never suggest disabling RLS. Never create tables in the Supabase
+dashboard — always write a migration file and push from VS Code.
+
+---
+
+## 🔌 Environment Variables
+
+### Next.js (.env.local)
+```
+NEXT_PUBLIC_SUPABASE_URL=
+NEXT_PUBLIC_SUPABASE_ANON_KEY=
+NEXT_PUBLIC_MAPBOX_TOKEN=
+RESEND_API_KEY=
+GMAIL_CLIENT_ID=
+GMAIL_CLIENT_SECRET=
+GMAIL_REFRESH_TOKEN=
+DVIDS_API_KEY=
+OPENWEATHER_API_KEY=
+AI_SERVICE_URL=http://localhost:8000
+AI_SERVICE_SECRET=
+```
+
+### Python (ai-service/.env — gitignored)
+```
+MODEL_PROVIDER=anthropic
+ANTHROPIC_API_KEY=
+OPENAI_API_KEY=
+SUPABASE_URL=
+SUPABASE_SERVICE_KEY=
+AI_SERVICE_SECRET=
+ENVIRONMENT=development
+```
+
+---
+
+## 🧭 Domain Knowledge — Critical Corrections
+
+Alec is a working mariner. Defer to him on all maritime specifics.
+Common areas where AI training data is wrong:
+
+- **CIVMAR vs CONMAR** — direct-hire federal civilians vs contracted
+  mariners. Different pay, different rules, not interchangeable.
+- **MMC structure** — the credential contains multiple endorsements.
+  "License" and "MMC" are not the same thing.
+- **Travel mode codes** — two-letter combinations. First letter =
+  payment/ownership, second = transport mode. e.g. "TP" =
+  government-ticketed plane. Not single letters.
+- **Sea time credit** — rules are vessel-type-specific. Always refer
+  to 46 CFR, not general knowledge.
+- **NMC processing** — takes weeks to months. Timing matters.
+
+---
+
 ## 🎯 What CIVSail Is
 
 **CIVSail.com** is a modern, mariner-first software and information platform designed to support U.S. merchant mariners across their entire career lifecycle.
@@ -637,7 +778,7 @@ Career mapping
 ---
 
 ## 📅 Last Updated
-January 2025
+April 2025
 
 ---
 

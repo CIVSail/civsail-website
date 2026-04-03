@@ -74,3 +74,12 @@ pids
 ehthumbs.db
 Thumbs.db.claude/
 .claude/
+.mcp.json
+
+# Python AI service
+ai-service/venv/
+ai-service/__pycache__/
+ai-service/**/__pycache__/
+ai-service/*.pyc
+ai-service/.env
+ai-service/scripts/source-documents/
