@@ -549,7 +549,8 @@ if (tdyLeg) {
       // Activity description (from -> to)
       const fromStr = leg.from.details || leg.from.type;
       const toStr = leg.to.details || leg.to.type;
-      const activity = `${fromStr} to ${toStr}`;
+      const flightInfo = leg.flightInfo ? ` (${leg.flightInfo})` : '';
+      const activity = `${fromStr} to ${toStr}${flightInfo}`;
       trySetTextField(form, activityFields[index], activity);
 
       // Numerical fields

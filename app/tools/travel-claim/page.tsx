@@ -36,6 +36,8 @@ import {
   Navigation,
   CircleDot,
   ArrowRight,
+  UploadCloud,
+  FileImage,
 } from 'lucide-react';
 
 import {
@@ -68,6 +70,7 @@ import {
 
 import { generateAndDownloadPDFs } from './pdf-generator';
 import { createPayClient } from '@/lib/supabase/pay-client';
+import { parseReceiptText, ReceiptParseResult } from './receipt-parser';
 // ============================================
 // WIZARD STEPS CONFIGURATION
 // ============================================
@@ -77,6 +80,7 @@ const WIZARD_STEPS: {
   label: string;
   icon: React.ReactNode;
 }[] = [
+  { key: 'intake', label: 'Start', icon: <UploadCloud className="w-4 h-4" /> },
   { key: 'overview', label: 'Trip Info', icon: <User className="w-4 h-4" /> },
   {
     key: 'itinerary',
@@ -446,10 +450,18 @@ function DateTimePicker({
 
 export default function TravelClaimGenerator() {
   // Wizard state
-  const [currentStep, setCurrentStep] = useState<WizardStep>('overview');
+  const [currentStep, setCurrentStep] = useState<WizardStep>('intake');
   const [completedSteps, setCompletedSteps] = useState<WizardStep[]>([]);
   const [isGenerating, setIsGenerating] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  const [intakeMode, setIntakeMode] = useState<'ocr' | 'manual' | null>(null);
+  const [receiptResults, setReceiptResults] = useState<ReceiptParseResult[]>([]);
+  const [receiptProcessing, setReceiptProcessing] = useState(false);
+  const [receiptError, setReceiptError] = useState<string | null>(null);
+  const [selectedReceiptNames, setSelectedReceiptNames] = useState<string[]>([]);
+  const [receiptApplied, setReceiptApplied] = useState(false);
+  const [receiptNotice, setReceiptNotice] = useState<string | null>(null);
 
   // Leg editing state
   const [editingLegId, setEditingLegId] = useState<string | null>(null);
@@ -529,6 +541,7 @@ useEffect(() => {
     }
     setCurrentStep(step);
     setEditingLegFromSummary(null);
+    setReceiptApplied(false);
   };
 
   const goNext = () => {
@@ -612,6 +625,31 @@ useEffect(() => {
     setFormData({
       ...formData,
       itinerary: [...formData.itinerary, newLeg],
+    });
+    setEditingLegId(newLeg.id);
+  };
+
+  const addLegToStart = () => {
+    const firstLeg = formData.itinerary[0];
+    const newLeg: ItineraryLeg = {
+      id: `leg-${Date.now()}`,
+      from: { type: 'HOR', details: '' },
+      to: firstLeg ? { ...firstLeg.from } : { type: 'Airport', details: '' },
+      departureDate: '',
+      departureTime: '',
+      arrivalDate: '',
+      arrivalTime: '',
+      departureTimezone: firstLeg ? firstLeg.departureTimezone : -5,
+      arrivalTimezone: firstLeg ? firstLeg.departureTimezone : -5,
+      transport: { type: 'govt-ticket-flight' },
+      reason: firstLeg ? 'CATCH_FLIGHT' : 'TDY_STATION',
+      isFlight: true,
+      isInternational: false,
+    };
+
+    setFormData({
+      ...formData,
+      itinerary: [newLeg, ...formData.itinerary],
     });
     setEditingLegId(newLeg.id);
   };
@@ -733,6 +771,8 @@ useEffect(() => {
 
   const renderStepContent = () => {
     switch (currentStep) {
+      case 'intake':
+        return renderIntakeStep();
       case 'overview':
         return renderOverviewStep();
       case 'itinerary':
@@ -751,6 +791,302 @@ useEffect(() => {
   // ============================================
   // STEP 1: OVERVIEW
   // ============================================
+
+  const handleReceiptUpload = async (files: FileList | null) => {
+    if (!files || files.length === 0) return;
+
+    setReceiptProcessing(true);
+    setReceiptError(null);
+    setReceiptResults([]);
+    setSelectedReceiptNames(Array.from(files).map((file) => file.name));
+    setReceiptApplied(false);
+    setReceiptNotice(null);
+
+    const form = new FormData();
+    Array.from(files).forEach((file) => {
+      form.append('files', file);
+    });
+
+    try {
+      const response = await fetch('/api/ocr/process-travel-receipt', {
+        method: 'POST',
+        body: form,
+      });
+
+      const payload = await response.json();
+      if (!response.ok || !payload.success) {
+        throw new Error(payload.error || 'OCR processing failed');
+      }
+
+      const parsed = (payload.results as {
+        fileName: string;
+        success: boolean;
+        text: string;
+        confidence: number;
+        error?: string;
+      }[])
+        .filter((result) => result.success && result.text)
+        .map((result, index) =>
+          parseReceiptText(result.text, index, result.confidence)
+        );
+
+      const resultsWithText = parsed.filter(
+        (result) => result.expenses.length > 0
+      );
+      setReceiptResults(parsed);
+      setReceiptError(
+        resultsWithText.length > 0
+          ? null
+          : 'Nothing was pulled from the receipt. Please upload a clearer image or a higher-quality scan.'
+      );
+    } catch (err) {
+      setReceiptError(
+        err instanceof Error ? err.message : 'Failed to process receipts'
+      );
+    } finally {
+      setReceiptProcessing(false);
+    }
+  };
+
+  const applyReceiptSuggestions = () => {
+    const expenses = receiptResults.flatMap((result) => result.expenses);
+    const legs = receiptResults.flatMap((result) =>
+      result.itineraryLegs.map((leg) => ({
+        ...leg,
+        flightInfo: leg.flightInfo || result.flightInfo,
+      }))
+    );
+    if (expenses.length === 0 && legs.length === 0) {
+      setReceiptNotice('No details were pulled. You can add them manually.');
+      return;
+    }
+
+    setFormData((prev) => ({
+      ...prev,
+      additionalExpenses: [...prev.additionalExpenses, ...expenses],
+      itinerary: prev.itinerary.length > 0 ? [...prev.itinerary, ...legs] : legs,
+    }));
+    setReceiptApplied(true);
+  };
+
+  const renderIntakeStep = () => (
+    <div className="space-y-6">
+      <SectionCard
+        title="Start your travel claim"
+        icon={<UploadCloud className="w-5 h-5 text-blue-600" />}
+      >
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <button
+            onClick={() => setIntakeMode('ocr')}
+            className={`text-left border rounded-2xl p-5 transition-colors hover:border-blue-300 hover:bg-blue-50/40 ${
+              intakeMode === 'ocr'
+                ? 'border-blue-400 bg-blue-50/60'
+                : 'border-gray-200 bg-white'
+            }`}
+          >
+            <div className="flex items-start gap-3">
+              <div className="w-10 h-10 rounded-xl bg-blue-100 flex items-center justify-center text-blue-600">
+                <UploadCloud className="w-5 h-5" />
+              </div>
+              <div>
+                <p className="font-semibold text-gray-900">Upload receipts</p>
+                <p className="text-sm text-gray-600 mt-1">
+                  Use OCR to auto-fill expenses, dates, and totals.
+                </p>
+              </div>
+            </div>
+          </button>
+
+          <button
+            onClick={() => {
+              setIntakeMode('manual');
+              goToStep('overview');
+            }}
+            className={`text-left border rounded-2xl p-5 transition-colors hover:border-blue-300 hover:bg-blue-50/40 ${
+              intakeMode === 'manual'
+                ? 'border-blue-400 bg-blue-50/60'
+                : 'border-gray-200 bg-white'
+            }`}
+          >
+            <div className="flex items-start gap-3">
+              <div className="w-10 h-10 rounded-xl bg-blue-100 flex items-center justify-center text-blue-600">
+                <Edit3 className="w-5 h-5" />
+              </div>
+              <div>
+                <p className="font-semibold text-gray-900">Enter everything manually</p>
+                <p className="text-sm text-gray-600 mt-1">
+                  Best if you already know all details.
+                </p>
+              </div>
+            </div>
+          </button>
+        </div>
+
+        {intakeMode === 'ocr' && (
+          <div className="mt-6 space-y-4">
+            <div className="border border-dashed border-gray-300 rounded-xl p-6 bg-gray-50">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Upload travel receipts (PNG, JPG, WEBP, PDF)
+              </label>
+              <div className="flex flex-col gap-3">
+                <label
+                  htmlFor="receipt-upload"
+                  className="inline-flex items-center justify-center px-5 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium w-fit"
+                >
+                  Select receipts
+                </label>
+                <input
+                  id="receipt-upload"
+                  type="file"
+                  accept="image/*,application/pdf"
+                  multiple
+                  onChange={(e) => handleReceiptUpload(e.target.files)}
+                  className="sr-only"
+                />
+                {selectedReceiptNames.length > 0 && (
+                  <div className="text-sm text-gray-600 space-y-1">
+                    {selectedReceiptNames.map((name) => (
+                      <div key={name} className="flex items-center gap-2">
+                        <FileImage className="w-4 h-4 text-blue-500" />
+                        <span>{name}</span>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+              <p className="text-xs text-gray-500 mt-2">
+                OCR runs in real time. We only extract text to pre-fill your form.
+              </p>
+            </div>
+
+            {receiptProcessing && (
+              <div className="flex items-center gap-3 text-sm text-gray-600">
+                <div className="h-2 w-2 rounded-full bg-blue-500 animate-pulse" />
+                Processing receipts...
+              </div>
+            )}
+
+            {receiptError && (
+              <div className="p-4 bg-red-50 border border-red-200 rounded-lg text-sm text-red-600">
+                {receiptError}
+              </div>
+            )}
+
+            {receiptNotice && (
+              <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg text-sm text-blue-700">
+                {receiptNotice}
+              </div>
+            )}
+
+            {receiptResults.length > 0 && (
+              <div className="space-y-4">
+                {receiptResults.some((result) => result.notes.length > 0) && (
+                  <div className="p-4 bg-amber-50 border border-amber-200 rounded-lg text-sm text-amber-700">
+                    Some details were not pulled in. You can fill the gaps manually.
+                  </div>
+                )}
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="font-semibold text-gray-900">OCR suggestions</p>
+                    <p className="text-sm text-gray-600">
+                      Review the detected expenses before applying them.
+                    </p>
+                  </div>
+                  {receiptResults.some(
+                    (result) =>
+                      result.expenses.length > 0 || result.itineraryLegs.length > 0
+                  ) && (
+                    <div className="flex flex-col items-end">
+                      <button
+                        onClick={applyReceiptSuggestions}
+                        disabled={receiptApplied}
+                        className={`px-5 py-2 rounded-lg transition-colors ${
+                          receiptApplied
+                            ? 'bg-gray-200 text-gray-600 cursor-not-allowed'
+                            : 'bg-blue-600 text-white hover:bg-blue-700'
+                        }`}
+                      >
+                        {receiptApplied ? (
+                          <span className="inline-flex items-center gap-2">
+                            <Check className="w-4 h-4" />
+                            Applied
+                          </span>
+                        ) : (
+                          'Apply to form'
+                        )}
+                      </button>
+                      {receiptApplied && (
+                        <div className="mt-3 inline-flex items-center gap-2 px-3 py-2 bg-green-50 border border-green-200 rounded-lg text-sm text-green-700">
+                          <Check className="w-4 h-4" />
+                          Data applied successfully.
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {receiptResults.map((result, index) => (
+                    <div
+                      key={`receipt-${index}`}
+                      className="border border-gray-200 rounded-xl p-4 bg-white"
+                    >
+                      <div className="flex items-center gap-2 text-sm text-gray-600">
+                        <FileImage className="w-4 h-4 text-blue-500" />
+                        OCR confidence: {result.confidence}%
+                      </div>
+                      {(result.itineraryLegs.length > 0 ||
+                        result.expenses.length > 0) && (
+                        <div className="mt-3 space-y-2">
+                          {result.itineraryLegs.map((leg) => (
+                            <div key={leg.id} className="text-sm text-gray-700">
+                              {leg.from.details} → {leg.to.details}{' '}
+                              {leg.departureDate
+                                ? `· ${leg.departureDate}`
+                                : ''}
+                              {result.flightInfo
+                                ? ` (${result.flightInfo})`
+                                : ''}
+                            </div>
+                          ))}
+                          {result.expenses.map((expense) => (
+                            <div key={expense.id} className="text-sm text-gray-700">
+                              {expense.description}{' '}
+                              {expense.amount > 0
+                                ? `· $${expense.amount.toFixed(2)}`
+                                : ''}
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                      {result.itineraryLegs.length === 0 &&
+                        result.expenses.length === 0 && (
+                          <p className="mt-3 text-sm text-gray-600">
+                            No details found for this receipt.
+                          </p>
+                        )}
+                      {result.notes.length > 0 && (
+                        <div className="mt-3 text-xs text-amber-600">
+                          {result.notes.join(' • ')}
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+      </SectionCard>
+
+      <InfoBox type="info">
+        <p>
+          You can always edit anything OCR fills in. If a receipt is unclear, add
+          the expense manually later.
+        </p>
+      </InfoBox>
+    </div>
+  );
 
   const renderOverviewStep = () => (
     <div className="space-y-6">
@@ -1158,6 +1494,19 @@ useEffect(() => {
           and add each segment of your journey.
         </p>
       </InfoBox>
+
+      <button
+        onClick={addLegToStart}
+        className="w-full py-4 border-2 border-dashed border-gray-300 rounded-xl text-gray-700 hover:bg-gray-50 hover:border-gray-400 transition-all flex items-center justify-center gap-2"
+      >
+        <Plus className="w-5 h-5" />
+        {formData.itinerary.length === 0
+          ? 'Add First Leg (Start from Home)'
+          : `Add Earlier Leg (To ${
+              formData.itinerary[0].from.details ||
+              getLocationLabel(formData.itinerary[0].from.type)
+            })`}
+      </button>
 
       {/* Existing Legs */}
       {formData.itinerary.map((leg, index) => (
@@ -1599,7 +1948,7 @@ useEffect(() => {
         </SectionCard>
       ))}
 
-      {/* Add Leg Button */}
+      {/* Add Next Leg Button */}
       <button
         onClick={addLeg}
         className="w-full py-4 border-2 border-dashed border-violet-300 rounded-xl text-violet-600 hover:bg-violet-50 hover:border-violet-400 transition-all flex items-center justify-center gap-2"
@@ -2112,9 +2461,9 @@ useEffect(() => {
   // ============================================
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-gray-50 to-violet-50">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-gray-50">
       {/* Header */}
-      <div className="bg-gradient-to-r from-violet-600 via-purple-600 to-violet-700 text-white">
+      <div className="bg-gradient-to-r from-blue-600 via-blue-700 to-blue-800 text-white">
         <div className="max-w-5xl mx-auto px-4 py-8">
           <div className="flex items-center gap-4">
             <div className="w-14 h-14 bg-white/20 rounded-xl flex items-center justify-center">
@@ -2145,18 +2494,19 @@ useEffect(() => {
         {/* Navigation Buttons */}
         {!editingLegFromSummary && (
           <div className="flex justify-between mt-8">
-            <button
-              onClick={goBack}
-              disabled={currentStep === 'overview'}
-              className="px-6 py-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-            >
+             <button
+               onClick={goBack}
+               disabled={currentStep === 'intake'}
+               className="px-6 py-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+             >
               ← Back
             </button>
 
             {currentStep !== 'review' && (
               <button
                 onClick={goNext}
-                className="px-6 py-2 bg-violet-600 text-white rounded-lg hover:bg-violet-700 transition-colors flex items-center gap-2"
+                disabled={receiptProcessing}
+                className="px-6 py-2 bg-violet-600 text-white rounded-lg hover:bg-violet-700 transition-colors flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 Next Step
                 <ChevronRight className="w-4 h-4" />

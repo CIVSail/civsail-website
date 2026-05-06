@@ -119,6 +119,8 @@ export interface ItineraryLeg {
   isFlight?: boolean;
   /** Is this international travel? */
   isInternational?: boolean;
+  /** Flight info for activity description */
+  flightInfo?: string;
 }
 
 /** Helper to get full departure datetime string */
@@ -237,6 +239,7 @@ export interface AdditionalExpense {
 // ============================================
 
 export type WizardStep = 
+  | 'intake'       // Upload receipts or manual entry
   | 'overview'     // Basic trip info
   | 'itinerary'    // Build travel legs
   | 'expenses'     // Additional expenses
