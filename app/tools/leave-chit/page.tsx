@@ -1,7 +1,7 @@
 // app/tools/leave-chit/page.tsx
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import {
   ClipboardList,
   Info,
@@ -14,6 +14,7 @@ import {
   HelpCircle,
 } from 'lucide-react';
 import { PDFDocument } from 'pdf-lib';
+import { createClient } from '@/lib/supabase/client';
 
 // ============================================================================
 // TYPES
@@ -456,6 +457,65 @@ async function generateLeaveChitPDF(form: FormState): Promise<void> {
 export default function LeaveChitPage() {
   const [form, setForm] = useState<FormState>(initialFormState);
   const [generating, setGenerating] = useState(false);
+  const [profileNotice, setProfileNotice] = useState<string | null>(null);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    async function loadProfile() {
+      try {
+        const supabase = createClient();
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) return;
+
+        const { data, error } = await supabase
+          .from('profiles')
+          .select('first_name,last_name,ship_email,email,phone')
+          .eq('user_id', user.id)
+          .maybeSingle();
+
+        if (error || !data) return;
+
+        setForm((prev) => {
+          const next = { ...prev };
+          let applied = false;
+
+          if (!prev.firstName && data.first_name) {
+            next.firstName = data.first_name;
+            applied = true;
+          }
+          if (!prev.lastName && data.last_name) {
+            next.lastName = data.last_name;
+            applied = true;
+          }
+
+          const emailValue = data.ship_email || data.email;
+          if (!prev.email && emailValue) {
+            next.email = emailValue;
+            applied = true;
+          }
+          if (!prev.phoneNumber && data.phone) {
+            next.phoneNumber = data.phone;
+            applied = true;
+          }
+
+          if (applied && isMounted) {
+            setProfileNotice('Profile details loaded from your account.');
+          }
+
+          return next;
+        });
+      } catch (err) {
+        console.warn('Failed to load profile details:', err);
+      }
+    }
+
+    loadProfile();
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
 
   const activeLeaveTypes = useMemo(() => {
     const active: LeaveType[] = [];
@@ -538,6 +598,15 @@ export default function LeaveChitPage() {
             </div>
           </div>
         </div>
+
+        {profileNotice && (
+          <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 mb-6">
+            <div className="flex items-start gap-3">
+              <Info className="w-5 h-5 text-blue-500 flex-shrink-0 mt-0.5" />
+              <p className="text-sm text-blue-700">{profileNotice}</p>
+            </div>
+          </div>
+        )}
 
         {/* FFD Warning */}
         {form.dutyStatus === 'FFD' && (

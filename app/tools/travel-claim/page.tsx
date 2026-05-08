@@ -70,6 +70,7 @@ import {
 
 import { generateAndDownloadPDFs } from './pdf-generator';
 import { createPayClient } from '@/lib/supabase/pay-client';
+import { createClient } from '@/lib/supabase/client';
 import { parseReceiptText, ReceiptParseResult } from './receipt-parser';
 // ============================================
 // WIZARD STEPS CONFIGURATION
@@ -462,6 +463,7 @@ export default function TravelClaimGenerator() {
   const [selectedReceiptNames, setSelectedReceiptNames] = useState<string[]>([]);
   const [receiptApplied, setReceiptApplied] = useState(false);
   const [receiptNotice, setReceiptNotice] = useState<string | null>(null);
+  const [profileNotice, setProfileNotice] = useState<string | null>(null);
 
   // Leg editing state
   const [editingLegId, setEditingLegId] = useState<string | null>(null);
@@ -500,12 +502,12 @@ export default function TravelClaimGenerator() {
   });
 
   // Positions from Supabase
-const [positions, setPositions] = useState<string[]>([]);
-const [positionsLoading, setPositionsLoading] = useState(true);
+  const [positions, setPositions] = useState<string[]>([]);
+  const [positionsLoading, setPositionsLoading] = useState(true);
 
 // Fetch positions on mount
-useEffect(() => {
-  async function loadPositions() {
+  useEffect(() => {
+    async function loadPositions() {
     try {
       const client = createPayClient();
       const { data: jobsData } = await client
@@ -529,6 +531,64 @@ useEffect(() => {
   
   loadPositions();
 }, []);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    async function loadProfile() {
+      try {
+        const supabase = createClient();
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) return;
+
+        const { data, error } = await supabase
+          .from('profiles')
+          .select('first_name,last_name,ship_email,email,phone')
+          .eq('user_id', user.id)
+          .maybeSingle();
+
+        if (error || !data) return;
+
+        setFormData((prev) => {
+          const next = { ...prev };
+          let applied = false;
+
+          if (!prev.traveler.firstName && data.first_name) {
+            next.traveler.firstName = data.first_name;
+            applied = true;
+          }
+          if (!prev.traveler.lastName && data.last_name) {
+            next.traveler.lastName = data.last_name;
+            applied = true;
+          }
+
+          const emailValue = data.ship_email || data.email;
+          if (!prev.traveler.email && emailValue) {
+            next.traveler.email = emailValue;
+            applied = true;
+          }
+          if (!prev.traveler.phone && data.phone) {
+            next.traveler.phone = data.phone;
+            applied = true;
+          }
+
+          if (applied && isMounted) {
+            setProfileNotice('Profile details loaded from your account.');
+          }
+
+          return next;
+        });
+      } catch (err) {
+        console.warn('Failed to load profile details:', err);
+      }
+    }
+
+    loadProfile();
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
 
   // ============================================
   // NAVIGATION HANDLERS
@@ -1090,6 +1150,12 @@ useEffect(() => {
 
   const renderOverviewStep = () => (
     <div className="space-y-6">
+      {profileNotice && (
+        <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg text-sm text-blue-700">
+          {profileNotice}
+        </div>
+      )}
+
       {/* Traveler Info */}
       <SectionCard
         title="Traveler Information"
