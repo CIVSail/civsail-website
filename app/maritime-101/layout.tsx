@@ -1,13 +1,13 @@
 import { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'Maritime 101 — Your Guide to the Merchant Marine | CIVSail',
+  title: 'Maritime 101 — Complete Guide to the U.S. Merchant Marine',
   description:
-    'Everything you need to know about becoming a merchant mariner: career sectors, credentials, training paths, life at sea, and how to get started.',
+    'Everything you need to know about the U.S. Merchant Marine: what it is, how to become a merchant mariner, career sectors (MSC, commercial shipping, tugboats, offshore, cruise, NOAA), credentials (MMC, STCW, TWIC), training paths (maritime academy vs hawsepipe vs military), life at sea, pay expectations, and how to get started. A free, comprehensive guide from CIVSail.',
   openGraph: {
-    title: 'Maritime 101 — Your Guide to the Merchant Marine | CIVSail',
+    title: 'Maritime 101 — Complete Guide to the U.S. Merchant Marine | CIVSail',
     description:
-      'The complete beginner-to-advanced guide to U.S. merchant marine careers, credentials, and life at sea.',
+      'How to become a merchant mariner: careers, credentials, training, life at sea, and getting started in the U.S. Merchant Marine.',
     url: 'https://civsail.com/maritime-101',
   },
   alternates: { canonical: 'https://civsail.com/maritime-101' },

@@ -1,12 +1,13 @@
 import { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'MSC Pay Comparison Tool | CIVSail',
+  title: 'MSC Pay Comparison — Compare CIVMAR Earnings Across Ship Classes',
   description:
-    'Compare earnings across MSC ship classes and positions side by side. See how deployment patterns, overtime, and premium pay affect total compensation.',
+    'Compare Military Sealift Command (MSC) CIVMAR pay across ship classes and positions side by side. See how T-AKE vs T-AO vs T-AOE earnings differ for AB, OS, QMED, 3rd Mate, Chief Engineer, and other positions. Includes base wage, overtime, premium pay, penalty pay, and deployment bonuses.',
   openGraph: {
-    title: 'MSC Pay Comparison Tool | CIVSail',
-    description: 'Compare MSC pay across ship classes and positions side by side.',
+    title: 'MSC Pay Comparison — Compare CIVMAR Earnings | CIVSail',
+    description:
+      'Compare CIVMAR pay across MSC ship classes side by side. T-AKE vs T-AO vs T-AOE earnings by position.',
     url: 'https://civsail.com/tools/pay-comparison',
   },
   alternates: { canonical: 'https://civsail.com/tools/pay-comparison' },

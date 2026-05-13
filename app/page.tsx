@@ -53,8 +53,10 @@ const ALL_MARINER_ITEMS = [
   { icon: '🗺️', label: 'Port Guides', desc: 'Interactive maps, restaurant picks, local tips, and Know Before You Go briefings from mariners who\'ve been there', status: 'growing' as const, statusLabel: 'Growing' },
   { icon: '⚓', label: 'Ship Information Library', desc: 'Specs and crew-sourced details on what it\'s really like aboard', status: 'growing' as const, statusLabel: 'Growing' },
   { icon: '📚', label: 'Guides & Resources', desc: 'Credentials, training, renewals — without digging through USCG.gov', status: 'growing' as const, statusLabel: 'Growing' },
-  { icon: '📋', label: 'Credential Dashboard', desc: 'Track MMC, TWIC, medical, STCW — with NMC auto-verification', status: 'coming' as const, statusLabel: 'In Development' },
   { icon: '🤝', label: 'Professional Network', desc: 'Financial planning, retirement resources, and connections to vetted professionals who understand mariners', status: 'growing' as const, statusLabel: 'Growing' },
+  { icon: '📋', label: 'Credential Dashboard', desc: 'Track MMC, TWIC, medical, STCW — with NMC auto-verification', status: 'coming' as const, statusLabel: 'In Development', href: '/portal' },
+  { icon: '🏪', label: 'Marketplace', desc: 'Connect with vetted gear, services, and tools built for mariners', status: 'coming' as const, statusLabel: 'Coming Soon', href: '/marketplace' },
+  { icon: '🖥️', label: 'Mariner Portal', desc: 'Your personal dashboard — credentials, sea time, documents, and career tools in one place', status: 'coming' as const, statusLabel: 'Coming Soon', href: '/portal' },
 ];
 
 const STATUS_COLORS = {
@@ -395,14 +397,14 @@ export default function Home() {
                 <div className="px-[26px] pt-4 pb-[26px]">
                   {ALL_MARINER_ITEMS.map((item, i) => {
                     const sc = STATUS_COLORS[item.status];
-                    return (
+                    const content = (
                       <div
                         key={i}
                         className={`flex gap-3 items-start py-[13px] ${
                           i < ALL_MARINER_ITEMS.length - 1
                             ? 'border-b border-white/[0.035]'
                             : ''
-                        }`}
+                        } ${'href' in item ? 'hover:bg-white/[0.02] -mx-2 px-2 rounded-lg transition-colors' : ''}`}
                       >
                         <span className="text-[1.1rem] mt-[1px]">
                           {item.icon}
@@ -424,6 +426,10 @@ export default function Home() {
                         </div>
                       </div>
                     );
+                    if ('href' in item && item.href) {
+                      return <Link key={i} href={item.href}>{content}</Link>;
+                    }
+                    return content;
                   })}
 
                   <div className="mt-[18px] p-[14px_16px] rounded-[10px] bg-yellow-400/[0.04] border border-yellow-400/10">
