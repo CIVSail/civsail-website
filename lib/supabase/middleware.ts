@@ -7,7 +7,7 @@
  * Phase 2 — Dashboard: Accessible only once onboarding_completed_at is set on the profile.
  *
  * Route rules:
- *   /login, /signup     → redirect to /dashboard if authed + onboarded, else /onboarding if authed + not onboarded
+ *   /login              → redirect to /dashboard if authed + onboarded, else /onboarding if authed + not onboarded
  *   /onboarding         → redirect to /login if not authed, /dashboard if already onboarded
  *   /dashboard/*        → redirect to /login if not authed, /onboarding if authed but not onboarded
  */
@@ -47,7 +47,7 @@ export async function updateSession(request: NextRequest) {
   const pathname = request.nextUrl.pathname;
   const isDashboard = pathname.startsWith('/dashboard');
   const isOnboarding = pathname.startsWith('/onboarding');
-  const isAuthPage = pathname === '/login' || pathname === '/signup';
+  const isAuthPage = pathname === '/login';
 
   // ── Not authenticated ──────────────────────────────────────────────────────
   if (!user) {
@@ -87,7 +87,7 @@ export async function updateSession(request: NextRequest) {
     }
 
     if (isAuthPage) {
-      // Logged-in users visiting login/signup get routed to the right place
+      // Logged-in users visiting login get routed to the right place
       if (onboardingComplete) {
         const url = request.nextUrl.clone();
         url.pathname = '/dashboard';
