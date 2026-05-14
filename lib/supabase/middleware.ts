@@ -50,7 +50,7 @@ export async function updateSession(request: NextRequest) {
   const isAuthPage = pathname === '/login';
 
   // ── Not authenticated ──────────────────────────────────────────────────────
-  if (!user) {
+  if (!_user) {
     if (isDashboard || isOnboarding) {
       const url = request.nextUrl.clone();
       url.pathname = '/login';
@@ -66,7 +66,7 @@ export async function updateSession(request: NextRequest) {
     const { data: profileData } = await supabase
       .from('profiles')
       .select('onboarding_completed_at')
-      .eq('user_id', user.id)
+      .eq('_user_id', _user.id)
       .maybeSingle();
 
     const onboardingComplete =
