@@ -162,6 +162,10 @@ export default function LoginPage() {
 
         {/* Sign Up Link */}
         <p className="text-center text-sm text-gray-600 mt-6">
+          New account registrations are currently paused.
+        </p>
+        {/*
+        <p className="text-center text-sm text-gray-600 mt-6">
           Don't have an account?{' '}
           <Link
             href="/signup"
@@ -170,6 +174,7 @@ export default function LoginPage() {
             Sign Up
           </Link>
         </p>
+        */}
 
         {/* Back to Home */}
         <div className="mt-8 text-center">
