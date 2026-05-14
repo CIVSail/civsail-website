@@ -329,12 +329,12 @@ export default function AboutPage() {
               },
               {
                 label: 'Travel Claim Generator',
-                href: '/tools/travel-voucher',
+                href: '/tools/travel-claim',
                 note: 'MSC',
               },
               {
                 label: 'Ship Pay Calculator',
-                href: '/tools/pay-calculator',
+                href: '/tools/ship-pay-calculator',
                 note: 'MSC',
               },
               { label: 'Interactive Port Guides', href: '/ports', note: '' },

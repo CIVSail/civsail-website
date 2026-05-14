@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { google } from 'googleapis';
+import { createClient } from '@/lib/supabase/server';
 
 const oauth2Client = new google.auth.OAuth2(
   process.env.GMAIL_CLIENT_ID,
@@ -13,17 +14,22 @@ oauth2Client.setCredentials({
 const gmail = google.gmail({ version: 'v1', auth: oauth2Client });
 
 export async function GET() {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+
+  if (!user) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+
   try {
-    // Search for ANY recent emails (no filters)
     const response = await gmail.users.messages.list({
       userId: 'me',
       maxResults: 10,
-      q: 'newer_than:1d' // Just emails from last 24 hours
+      q: 'newer_than:1d'
     });
 
     const messages = response.data.messages || [];
-    
-    // Get details for each email
+
     const emailDetails = await Promise.all(
       messages.map(async (msg) => {
         const details = await gmail.users.messages.get({
@@ -32,7 +38,7 @@ export async function GET() {
           format: 'metadata',
           metadataHeaders: ['From', 'Subject', 'Date']
         });
-        
+
         const headers = details.data.payload?.headers || [];
         return {
           id: msg.id,

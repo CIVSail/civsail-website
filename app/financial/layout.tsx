@@ -1,13 +1,13 @@
 import { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'Financial Planning for Mariners | CIVSail',
+  title: 'Financial Planning for Merchant Mariners — Retirement, TSP & Investing',
   description:
-    'Connect with financial professionals who understand mariner life. Free consultation for retirement planning, investing, budgeting, and more.',
+    'Financial planning resources for U.S. merchant mariners and CIVMARs: FERS retirement, TSP allocation strategies, budgeting for rotation schedules, investing on mariner income, tax considerations for sea-based work, and connections to financial professionals who understand the unique challenges of maritime careers.',
   openGraph: {
-    title: 'Financial Planning for Mariners | CIVSail',
+    title: 'Financial Planning for Merchant Mariners | CIVSail',
     description:
-      'Making money at sea? Make sure you keep it. Get your free financial consultation.',
+      'FERS retirement, TSP strategies, budgeting, and investing resources built for the unique financial needs of merchant mariners.',
     type: 'website',
     url: 'https://civsail.com/financial',
   },

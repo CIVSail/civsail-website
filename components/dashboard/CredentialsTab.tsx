@@ -78,7 +78,8 @@ export default function CredentialsTab({
     if (!refNumber) return;
 
     // Capture current credential IDs so we can highlight new ones after the lookup
-    setPreReverifyIds(new Set(credentials.map((c) => c.id)));
+    const preReverifySnapshot = new Set(credentials.map((c) => c.id));
+    setPreReverifyIds(preReverifySnapshot);
     setReverifyStatus('checking');
     setReverifyMessage('');
 
@@ -99,10 +100,10 @@ export default function CredentialsTab({
     }
 
     // Poll for completion — check the nmc_verifications status
-    pollForCompletion(userId);
+    pollForCompletion(userId, preReverifySnapshot);
   }
 
-  async function pollForCompletion(userId: string) {
+  async function pollForCompletion(userId: string, preReverifySnapshot: Set<string>) {
     const maxAttempts = 60; // 5 minutes at 5-second intervals
     let attempts = 0;
 
@@ -139,7 +140,7 @@ export default function CredentialsTab({
 
         // Find credentials that weren't in the pre-reverify set
         const newlyAdded = newCredList.filter(
-          (c: Credential) => !preReverifyIds.has(c.id)
+          (c: Credential) => !preReverifySnapshot.has(c.id)
         );
 
         setCredentials(newCredList);

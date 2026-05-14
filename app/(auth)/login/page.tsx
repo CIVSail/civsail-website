@@ -160,8 +160,15 @@ export default function LoginPage() {
           <div className="flex-1 border-t border-gray-300"></div>
         </div>
 
+        {/* Sign Up Link */}
         <p className="text-center text-sm text-gray-600 mt-6">
-          New account creation is disabled.
+          Don't have an account?{' '}
+          <Link
+            href="/signup"
+            className="text-blue-600 hover:text-blue-700 font-medium"
+          >
+            Sign Up
+          </Link>
         </p>
 
         {/* Back to Home */}

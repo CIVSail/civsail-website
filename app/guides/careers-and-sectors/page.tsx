@@ -47,7 +47,7 @@ export default function CareersAndSectorsPage() {
             
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link
-                href="/login"
+                href="/signup"
                 className="inline-block bg-blue-600 text-white font-semibold px-8 py-4 rounded-full hover:bg-blue-500 transition-all shadow-lg hover:shadow-xl hover:-translate-y-0.5"
               >
                 Create free account
