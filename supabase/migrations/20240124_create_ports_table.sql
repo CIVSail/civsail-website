@@ -7,10 +7,13 @@
 -- full_guide = complete port guide with venues, tips, maps
 -- basic_page = template page with basic info
 -- none = just coordinates, no page built yet
-CREATE TYPE port_page_status AS ENUM ('full_guide', 'basic_page', 'none');
+DO $$ BEGIN
+  CREATE TYPE port_page_status AS ENUM ('full_guide', 'basic_page', 'none');
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
 
 -- Step 2: Create the ports table
-CREATE TABLE ports (
+CREATE TABLE IF NOT EXISTS ports (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
 
   -- Core location data (from world_ports dataset)
@@ -42,15 +45,20 @@ CREATE TABLE ports (
 );
 
 -- Step 3: Add unique constraint for upsert operations
--- Prevents duplicate city+country combinations
-ALTER TABLE ports ADD CONSTRAINT ports_city_country_unique UNIQUE (city, country);
+DO $$ BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_constraint WHERE conname = 'ports_city_country_unique'
+  ) THEN
+    ALTER TABLE ports ADD CONSTRAINT ports_city_country_unique UNIQUE (city, country);
+  END IF;
+END $$;
 
 -- Step 4: Create indexes for common query patterns
-CREATE INDEX idx_ports_coordinates ON ports (latitude, longitude);
-CREATE INDEX idx_ports_region ON ports (region) WHERE region IS NOT NULL;
-CREATE INDEX idx_ports_slug ON ports (slug) WHERE slug IS NOT NULL;
-CREATE INDEX idx_ports_page_status ON ports (page_status);
-CREATE INDEX idx_ports_country ON ports (country);
+CREATE INDEX IF NOT EXISTS idx_ports_coordinates ON ports (latitude, longitude);
+CREATE INDEX IF NOT EXISTS idx_ports_region ON ports (region) WHERE region IS NOT NULL;
+CREATE INDEX IF NOT EXISTS idx_ports_slug ON ports (slug) WHERE slug IS NOT NULL;
+CREATE INDEX IF NOT EXISTS idx_ports_page_status ON ports (page_status);
+CREATE INDEX IF NOT EXISTS idx_ports_country ON ports (country);
 
 -- Step 5: Create updated_at trigger
 CREATE OR REPLACE FUNCTION update_ports_updated_at()
@@ -61,6 +69,7 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
+DROP TRIGGER IF EXISTS ports_updated_at ON ports;
 CREATE TRIGGER ports_updated_at
   BEFORE UPDATE ON ports
   FOR EACH ROW
@@ -70,37 +79,37 @@ CREATE TRIGGER ports_updated_at
 ALTER TABLE ports ENABLE ROW LEVEL SECURITY;
 
 -- Step 7: RLS Policies
--- Anyone can read ports (public data for the globe)
-CREATE POLICY "Public read access for ports"
-  ON ports FOR SELECT
-  USING (true);
-
--- Only admins can modify ports
--- Check user metadata for admin role OR match specific admin user IDs
-CREATE POLICY "Admin write access for ports"
-  ON ports FOR INSERT
-  WITH CHECK (
-    auth.jwt() ->> 'role' = 'admin' OR
-    auth.uid() IN (
-      -- Add your admin user UUIDs here
-      -- Example: 'xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx'::uuid
-      SELECT auth.uid() WHERE auth.jwt() -> 'app_metadata' ->> 'role' = 'admin'
-    )
-  );
-
-CREATE POLICY "Admin update access for ports"
-  ON ports FOR UPDATE
-  USING (
-    auth.jwt() ->> 'role' = 'admin' OR
-    auth.jwt() -> 'app_metadata' ->> 'role' = 'admin'
-  );
-
-CREATE POLICY "Admin delete access for ports"
-  ON ports FOR DELETE
-  USING (
-    auth.jwt() ->> 'role' = 'admin' OR
-    auth.jwt() -> 'app_metadata' ->> 'role' = 'admin'
-  );
+DO $$ BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE tablename = 'ports' AND policyname = 'Public read access for ports') THEN
+    CREATE POLICY "Public read access for ports" ON ports FOR SELECT USING (true);
+  END IF;
+  IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE tablename = 'ports' AND policyname = 'Admin write access for ports') THEN
+    CREATE POLICY "Admin write access for ports"
+      ON ports FOR INSERT
+      WITH CHECK (
+        auth.jwt() ->> 'role' = 'admin' OR
+        auth.uid() IN (
+          SELECT auth.uid() WHERE auth.jwt() -> 'app_metadata' ->> 'role' = 'admin'
+        )
+      );
+  END IF;
+  IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE tablename = 'ports' AND policyname = 'Admin update access for ports') THEN
+    CREATE POLICY "Admin update access for ports"
+      ON ports FOR UPDATE
+      USING (
+        auth.jwt() ->> 'role' = 'admin' OR
+        auth.jwt() -> 'app_metadata' ->> 'role' = 'admin'
+      );
+  END IF;
+  IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE tablename = 'ports' AND policyname = 'Admin delete access for ports') THEN
+    CREATE POLICY "Admin delete access for ports"
+      ON ports FOR DELETE
+      USING (
+        auth.jwt() ->> 'role' = 'admin' OR
+        auth.jwt() -> 'app_metadata' ->> 'role' = 'admin'
+      );
+  END IF;
+END $$;
 
 -- ============================================================================
 -- Verification queries (run after migration)

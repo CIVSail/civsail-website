@@ -6,19 +6,25 @@ import {
   markEmailAsRead,
 } from '@/lib/gmail/client';
 import { parseNMCEmail, detectDiscrepancies } from '@/lib/utils/nmc-parser';
+import { sendNmcTimeoutNotification } from '@/lib/utils/email';
 
-// Use service role key for cron jobs
+// Use service role key for cron jobs (bypasses RLS)
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.SUPABASE_SERVICE_ROLE_KEY!
 );
 
+// 48 hours in minutes — spec-defined user-facing timeout for NMC verification
+const TIMEOUT_MINUTES = 2880;
+
 /**
  * GET /api/cron/check-nmc-emails
- * Vercel Cron job to check Gmail for NMC responses
- * Runs every once a day minute-VERCEL does not allow unpaid plans to run more frequently
+ * Vercel Cron job to check Gmail for NMC responses.
  *
- * Protected by CRON_SECRET header
+ * On finding a match: parses credentials, updates profile, marks email read.
+ * On timeout (48h): updates status to 'timeout', sends email notification to user.
+ *
+ * Protected by CRON_SECRET header.
  */
 export async function GET(request: NextRequest) {
   // Verify cron secret
@@ -64,73 +70,70 @@ export async function GET(request: NextRequest) {
     let processedCount = 0;
     let timedOutCount = 0;
 
-    // Process each pending verification
     for (const verification of pendingVerifications) {
       const ageInMinutes =
         (Date.now() - new Date(verification.requested_at).getTime()) /
         (1000 * 60);
 
-      // Determine if we should check this verification (based on age)
+      // ── 48-hour timeout ────────────────────────────────────────────────────
+      // Email type verifications get 30 days since the email may have been
+      // sent days ago before we started monitoring the inbox.
+      const timeoutMinutes =
+        verification.verification_type === 'email' ? 43200 : TIMEOUT_MINUTES;
+
+      if (ageInMinutes > timeoutMinutes) {
+        await supabase
+          .from('nmc_verifications')
+          .update({ status: 'timeout' })
+          .eq('id', verification.id);
+
+        await supabase
+          .from('profiles')
+          .update({ nmc_verification_status: 'timeout' })
+          .eq('user_id', verification.user_id);
+
+        // Notify user so they know to check their ref number / last name
+        if (verification.verification_type !== 'email') {
+          const { data: profile } = await supabase
+            .from('profiles')
+            .select('email, first_name')
+            .eq('user_id', verification.user_id)
+            .single();
+
+          if (profile?.email) {
+            await sendNmcTimeoutNotification({
+              recipientName: profile.first_name || 'Mariner',
+              recipientEmail: profile.email,
+              refNumber: verification.ref_number,
+              lastName: verification.last_name,
+            });
+            console.log(
+              `[NMC Cron] Sent timeout notification to ${profile.email}`
+            );
+          }
+        }
+
+        timedOutCount++;
+        continue;
+      }
+
+      // ── Checking frequency based on age ──────────────────────────────────
+      // Controls how often we hit the Gmail API per verification.
+      // On Vercel Pro with a 5-min cron: first 5 min = every run,
+      // then backs off to avoid unnecessary API calls.
       let shouldCheck = false;
 
-      if (verification.verification_type === 'onboarding') {
-        // Aggressive checking for onboarding
-        if (ageInMinutes < 5)
-          shouldCheck = true; // Every 30 sec (cron runs every minute)
-        else if (ageInMinutes < 15)
-          shouldCheck = verification.check_count % 1 === 0; // Every 1 min
-        else if (ageInMinutes < 30)
-          shouldCheck = verification.check_count % 2 === 0; // Every 2 min
-        else if (ageInMinutes < 60)
-          shouldCheck = verification.check_count % 5 === 0; // Every 5 min
-        else {
-          // Timeout after 60 minutes
-          await supabase
-            .from('nmc_verifications')
-            .update({ status: 'timeout' })
-            .eq('id', verification.id);
-
-          await supabase
-            .from('profiles')
-            .update({ nmc_verification_status: 'timeout' })
-            .eq('user_id', verification.user_id);
-
-          timedOutCount++;
-          continue;
-        }
-      } else if (verification.verification_type === 'email') {
-        // Email verifications: check every time (user manually requested)
-        shouldCheck = true;
-        
-        // Timeout after 30 days (email might be older)
-        if (ageInMinutes > 43200) { // 30 days
-          await supabase
-            .from('nmc_verifications')
-            .update({ status: 'timeout' })
-            .eq('id', verification.id);
-          
-          timedOutCount++;
-          continue;
-        }
+      if (ageInMinutes < 5) {
+        shouldCheck = true; // Every run in first 5 minutes
+      } else if (ageInMinutes < 60) {
+        shouldCheck = verification.check_count % 3 === 0; // ~every 15 min
+      } else if (ageInMinutes < 360) {
+        shouldCheck = verification.check_count % 12 === 0; // every hour
       } else {
-        // Relaxed checking for re-verification
-        if (ageInMinutes < 120)
-          shouldCheck = verification.check_count % 15 === 0; // Every 15 min
-        else {
-          // Timeout after 2 hours
-          await supabase
-            .from('nmc_verifications')
-            .update({ status: 'timeout' })
-            .eq('id', verification.id);
-
-          timedOutCount++;
-          continue;
-        }
+        shouldCheck = verification.check_count % 48 === 0; // every 4 hours
       }
 
-      if (!shouldCheck) {
-        continue; // Skip this check interval
-      }
+      if (!shouldCheck) continue;
 
       // Increment check count
       await supabase
@@ -141,132 +144,121 @@ export async function GET(request: NextRequest) {
         })
         .eq('id', verification.id);
 
-      // Look for matching email
+      // Search emails for a match by reference number
       for (const messageId of messageIds) {
         const email = await getEmailContent(messageId);
 
-        console.log(`[NMC Cron] Checking email for ref: ${verification.ref_number}`);
-        console.log(`[NMC Cron] Email body preview: ${email.body.substring(0, 200)}`);
+        console.log(
+          `[NMC Cron] Checking email for ref: ${verification.ref_number}`
+        );
+        console.log(
+          `[NMC Cron] Email body preview: ${email.body.substring(0, 200)}`
+        );
 
-        // Check if email matches this verification (by ref number)
-        if (email.body.includes(`RefNum: ${verification.ref_number}`)) {
-          console.log(
-            `[NMC Cron] Found matching email for ref ${verification.ref_number}`
+        if (!email.body.includes(`RefNum: ${verification.ref_number}`))
+          continue;
+
+        console.log(
+          `[NMC Cron] Found matching email for ref ${verification.ref_number}`
+        );
+
+        try {
+          const parsed = parseNMCEmail(email.body);
+
+          const { data: profile } = await supabase
+            .from('profiles')
+            .select('mmc_exp, medical_exp')
+            .eq('user_id', verification.user_id)
+            .single();
+
+          const discrepancy = detectDiscrepancies(
+            profile?.mmc_exp || null,
+            profile?.medical_exp || null,
+            parsed.mmcExpiration,
+            parsed.medicalExpiration
           );
 
-          try {
-            // Parse email
-            const parsed = parseNMCEmail(email.body);
+          await supabase
+            .from('profiles')
+            .update({
+              mmc_exp: parsed.mmcExpiration,
+              mmc_exp_nmc_verified: parsed.mmcExpiration,
+              mmc_exp_user_entered: profile?.mmc_exp || null,
+              medical_exp: parsed.medicalExpiration,
+              medical_exp_nmc_verified: parsed.medicalExpiration,
+              medical_exp_user_entered: profile?.medical_exp || null,
+              nmc_verification_status: discrepancy.hasAnyDiscrepancy
+                ? 'verified_needs_review'
+                : 'verified',
+              nmc_verified_at: new Date().toISOString(),
+            })
+            .eq('user_id', verification.user_id);
 
-            // Get user's current profile
-            const { data: profile } = await supabase
-              .from('profiles')
-              .select('mmc_exp, medical_exp')
-              .eq('user_id', verification.user_id)
-              .single();
-
-            // Detect discrepancies
-            const discrepancy = detectDiscrepancies(
-              profile?.mmc_exp || null,
-              profile?.medical_exp || null,
-              parsed.mmcExpiration,
-              parsed.medicalExpiration
-            );
-
-            // Update profile with NMC data
-            await supabase
-              .from('profiles')
-              .update({
-                mmc_exp: parsed.mmcExpiration,
-                mmc_exp_nmc_verified: parsed.mmcExpiration,
-                mmc_exp_user_entered: profile?.mmc_exp || null,
-                medical_exp: parsed.medicalExpiration,
-                medical_exp_nmc_verified: parsed.medicalExpiration,
-                medical_exp_user_entered: profile?.medical_exp || null,
-                nmc_verification_status: discrepancy.hasAnyDiscrepancy
-                  ? 'verified_needs_review'
-                  : 'verified',
-                nmc_verified_at: new Date().toISOString(),
-              })
-              .eq('user_id', verification.user_id);
-
-            // Store credentials
-            // ✅ FIXED CODE:
-            for (const cred of parsed.credentials) {
-              // Only save credentials we successfully classified
-              if (!cred.classification) {
-                console.warn('Skipping unknown credential:', cred.rawText);
-                continue;
-              }
-
-              await supabase.from('credentials').upsert(
-                {
-                  user_id: verification.user_id,
-
-                  // Use classification fields (these exist!)
-                  credential_type: cred.classification.type,
-                  endorsement_name: cred.classification.shortName,
-                  department: cred.classification.department,
-                  endorsement_system: cred.classification.system, // 'national' or 'stcw'
-
-                  // Store original text for audit trail
-                  raw_nmc_text: cred.rawText,
-
-                  // Metadata
-                  rank: cred.classification.rank,
-                  qualification_level: cred.classification.level,
-                  verified_by_nmc: true,
-                  needs_review: cred.needsReview,
-                  source_verification_id: verification.id,
-                },
-                {
-                  onConflict: 'user_id,endorsement_name', // Don't create duplicates
-                }
+          // Store credentials from the parsed NMC email
+          for (const cred of parsed.credentials) {
+            // Skip credentials we couldn't classify — log for manual review
+            if (!cred.classification) {
+              console.warn(
+                '[NMC Cron] Skipping unknown credential:',
+                cred.rawText
               );
+              continue;
             }
 
-            // Log unknown credentials for later classification
-            if (parsed.unknownCredentials.length > 0) {
-              console.log(
-                'Found unknown credentials:',
-                parsed.unknownCredentials
-              );
-              // TODO: Store these in a review queue table later
-            }
-
-            // Mark verification as completed
-            await supabase
-              .from('nmc_verifications')
-              .update({
-                status: 'completed',
-                completed_at: new Date().toISOString(),
-                raw_email_text: email.body,
-                parsed_data: parsed,
-                has_discrepancy: discrepancy.hasAnyDiscrepancy,
-              })
-              .eq('id', verification.id);
-
-            // Mark email as read
-            await markEmailAsRead(messageId);
-
-            processedCount++;
-
-            // TODO: Send notification to user (implement later)
-            console.log(
-              `[NMC Cron] Processed verification for user ${verification.user_id}`
+            await supabase.from('credentials').upsert(
+              {
+                user_id: verification.user_id,
+                credential_type: cred.classification.type,
+                endorsement_name: cred.classification.shortName,
+                department: cred.classification.department,
+                endorsement_system: cred.classification.system,
+                raw_nmc_text: cred.rawText,
+                rank: cred.classification.rank,
+                qualification_level: cred.classification.level,
+                verified_by_nmc: true,
+                needs_review: cred.needsReview,
+                source_verification_id: verification.id,
+              },
+              { onConflict: 'user_id,endorsement_name' }
             );
-          } catch (parseError) {
-            console.error('[NMC Cron] Error parsing email:', parseError);
-            // Don't mark as failed - might be temporary parsing issue
           }
 
-          break; // Found matching email, move to next verification
+          if (parsed.unknownCredentials.length > 0) {
+            console.log(
+              '[NMC Cron] Unknown credentials (need classification):',
+              parsed.unknownCredentials
+            );
+            // TODO: Store in a review queue table for manual classification
+          }
+
+          await supabase
+            .from('nmc_verifications')
+            .update({
+              status: 'completed',
+              completed_at: new Date().toISOString(),
+              raw_email_text: email.body,
+              parsed_data: parsed,
+              has_discrepancy: discrepancy.hasAnyDiscrepancy,
+            })
+            .eq('id', verification.id);
+
+          await markEmailAsRead(messageId);
+
+          processedCount++;
+          console.log(
+            `[NMC Cron] Processed verification for user ${verification.user_id}`
+          );
+        } catch (parseError) {
+          console.error('[NMC Cron] Error parsing email:', parseError);
+          // Don't mark as failed — might be a temporary parsing issue
         }
+
+        break; // Found a match, move to next verification
       }
     }
 
     console.log(
-      `[NMC Cron] Completed. Processed: ${processedCount}, Timed out: ${timedOutCount}`
+      `[NMC Cron] Done. Processed: ${processedCount}, Timed out: ${timedOutCount}`
     );
 
     return NextResponse.json({
