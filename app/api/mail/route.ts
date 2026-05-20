@@ -11,7 +11,7 @@ const supabase = createClient(
   process.env.SUPABASE_SERVICE_ROLE_KEY!
 );
 
-const NMC_SENDER = 'smb-nationalmariticenter-donotreply@uscg.mil';
+const NMC_SENDER = 'smb-nationalmaritimecenter-donotreply@uscg.mil';
 
 /**
  * POST /api/mail
@@ -32,7 +32,14 @@ export async function POST(request: NextRequest) {
 
   let event: {
     type: string;
-    data: { email_id: string; from: string; to: string[]; subject: string };
+    data: {
+      email_id: string;
+      from: string;
+      to: string[];
+      subject: string;
+      text?: string;
+      html?: string;
+    };
   };
 
   try {
@@ -51,7 +58,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ received: true, skipped: true });
   }
 
-  const { email_id, from, subject } = event.data;
+  const { email_id, from, subject, text, html } = event.data;
 
   // ── Confirm sender is NMC ──────────────────────────────────────────────────
   if (!from.toLowerCase().includes(NMC_SENDER)) {
@@ -62,18 +69,28 @@ export async function POST(request: NextRequest) {
   console.log(`[NMC Mail] Received NMC email ${email_id} — "${subject}"`);
 
   // ── Fetch full email body ──────────────────────────────────────────────────
-  // Resend webhooks only carry metadata; body requires a separate API call.
+  // Resend inbound webhooks can include text/html; fall back to API only if needed.
   let emailBody = '';
-  try {
-    const emailData = await resend.emails.get(email_id);
-    if (emailData.data?.text) {
-      emailBody = emailData.data.text;
-    } else if (emailData.data?.html) {
-      emailBody = emailData.data.html.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
+
+  if (text && text.trim()) {
+    emailBody = text.trim();
+  } else if (html && html.trim()) {
+    emailBody = html.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
+  } else {
+    try {
+      const emailData = await resend.emails.get(email_id);
+      if (emailData.data?.text) {
+        emailBody = emailData.data.text;
+      } else if (emailData.data?.html) {
+        emailBody = emailData.data.html
+          .replace(/<[^>]+>/g, ' ')
+          .replace(/\s+/g, ' ')
+          .trim();
+      }
+    } catch (err) {
+      console.error('[NMC Mail] Failed to fetch email body:', err);
+      return new NextResponse('Failed to fetch email content', { status: 500 });
     }
-  } catch (err) {
-    console.error('[NMC Mail] Failed to fetch email body:', err);
-    return new NextResponse('Failed to fetch email content', { status: 500 });
   }
 
   if (!emailBody) {
@@ -92,9 +109,12 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Database error' }, { status: 500 });
   }
 
-  const verification = pendingVerifications?.find((v) =>
-    emailBody.includes(`RefNum: ${v.ref_number}`)
-  );
+  const verification = pendingVerifications?.find((v) => {
+    const ref = String(v.ref_number).trim();
+    if (!ref) return false;
+    const refRegex = new RegExp(`Ref\s*Num\s*:\s*${ref}`, 'i');
+    return refRegex.test(emailBody);
+  });
 
   if (!verification) {
     console.log('[NMC Mail] No pending verification matched the ref number in this email');

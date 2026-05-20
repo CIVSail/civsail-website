@@ -489,9 +489,18 @@ export function parseNMCEmail(emailBody: string): ParsedNMCEmail {
     const trimmed = line.trim();  // Remove spaces from start/end
     
     // PATTERN 1: Extract Reference Number
-    // Looking for: "RefNum: 4161399"
+    // Looking for: "RefNum: 4161399" (may share line with last name)
     if (trimmed.startsWith('RefNum:') || trimmed.startsWith('Ref Num:')) {
-      refNumber = trimmed.split(':')[1].trim();
+      const refMatch = trimmed.match(/Ref\s*Num\s*:\s*(\d+)/i);
+      if (refMatch) {
+        refNumber = refMatch[1].trim();
+      }
+
+      const lastNameMatch = trimmed.match(/Last\s*Name\s*:\s*([A-Za-z'\-\s]+)/i);
+      if (lastNameMatch) {
+        lastName = lastNameMatch[1].trim();
+      }
+
       continue;  // Move to next line
     }
     
