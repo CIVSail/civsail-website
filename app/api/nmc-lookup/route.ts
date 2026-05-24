@@ -31,8 +31,12 @@ export async function POST(request: NextRequest) {
     
     // Parse request body
     const { refNumber, lastName, verificationType = 'onboarding' } = await request.json();
+
+    const normalizedRefNumber = String(refNumber || '')
+      .replace(/\D/g, '')
+      .trim();
     
-    if (!refNumber || !lastName) {
+    if (!normalizedRefNumber || !lastName) {
       return NextResponse.json(
         { ok: false, error: 'Missing refNumber or lastName' },
         { status: 400 }
@@ -60,7 +64,7 @@ export async function POST(request: NextRequest) {
       .from('nmc_verifications')
       .insert({
         user_id: user.id,
-        ref_number: refNumber,
+        ref_number: normalizedRefNumber,
         last_name: lastName,
         verification_type: verificationType,
         status: 'pending',
@@ -83,7 +87,7 @@ export async function POST(request: NextRequest) {
       .from('profiles')
       .update({ 
         nmc_verification_status: 'pending',
-        ref_number: refNumber 
+        ref_number: normalizedRefNumber 
       })
       .eq('user_id', user.id);
     
