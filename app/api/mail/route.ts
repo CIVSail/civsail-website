@@ -1,26 +1,18 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
+import type { NextRequest } from 'next/server';
+import { NextResponse } from 'next/server';
 import { Webhook } from 'svix';
 import { Resend } from 'resend';
+import { createClient } from '@supabase/supabase-js';
 import { parseNMCEmail, detectDiscrepancies } from '@/lib/utils/nmc-parser';
 
-const resend = new Resend(process.env.RESEND_API_KEY!);
-
+const resend = new Resend(process.env.RESEND_API_KEY);
+const NMC_SENDER = 'smb-nationalmaritimecenter-donotreply@uscg.mil';
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.SUPABASE_SERVICE_ROLE_KEY!
 );
 
-const NMC_SENDER = 'smb-nationalmaritimecenter-donotreply@uscg.mil';
-
-/**
- * POST /api/mail
- *
- * Resend inbound webhook — fires when an email arrives at credentials@civsail.com.
- * Finds the matching pending verification, parses credentials, and updates Supabase.
- */
-export async function POST(request: NextRequest) {
-  // ── Verify webhook signature ───────────────────────────────────────────────
+export const POST = async (request: NextRequest) => {
   const rawBody = await request.text();
   const svixId = request.headers.get('svix-id');
   const svixTimestamp = request.headers.get('svix-timestamp');
@@ -60,16 +52,10 @@ export async function POST(request: NextRequest) {
 
   const { email_id, from, subject, text, html } = event.data;
 
-  // ── Confirm sender is NMC ──────────────────────────────────────────────────
   if (!from.toLowerCase().includes(NMC_SENDER)) {
-    console.log(`[NMC Mail] Ignored non-NMC sender: ${from}`);
     return NextResponse.json({ received: true, skipped: true });
   }
 
-  console.log(`[NMC Mail] Received NMC email ${email_id} — "${subject}"`);
-
-  // ── Fetch full email body ──────────────────────────────────────────────────
-  // Resend inbound webhooks can include text/html; fall back to API only if needed.
   let emailBody = '';
 
   if (text && text.trim()) {
@@ -78,7 +64,7 @@ export async function POST(request: NextRequest) {
     emailBody = html.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
   } else {
     try {
-      const emailData = await resend.emails.get(email_id);
+      const emailData = await resend.emails.receiving.get(email_id);
       if (emailData.data?.text) {
         emailBody = emailData.data.text;
       } else if (emailData.data?.html) {
@@ -98,34 +84,33 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ received: true, parsed: false, reason: 'empty body' });
   }
 
-  // ── Match to a pending verification by ref number ─────────────────────────
-  const { data: pendingVerifications, error: fetchError } = await supabase
-    .from('nmc_verifications')
-    .select('*')
-    .eq('status', 'pending');
-
-  if (fetchError) {
-    console.error('[NMC Mail] Error fetching pending verifications:', fetchError);
-    return NextResponse.json({ error: 'Database error' }, { status: 500 });
-  }
-
-  const verification = pendingVerifications?.find((v) => {
-    const ref = String(v.ref_number).trim();
-    if (!ref) return false;
-    const refRegex = new RegExp(`Ref\s*Num\s*:\s*${ref}`, 'i');
-    return refRegex.test(emailBody);
-  });
-
-  if (!verification) {
-    console.log('[NMC Mail] No pending verification matched the ref number in this email');
-    return NextResponse.json({ received: true, skipped: true, reason: 'no matching ref' });
-  }
-
-  console.log(`[NMC Mail] Matched ref ${verification.ref_number} → user ${verification.user_id}`);
-
-  // ── Parse, detect discrepancies, write to Supabase ────────────────────────
   try {
     const parsed = parseNMCEmail(emailBody);
+
+    const emailRefMatch = emailBody.match(/Ref\s*Num\s*:\s*(\d+)/i);
+    const normalizedEmailRef = emailRefMatch?.[1]?.trim() || '';
+
+    if (!normalizedEmailRef) {
+      return NextResponse.json({ received: true, skipped: true, reason: 'no ref in email' });
+    }
+
+    const { data: pendingVerifications, error: fetchError } = await supabase
+      .from('nmc_verifications')
+      .select('*')
+      .eq('status', 'pending')
+      .eq('ref_number', normalizedEmailRef)
+      .order('requested_at', { ascending: false });
+
+    if (fetchError) {
+      console.error('[NMC Mail] Error fetching pending verifications:', fetchError);
+      return NextResponse.json({ error: 'Database error' }, { status: 500 });
+    }
+
+    const verification = pendingVerifications?.[0];
+
+    if (!verification) {
+      return NextResponse.json({ received: true, skipped: true, reason: 'no matching ref' });
+    }
 
     const { data: profile } = await supabase
       .from('profiles')
@@ -182,7 +167,6 @@ export async function POST(request: NextRequest) {
 
     if (parsed.unknownCredentials.length > 0) {
       console.log('[NMC Mail] Unknown credentials (need classification):', parsed.unknownCredentials);
-      // TODO: Store in a review queue table for manual classification
     }
 
     await supabase
@@ -196,11 +180,9 @@ export async function POST(request: NextRequest) {
       })
       .eq('id', verification.id);
 
-    console.log(`[NMC Mail] Done — user ${verification.user_id}`);
     return NextResponse.json({ received: true, parsed: true });
   } catch (parseError) {
     console.error('[NMC Mail] Parse error:', parseError);
-    // Return 200 so Resend doesn't retry — this is a parsing issue, not transport
     return NextResponse.json({ received: true, parsed: false, reason: 'parse error' });
   }
-}
+};
