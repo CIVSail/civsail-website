@@ -37,7 +37,6 @@ import {
   CircleDot,
   ArrowRight,
   UploadCloud,
-  FileImage,
 } from 'lucide-react';
 
 import {
@@ -71,7 +70,7 @@ import {
 import { generateAndDownloadPDFs } from './pdf-generator';
 import { createPayClient } from '@/lib/supabase/pay-client';
 import { createClient } from '@/lib/supabase/client';
-import { parseReceiptText, ReceiptParseResult } from './receipt-parser';
+import { parseItineraryFromOcrText } from './itinerary-parser';
 // ============================================
 // WIZARD STEPS CONFIGURATION
 // ============================================
@@ -458,13 +457,17 @@ export default function TravelClaimGenerator() {
   const [showUpdateNotice, setShowUpdateNotice] = useState(true);
 
   const [intakeMode, setIntakeMode] = useState<'ocr' | 'manual' | null>(null);
-  const [receiptResults, setReceiptResults] = useState<ReceiptParseResult[]>([]);
-  const [receiptProcessing, setReceiptProcessing] = useState(false);
-  const [receiptError, setReceiptError] = useState<string | null>(null);
-  const [selectedReceiptNames, setSelectedReceiptNames] = useState<string[]>([]);
-  const [receiptApplied, setReceiptApplied] = useState(false);
-  const [receiptNotice, setReceiptNotice] = useState<string | null>(null);
   const [profileNotice, setProfileNotice] = useState<string | null>(null);
+  const [uploadStatus, setUploadStatus] = useState({
+    orders: 'idle',
+    itinerary: 'idle',
+    receipts: 'idle',
+  } as Record<'orders' | 'itinerary' | 'receipts', 'idle' | 'uploading' | 'extracting' | 'ready' | 'error'>);
+  const [uploadErrors, setUploadErrors] = useState({
+    orders: null,
+    itinerary: null,
+    receipts: null,
+  } as Record<'orders' | 'itinerary' | 'receipts', string | null>);
 
   // Leg editing state
   const [editingLegId, setEditingLegId] = useState<string | null>(null);
@@ -602,7 +605,6 @@ export default function TravelClaimGenerator() {
     }
     setCurrentStep(step);
     setEditingLegFromSummary(null);
-    setReceiptApplied(false);
   };
 
   const goNext = () => {
@@ -853,81 +855,89 @@ export default function TravelClaimGenerator() {
   // STEP 1: OVERVIEW
   // ============================================
 
-  const handleReceiptUpload = async (files: FileList | null) => {
-    if (!files || files.length === 0) return;
-
-    setReceiptProcessing(true);
-    setReceiptError(null);
-    setReceiptResults([]);
-    setSelectedReceiptNames(Array.from(files).map((file) => file.name));
-    setReceiptApplied(false);
-    setReceiptNotice(null);
-
-    const form = new FormData();
-    Array.from(files).forEach((file) => {
-      form.append('files', file);
-    });
-
-    try {
-      const response = await fetch('/api/ocr/process-travel-receipt', {
-        method: 'POST',
-        body: form,
-      });
-
-      const payload = await response.json();
-      if (!response.ok || !payload.success) {
-        throw new Error(payload.error || 'OCR processing failed');
-      }
-
-      const parsed = (payload.results as {
-        fileName: string;
-        success: boolean;
-        text: string;
-        confidence: number;
-        error?: string;
-      }[])
-        .filter((result) => result.success && result.text)
-        .map((result, index) =>
-          parseReceiptText(result.text, index, result.confidence)
-        );
-
-      const resultsWithText = parsed.filter(
-        (result) => result.expenses.length > 0
-      );
-      setReceiptResults(parsed);
-      setReceiptError(
-        resultsWithText.length > 0
-          ? null
-          : 'Nothing was pulled from the receipt. Please upload a clearer image or a higher-quality scan.'
-      );
-    } catch (err) {
-      setReceiptError(
-        err instanceof Error ? err.message : 'Failed to process receipts'
-      );
-    } finally {
-      setReceiptProcessing(false);
+  const updateUploadStatus = (
+    key: 'orders' | 'itinerary' | 'receipts',
+    status: 'idle' | 'uploading' | 'extracting' | 'ready' | 'error',
+    error?: string | null
+  ) => {
+    setUploadStatus((prev) => ({ ...prev, [key]: status }));
+    if (error !== undefined) {
+      setUploadErrors((prev) => ({ ...prev, [key]: error }));
     }
   };
 
-  const applyReceiptSuggestions = () => {
-    const expenses = receiptResults.flatMap((result) => result.expenses);
-    const legs = receiptResults.flatMap((result) =>
-      result.itineraryLegs.map((leg) => ({
-        ...leg,
-        flightInfo: leg.flightInfo || result.flightInfo,
-      }))
-    );
-    if (expenses.length === 0 && legs.length === 0) {
-      setReceiptNotice('No details were pulled. You can add them manually.');
-      return;
+  const extractAllOcrText = async (file: File) => {
+    const form = new FormData();
+    form.append('files', file);
+
+    const response = await fetch('/api/ocr/process-travel-receipt', {
+      method: 'POST',
+      body: form,
+    });
+
+    const payload = await response.json();
+    if (!response.ok || !payload.success) {
+      throw new Error(payload.error || 'OCR processing failed');
     }
 
-    setFormData((prev) => ({
-      ...prev,
-      additionalExpenses: [...prev.additionalExpenses, ...expenses],
-      itinerary: prev.itinerary.length > 0 ? [...prev.itinerary, ...legs] : legs,
-    }));
-    setReceiptApplied(true);
+    const results = (payload.results as {
+      fileName: string;
+      success: boolean;
+      text: string;
+      confidence: number;
+      error?: string;
+    }[]).filter((item) => item.success && item.text);
+
+    if (results.length === 0) {
+      throw new Error('We could not read this document. Try a clearer scan.');
+    }
+
+    const combinedText = results.map((item) => item.text).join('\n\n');
+    const confidence = Math.round(
+      results.reduce((sum, item) => sum + item.confidence, 0) / results.length
+    );
+
+    return { text: combinedText, confidence };
+  };
+
+  const handleOrdersUpload = async (file: File | null) => {
+    if (!file) return;
+    updateUploadStatus('orders', 'uploading', null);
+    updateUploadStatus('orders', 'ready');
+  };
+
+  const handleItineraryUpload = async (file: File | null) => {
+    if (!file) return;
+    updateUploadStatus('itinerary', 'uploading', null);
+
+    try {
+      updateUploadStatus('itinerary', 'extracting');
+      const result = await extractAllOcrText(file);
+      const parsed = parseItineraryFromOcrText(result.text, 0);
+
+      if (parsed.legs.length > 0) {
+        setFormData((prev) => ({
+          ...prev,
+          itinerary: parsed.legs,
+        }));
+      }
+
+      updateUploadStatus('itinerary', 'ready');
+    } catch (err) {
+      updateUploadStatus(
+        'itinerary',
+        'error',
+        err instanceof Error
+          ? err.message
+          : 'We could not read this document. Try a clearer scan.'
+      );
+    }
+  };
+
+  const handleReceiptFilesUpload = async (files: FileList | null) => {
+    if (!files || files.length === 0) return;
+    updateUploadStatus('receipts', 'uploading', null);
+    updateUploadStatus('receipts', 'ready');
   };
 
   const renderIntakeStep = () => (
@@ -950,9 +960,9 @@ export default function TravelClaimGenerator() {
                 <UploadCloud className="w-5 h-5" />
               </div>
               <div>
-                <p className="font-semibold text-gray-900">Upload receipts</p>
+                <p className="font-semibold text-gray-900">Upload documents (faster)</p>
                 <p className="text-sm text-gray-600 mt-1">
-                  Use OCR to auto-fill expenses, dates, and totals.
+                  Orders, itinerary, and receipts pre-fill the trip skeleton.
                 </p>
               </div>
             </div>
@@ -974,7 +984,7 @@ export default function TravelClaimGenerator() {
                 <Edit3 className="w-5 h-5" />
               </div>
               <div>
-                <p className="font-semibold text-gray-900">Enter everything manually</p>
+                <p className="font-semibold text-gray-900">Enter manually</p>
                 <p className="text-sm text-gray-600 mt-1">
                   Best if you already know all details.
                 </p>
@@ -984,168 +994,103 @@ export default function TravelClaimGenerator() {
         </div>
 
         {intakeMode === 'ocr' && (
-          <div className="mt-6 space-y-4">
-            <div className="border border-dashed border-gray-300 rounded-xl p-6 bg-gray-50">
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Upload travel receipts (PNG, JPG, WEBP, PDF)
-              </label>
-              <div className="flex flex-col gap-3">
-                <label
-                  htmlFor="receipt-upload"
-                  className="inline-flex items-center justify-center px-5 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium w-fit"
-                >
-                  Select receipts
-                </label>
-                <input
-                  id="receipt-upload"
-                  type="file"
-                  accept="image/*,application/pdf"
-                  multiple
-                  onChange={(e) => handleReceiptUpload(e.target.files)}
-                  className="sr-only"
-                />
-                {selectedReceiptNames.length > 0 && (
-                  <div className="text-sm text-gray-600 space-y-1">
-                    {selectedReceiptNames.map((name) => (
-                      <div key={name} className="flex items-center gap-2">
-                        <FileImage className="w-4 h-4 text-blue-500" />
-                        <span>{name}</span>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-              <p className="text-xs text-gray-500 mt-2">
-                OCR runs in real time. We only extract text to pre-fill your form.
-              </p>
-            </div>
-
-            {receiptProcessing && (
-              <div className="flex items-center gap-3 text-sm text-gray-600">
-                <div className="h-2 w-2 rounded-full bg-blue-500 animate-pulse" />
-                Processing receipts...
-              </div>
-            )}
-
-            {receiptError && (
-              <div className="p-4 bg-red-50 border border-red-200 rounded-lg text-sm text-red-600">
-                {receiptError}
-              </div>
-            )}
-
-            {receiptNotice && (
-              <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg text-sm text-blue-700">
-                {receiptNotice}
-              </div>
-            )}
-
-            {receiptResults.length > 0 && (
-              <div className="space-y-4">
-                {receiptResults.some((result) => result.notes.length > 0) && (
-                  <div className="p-4 bg-amber-50 border border-amber-200 rounded-lg text-sm text-amber-700">
-                    Some details were not pulled in. You can fill the gaps manually.
-                  </div>
-                )}
+          <div className="mt-6 space-y-5">
+            <div className="grid grid-cols-1 gap-4">
+              <div className="border border-dashed border-gray-300 rounded-xl p-5 bg-gray-50">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="font-semibold text-gray-900">OCR suggestions</p>
-                    <p className="text-sm text-gray-600">
-                      Review the detected expenses before applying them.
-                    </p>
+                    <p className="text-sm font-medium text-gray-900">Orders (required)</p>
+                    <p className="text-xs text-gray-500">PDF only</p>
                   </div>
-                  {receiptResults.some(
-                    (result) =>
-                      result.expenses.length > 0 || result.itineraryLegs.length > 0
-                  ) && (
-                    <div className="flex flex-col items-end">
-                      <button
-                        onClick={applyReceiptSuggestions}
-                        disabled={receiptApplied}
-                        className={`px-5 py-2 rounded-lg transition-colors ${
-                          receiptApplied
-                            ? 'bg-gray-200 text-gray-600 cursor-not-allowed'
-                            : 'bg-blue-600 text-white hover:bg-blue-700'
-                        }`}
-                      >
-                        {receiptApplied ? (
-                          <span className="inline-flex items-center gap-2">
-                            <Check className="w-4 h-4" />
-                            Applied
-                          </span>
-                        ) : (
-                          'Apply to form'
-                        )}
-                      </button>
-                      {receiptApplied && (
-                        <div className="mt-3 inline-flex items-center gap-2 px-3 py-2 bg-green-50 border border-green-200 rounded-lg text-sm text-green-700">
-                          <Check className="w-4 h-4" />
-                          Data applied successfully.
-                        </div>
-                      )}
-                    </div>
-                  )}
+                  <label className="inline-flex items-center justify-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium">
+                    Upload
+                    <input
+                      type="file"
+                      accept="application/pdf"
+                      className="sr-only"
+                      onChange={(e) => handleOrdersUpload(e.target.files?.[0] || null)}
+                    />
+                  </label>
                 </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {receiptResults.map((result, index) => (
-                    <div
-                      key={`receipt-${index}`}
-                      className="border border-gray-200 rounded-xl p-4 bg-white"
-                    >
-                      <div className="flex items-center gap-2 text-sm text-gray-600">
-                        <FileImage className="w-4 h-4 text-blue-500" />
-                        OCR confidence: {result.confidence}%
-                      </div>
-                      {(result.itineraryLegs.length > 0 ||
-                        result.expenses.length > 0) && (
-                        <div className="mt-3 space-y-2">
-                          {result.itineraryLegs.map((leg) => (
-                            <div key={leg.id} className="text-sm text-gray-700">
-                              {leg.from.details} → {leg.to.details}{' '}
-                              {leg.departureDate
-                                ? `· ${leg.departureDate}`
-                                : ''}
-                              {result.flightInfo
-                                ? ` (${result.flightInfo})`
-                                : ''}
-                            </div>
-                          ))}
-                          {result.expenses.map((expense) => (
-                            <div key={expense.id} className="text-sm text-gray-700">
-                              {expense.description}{' '}
-                              {expense.amount > 0
-                                ? `· $${expense.amount.toFixed(2)}`
-                                : ''}
-                            </div>
-                          ))}
-                        </div>
-                      )}
-                      {result.itineraryLegs.length === 0 &&
-                        result.expenses.length === 0 && (
-                          <p className="mt-3 text-sm text-gray-600">
-                            No details found for this receipt.
-                          </p>
-                        )}
-                      {result.notes.length > 0 && (
-                        <div className="mt-3 text-xs text-amber-600">
-                          {result.notes.join(' • ')}
-                        </div>
-                      )}
-                    </div>
-                  ))}
-                </div>
+                {uploadErrors.orders && (
+                  <p className="mt-2 text-xs text-red-600">{uploadErrors.orders}</p>
+                )}
+                <p className="mt-2 text-xs text-gray-500">Status: {uploadStatus.orders}</p>
+                {uploadStatus.orders === 'error' && (
+                  <button
+                    type="button"
+                    onClick={() => updateUploadStatus('orders', 'idle', null)}
+                    className="mt-2 text-xs text-blue-600 hover:text-blue-700"
+                  >
+                    Retry or skip and enter manually
+                  </button>
+                )}
               </div>
-            )}
+              <div className="border border-dashed border-gray-300 rounded-xl p-5 bg-gray-50">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-gray-900">E-Ticket / Itinerary (required)</p>
+                    <p className="text-xs text-gray-500">PDF, JPG, PNG</p>
+                  </div>
+                  <label className="inline-flex items-center justify-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium">
+                    Upload
+                    <input
+                      type="file"
+                      accept="application/pdf,image/*"
+                      className="sr-only"
+                      onChange={(e) => handleItineraryUpload(e.target.files?.[0] || null)}
+                    />
+                  </label>
+                </div>
+                {uploadErrors.itinerary && (
+                  <p className="mt-2 text-xs text-red-600">{uploadErrors.itinerary}</p>
+                )}
+                <p className="mt-2 text-xs text-gray-500">Status: {uploadStatus.itinerary}</p>
+                {uploadStatus.itinerary === 'error' && (
+                  <button
+                    type="button"
+                    onClick={() => updateUploadStatus('itinerary', 'idle', null)}
+                    className="mt-2 text-xs text-blue-600 hover:text-blue-700"
+                  >
+                    Retry or skip and enter manually
+                  </button>
+                )}
+              </div>
+              <div className="border border-dashed border-gray-300 rounded-xl p-5 bg-gray-50">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-gray-900">Receipts (optional)</p>
+                    <p className="text-xs text-gray-500">PDF, JPG, PNG, HEIC</p>
+                  </div>
+                  <label className="inline-flex items-center justify-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium">
+                    Upload
+                    <input
+                      type="file"
+                      accept="application/pdf,image/*"
+                      multiple
+                      className="sr-only"
+                      onChange={(e) => handleReceiptFilesUpload(e.target.files)}
+                    />
+                  </label>
+                </div>
+                {uploadErrors.receipts && (
+                  <p className="mt-2 text-xs text-red-600">{uploadErrors.receipts}</p>
+                )}
+                <p className="mt-2 text-xs text-gray-500">Status: {uploadStatus.receipts}</p>
+                {uploadStatus.receipts === 'error' && (
+                  <button
+                    type="button"
+                    onClick={() => updateUploadStatus('receipts', 'idle', null)}
+                    className="mt-2 text-xs text-blue-600 hover:text-blue-700"
+                  >
+                    Retry or skip and enter manually
+                  </button>
+                )}
+              </div>
+            </div>
           </div>
         )}
       </SectionCard>
-
-      <InfoBox type="info">
-        <p>
-          You can always edit anything OCR fills in. If a receipt is unclear, add
-          the expense manually later.
-        </p>
-      </InfoBox>
     </div>
   );
 
@@ -2595,7 +2540,6 @@ export default function TravelClaimGenerator() {
             {currentStep !== 'review' && (
               <button
                 onClick={goNext}
-                disabled={receiptProcessing}
                 className="px-6 py-2 bg-violet-600 text-white rounded-lg hover:bg-violet-700 transition-colors flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 Next Step

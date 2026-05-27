@@ -1,9 +1,52 @@
 // app/api/ocr/process-travel-receipt/route.ts
 import { NextResponse } from 'next/server';
 import { extractTextFromReceipt } from '@/lib/ocr/ocr-space';
+import {
+  PDFCheckBox,
+  PDFDocument,
+  PDFDropdown,
+  PDFOptionList,
+  PDFRadioGroup,
+  PDFTextField,
+} from 'pdf-lib';
 
 export const runtime = 'nodejs';
 
+function getPdfFormFieldValue(field: unknown): string {
+  if (field instanceof PDFTextField) {
+    return field.getText() ?? '';
+  }
+
+  if (field instanceof PDFDropdown || field instanceof PDFOptionList) {
+    return field.getSelected().join(', ');
+  }
+
+  if (field instanceof PDFCheckBox) {
+    return field.isChecked() ? 'Yes' : '';
+  }
+
+  if (field instanceof PDFRadioGroup) {
+    return field.getSelected() ?? '';
+  }
+
+  return '';
+}
+
+async function extractTextFromPdfForm(buffer: Buffer): Promise<string> {
+  const pdfDoc = await PDFDocument.load(buffer, { ignoreEncryption: true });
+  const form = pdfDoc.getForm();
+  const fields = form.getFields();
+
+  const lines: string[] = [];
+  for (const field of fields) {
+    const name = field.getName();
+    const value = getPdfFormFieldValue(field).trim();
+    if (!value) continue;
+    lines.push(`${name}: ${value}`);
+  }
+
+  return lines.join('\n').trim();
+}
 
 /**
  * POST /api/ocr/process-travel-receipt
@@ -48,9 +91,20 @@ export async function POST(request: Request) {
       const buffer = Buffer.from(arrayBuffer);
 
       if (isPdf) {
+        const formText = await extractTextFromPdfForm(buffer);
+        if (formText) {
+          results.push({
+            fileName: file.name,
+            success: true,
+            text: formText,
+            confidence: 100,
+          });
+          continue;
+        }
+
         const pdfResult = await extractTextFromReceipt(buffer, 'application/pdf');
         const fallbackMessage =
-          'Please upload a clearer image or a higher-quality scan.';
+          'No embedded text found in this PDF. If it is a scanned image, export a higher-resolution version or upload a clear image instead.';
 
         results.push({
           fileName: file.name,

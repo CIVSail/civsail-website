@@ -71,6 +71,7 @@ export default function DashboardPage() {
   // File management state
   const [mmcFiles, setMmcFiles] = useState<any[]>([]);
   const [seaServiceFiles, setSeaServiceFiles] = useState<any[]>([]);
+  const [travelClaimFiles, setTravelClaimFiles] = useState<any[]>([]);
   const [uploadingTo, setUploadingTo] = useState<string | null>(null);
 
   // Sea service data state
@@ -171,6 +172,12 @@ export default function DashboardPage() {
       .from('documents')
       .list(`sea_service/${user.id}`);
     setSeaServiceFiles(seaList || []);
+
+    // Load travel claim forms
+    const { data: travelList } = await supabase.storage
+      .from('documents')
+      .list(`travel_claim/${user.id}`);
+    setTravelClaimFiles(travelList || []);
   }
 
   // Load sea service periods from database
@@ -218,7 +225,7 @@ export default function DashboardPage() {
 
   // Modified to process sea service files with OCR
   async function handleFileUpload(
-    type: 'mmc' | 'sea_service',
+    type: 'mmc' | 'sea_service' | 'travel_claim',
     files: FileList | null
   ) {
     if (!files || !profile) return;
@@ -350,7 +357,7 @@ export default function DashboardPage() {
   }
 
   async function handleDeleteFile(
-    type: 'mmc' | 'sea_service',
+    type: 'mmc' | 'sea_service' | 'travel_claim',
     fileName: string
   ) {
     if (!profile) return;
@@ -802,6 +809,16 @@ export default function DashboardPage() {
                 uploading={uploadingTo === 'sea_service'}
                 onUpload={(files) => handleFileUpload('sea_service', files)}
                 onDelete={(name) => handleDeleteFile('sea_service', name)}
+                userId={profile.user_id}
+                supabase={supabase}
+              />
+              <DocumentSection
+                title="Travel Claim Forms"
+                files={travelClaimFiles}
+                type="travel_claim"
+                uploading={uploadingTo === 'travel_claim'}
+                onUpload={(files) => handleFileUpload('travel_claim', files)}
+                onDelete={(name) => handleDeleteFile('travel_claim', name)}
                 userId={profile.user_id}
                 supabase={supabase}
               />
@@ -1363,7 +1380,7 @@ function DocumentSection({
 }: {
   title: string;
   files: any[];
-  type: 'mmc' | 'sea_service';
+  type: 'mmc' | 'sea_service' | 'travel_claim';
   uploading: boolean;
   onUpload: (files: FileList | null) => void;
   onDelete: (name: string) => void;

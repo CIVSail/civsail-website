@@ -689,6 +689,31 @@ export async function generateAndDownloadPDFs(
   }
 }
 
+export async function generateTravelClaimPackage(
+  formData: TravelClaimForm
+): Promise<Uint8Array> {
+  const dd1351Bytes = await generateDD1351PDF(formData);
+  const compTimeBytes = await generateCompTimePDF(formData);
+  const packageDoc = await PDFDocument.create();
+
+  const dd1351Doc = await PDFDocument.load(dd1351Bytes, { ignoreEncryption: true });
+  const compTimeDoc = await PDFDocument.load(compTimeBytes, { ignoreEncryption: true });
+
+  const dd1351Pages = await packageDoc.copyPages(
+    dd1351Doc,
+    dd1351Doc.getPageIndices()
+  );
+  dd1351Pages.forEach((page) => packageDoc.addPage(page));
+
+  const compPages = await packageDoc.copyPages(
+    compTimeDoc,
+    compTimeDoc.getPageIndices()
+  );
+  compPages.forEach((page) => packageDoc.addPage(page));
+
+  return await packageDoc.save();
+}
+
 /**
  * Trigger PDF download in browser
  */

@@ -235,6 +235,38 @@ export interface AdditionalExpense {
 }
 
 // ============================================
+// RECEIPT TYPES (UPLOAD FLOW)
+// ============================================
+
+export type ReceiptCategory =
+  | 'lodging'
+  | 'meal'
+  | 'ground_transport'
+  | 'baggage'
+  | 'other';
+
+export interface ReceiptDateRange {
+  start: string;
+  end: string;
+}
+
+export interface ReceiptItem {
+  id: string;
+  fileName: string;
+  vendor?: string;
+  amount?: number;
+  currency?: string;
+  date?: string;
+  dateRange?: ReceiptDateRange;
+  category?: ReceiptCategory;
+  location?: string;
+  confidence: number;
+  linkedLegId?: string | null;
+  duplicateOf?: string | null;
+  notes?: string[];
+}
+
+// ============================================
 // UI STATE TYPES
 // ============================================
 

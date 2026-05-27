@@ -68,8 +68,11 @@ export async function extractTextFromReceipt(
       };
     }
 
-    const parsedText = response.ParsedResults?.[0]?.ParsedText || '';
-    const text = parsedText.trim();
+    const parsedResults = response.ParsedResults || [];
+    const text = parsedResults
+      .map((result) => (result?.ParsedText || '').trim())
+      .filter(Boolean)
+      .join('\n\n');
 
     if (!text) {
       return {
