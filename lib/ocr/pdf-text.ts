@@ -15,7 +15,17 @@ function getItemText(item: unknown): string {
 
 export async function extractTextFromPdf(buffer: Buffer): Promise<string> {
   const pdfjs = await import('pdfjs-dist/legacy/build/pdf.mjs');
-  const loadingTask = pdfjs.getDocument({ data: new Uint8Array(buffer) });
+  const isBrowser = typeof window !== 'undefined';
+  if (isBrowser && !pdfjs.GlobalWorkerOptions?.workerSrc) {
+    pdfjs.GlobalWorkerOptions.workerSrc = new URL(
+      'pdfjs-dist/build/pdf.worker.min.mjs',
+      import.meta.url
+    ).toString();
+  }
+  const loadingTask = pdfjs.getDocument({
+    data: new Uint8Array(buffer),
+    disableWorker: !isBrowser,
+  });
   const pdf = await loadingTask.promise;
 
   let combined = '';

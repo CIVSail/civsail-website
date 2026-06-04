@@ -71,6 +71,7 @@ import { generateAndDownloadPDFs } from './pdf-generator';
 import { createPayClient } from '@/lib/supabase/pay-client';
 import { createClient } from '@/lib/supabase/client';
 import { parseItineraryFromOcrText } from './itinerary-parser';
+import { extractTextFromPdf } from '@/lib/ocr/pdf-text';
 // ============================================
 // WIZARD STEPS CONFIGURATION
 // ============================================
@@ -900,10 +901,111 @@ export default function TravelClaimGenerator() {
     return { text: combinedText, confidence };
   };
 
+  const applyOrdersExtraction = (rawText: string) => {
+    const text = rawText.replace(/\r/g, '').trim();
+    const lines = text.split('\n').map((line) => line.trim()).filter(Boolean);
+
+    const matchLineAfter = (labelRegex: RegExp): string | undefined => {
+      const index = lines.findIndex((line) => labelRegex.test(line));
+      if (index === -1) return undefined;
+      const nextLine = lines[index + 1];
+      return nextLine?.trim();
+    };
+
+    const findTokenAfter = (labelRegex: RegExp): string | undefined => {
+      const index = lines.findIndex((line) => labelRegex.test(line));
+      if (index === -1) return undefined;
+      const candidates = lines.slice(index + 1, index + 3).filter(Boolean);
+      for (const line of candidates) {
+        const tokens = line.split(/\s+/).filter(Boolean);
+        const token = tokens.find((value) => /^[A-Z0-9]{4,}$/.test(value));
+        if (token) return token;
+      }
+      return undefined;
+    };
+
+    const orderNumber = findTokenAfter(/TRAVEL ORDER NUMBER/i);
+    const gradeMatch = text.match(/GS-\s*(\d{1,2})/i);
+    const purposeRaw = matchLineAfter(/TDY PURPOSE/i);
+    const purpose = purposeRaw?.trim();
+
+    const fromMatch = text.match(/FROM:\s*([^\n]+)/i);
+    const toMatch = text.match(/TO:\s*([^\n]+)/i);
+
+    const travelTypeMatch = text.match(/\b(CONUS|OCONUS)\b/i);
+    const travelType = travelTypeMatch?.[1]?.toUpperCase() as
+      | 'CONUS'
+      | 'OCONUS'
+      | undefined;
+
+    setFormData((prev) => {
+      const next = { ...prev };
+
+      if (orderNumber) {
+        next.authorizationNumber = orderNumber;
+      }
+
+      if (gradeMatch) {
+        next.traveler = {
+          ...next.traveler,
+          grade: Number.parseInt(gradeMatch[1], 10),
+        };
+      }
+
+      if (purpose && /TRAINING/i.test(purpose)) {
+        next.purpose = 'Going to Training';
+      }
+
+      if (travelType) {
+        next.travelType = travelType;
+      }
+
+      return next;
+    });
+
+    if (fromMatch?.[1] || toMatch?.[1]) {
+      setProfileNotice((prev) => {
+        const parts = [
+          fromMatch?.[1] ? `Orders from: ${fromMatch[1].trim()}` : null,
+          toMatch?.[1] ? `to: ${toMatch[1].trim()}` : null,
+        ].filter(Boolean);
+        if (parts.length === 0) return prev;
+        const combined = parts.join(' ');
+        return prev ? `${prev} · ${combined}` : combined;
+      });
+    }
+  };
+
   const handleOrdersUpload = async (file: File | null) => {
     if (!file) return;
     updateUploadStatus('orders', 'uploading', null);
-    updateUploadStatus('orders', 'ready');
+    try {
+      updateUploadStatus('orders', 'extracting');
+      const pdfText = await extractTextFromPdf(Buffer.from(await file.arrayBuffer()));
+      const trimmedPdfText = pdfText.trim();
+      console.log('[Orders Text Preview]', file.name, trimmedPdfText.slice(0, 200));
+      console.log('[Orders Text Length]', file.name, trimmedPdfText.length);
+      if (trimmedPdfText) {
+        console.log('[Orders Text]', file.name, trimmedPdfText);
+        applyOrdersExtraction(trimmedPdfText);
+        updateUploadStatus('orders', 'ready');
+        return;
+      }
+
+      const result = await extractAllOcrText(file);
+      console.log('[Orders OCR]', file.name, result.text);
+      applyOrdersExtraction(result.text);
+      updateUploadStatus('orders', 'ready');
+    } catch (err) {
+      console.error('[Orders Text Error]', err);
+      updateUploadStatus(
+        'orders',
+        'error',
+        err instanceof Error
+          ? err.message
+          : 'We could not read this document. Try a clearer scan.'
+      );
+    }
   };
 
   const handleItineraryUpload = async (file: File | null) => {
