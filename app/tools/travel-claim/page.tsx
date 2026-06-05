@@ -49,6 +49,8 @@ import {
   TransportType,
   StopReason,
   Location,
+  ReceiptItem,
+  ReceiptCategory,
   LOCATION_OPTIONS,
   TRANSPORT_OPTIONS,
   STOP_REASON_OPTIONS,
@@ -72,6 +74,7 @@ import { createPayClient } from '@/lib/supabase/pay-client';
 import { createClient } from '@/lib/supabase/client';
 import { parseItineraryFromOcrText } from './itinerary-parser';
 import { extractTextFromPdf } from '@/lib/ocr/pdf-text';
+import { parseReceiptText } from './receipt-parser';
 // ============================================
 // WIZARD STEPS CONFIGURATION
 // ============================================
@@ -455,7 +458,6 @@ export default function TravelClaimGenerator() {
   const [completedSteps, setCompletedSteps] = useState<WizardStep[]>([]);
   const [isGenerating, setIsGenerating] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [showUpdateNotice, setShowUpdateNotice] = useState(true);
 
   const [intakeMode, setIntakeMode] = useState<'ocr' | 'manual' | null>(null);
   const [profileNotice, setProfileNotice] = useState<string | null>(null);
@@ -469,6 +471,11 @@ export default function TravelClaimGenerator() {
     itinerary: null,
     receipts: null,
   } as Record<'orders' | 'itinerary' | 'receipts', string | null>);
+  const [uploadFiles, setUploadFiles] = useState({
+    orders: null,
+    itinerary: null,
+    receipts: [] as string[],
+  });
 
   // Leg editing state
   const [editingLegId, setEditingLegId] = useState<string | null>(null);
@@ -495,6 +502,8 @@ export default function TravelClaimGenerator() {
       workSchedule: '0800-1630',
       normalCommuteMinutes: 30,
     },
+    tripStart: { type: 'HOR', details: '' },
+    tripEnd: { type: 'Airport', details: '' },
     authorizationNumber: '',
     travelOrdersIssued: true,
     purpose: '',
@@ -504,6 +513,7 @@ export default function TravelClaimGenerator() {
     advanceAmount: 0,
     itinerary: [],
     additionalExpenses: [],
+    receipts: [],
   });
 
   // Positions from Supabase
@@ -718,6 +728,31 @@ export default function TravelClaimGenerator() {
     setEditingLegId(newLeg.id);
   };
 
+  const addLegToEnd = () => {
+    const lastLeg = formData.itinerary[formData.itinerary.length - 1];
+    const newLeg: ItineraryLeg = {
+      id: `leg-${Date.now()}`,
+      from: lastLeg ? { ...lastLeg.to } : { type: 'HOR', details: '' },
+      to: { ...formData.tripEnd },
+      departureDate: '',
+      departureTime: '',
+      arrivalDate: '',
+      arrivalTime: '',
+      departureTimezone: lastLeg ? lastLeg.arrivalTimezone : -5,
+      arrivalTimezone: lastLeg ? lastLeg.arrivalTimezone : -5,
+      transport: { type: 'govt-ticket-flight' },
+      reason: 'FINAL_DESTINATION',
+      isFlight: true,
+      isInternational: false,
+    };
+
+    setFormData({
+      ...formData,
+      itinerary: [...formData.itinerary, newLeg],
+    });
+    setEditingLegId(newLeg.id);
+  };
+
   const updateLeg = (legId: string, updates: Partial<ItineraryLeg>) => {
     setFormData({
       ...formData,
@@ -725,6 +760,34 @@ export default function TravelClaimGenerator() {
         leg.id === legId ? { ...leg, ...updates } : leg
       ),
     });
+  };
+
+  const insertLegAfter = (index: number) => {
+    const prevLeg = formData.itinerary[index];
+    const nextLeg = formData.itinerary[index + 1];
+    const newLeg: ItineraryLeg = {
+      id: `leg-${Date.now()}`,
+      from: prevLeg ? { ...prevLeg.to } : { type: 'HOR', details: '' },
+      to: nextLeg ? { ...nextLeg.from } : { type: 'Airport', details: '' },
+      departureDate: '',
+      departureTime: '',
+      arrivalDate: '',
+      arrivalTime: '',
+      departureTimezone: prevLeg ? prevLeg.arrivalTimezone : -5,
+      arrivalTimezone: nextLeg ? nextLeg.departureTimezone : -5,
+      transport: { type: 'govt-ticket-flight' },
+      reason: 'WAITING_TRANSPORT',
+      isFlight: true,
+      isInternational: false,
+    };
+
+    const nextItinerary = [...formData.itinerary];
+    nextItinerary.splice(index + 1, 0, newLeg);
+    setFormData({
+      ...formData,
+      itinerary: nextItinerary,
+    });
+    setEditingLegId(newLeg.id);
   };
 
   const deleteLeg = (legId: string) => {
@@ -781,6 +844,15 @@ export default function TravelClaimGenerator() {
         (exp) => exp.id !== expId
       ),
     });
+  };
+
+  const assignReceiptToLeg = (receiptId: string, legId: string | null) => {
+    setFormData((prev) => ({
+      ...prev,
+      receipts: (prev.receipts ?? []).map((receipt) =>
+        receipt.id === receiptId ? { ...receipt, linkedLegId: legId } : receipt
+      ),
+    }));
   };
 
   // ============================================
@@ -851,6 +923,10 @@ export default function TravelClaimGenerator() {
         return null;
     }
   };
+
+  const isOcrBusy = Object.values(uploadStatus).some(
+    (status) => status === 'uploading' || status === 'extracting'
+  );
 
   // ============================================
   // STEP 1: OVERVIEW
@@ -979,6 +1055,7 @@ export default function TravelClaimGenerator() {
   const handleOrdersUpload = async (file: File | null) => {
     if (!file) return;
     updateUploadStatus('orders', 'uploading', null);
+    setUploadFiles((prev) => ({ ...prev, orders: file.name }));
     try {
       updateUploadStatus('orders', 'extracting');
       const pdfText = await extractTextFromPdf(Buffer.from(await file.arrayBuffer()));
@@ -1011,6 +1088,7 @@ export default function TravelClaimGenerator() {
   const handleItineraryUpload = async (file: File | null) => {
     if (!file) return;
     updateUploadStatus('itinerary', 'uploading', null);
+    setUploadFiles((prev) => ({ ...prev, itinerary: file.name }));
 
     try {
       updateUploadStatus('itinerary', 'extracting');
@@ -1039,7 +1117,98 @@ export default function TravelClaimGenerator() {
   const handleReceiptFilesUpload = async (files: FileList | null) => {
     if (!files || files.length === 0) return;
     updateUploadStatus('receipts', 'uploading', null);
-    updateUploadStatus('receipts', 'ready');
+    setUploadFiles((prev) => ({
+      ...prev,
+      receipts: [...prev.receipts, ...Array.from(files).map((file) => file.name)],
+    }));
+    try {
+      updateUploadStatus('receipts', 'extracting');
+      const parsedReceipts: ReceiptItem[] = [];
+      const fileArray = Array.from(files);
+      const now = Date.now();
+
+      const existingReceipts = formData.receipts ?? [];
+      const itinerarySnapshot = formData.itinerary;
+
+      for (const [index, file] of fileArray.entries()) {
+        const result = await extractAllOcrText(file);
+        const parsed = parseReceiptText(result.text, index, result.confidence / 100);
+        const receiptId = `receipt-${now}-${index}`;
+        const duplicateMatch = [...existingReceipts, ...parsedReceipts].find(
+          (existing) =>
+            existing.vendor &&
+            existing.amount !== undefined &&
+            existing.date &&
+            existing.vendor === parsed.merchant &&
+            existing.amount === parsed.expenses[0]?.amount &&
+            existing.date === parsed.expenses[0]?.date
+        );
+
+        const autoLinkedLeg = parsed.dateRange
+          ? itinerarySnapshot.find((leg) => {
+              const startDate = leg.departureDate;
+              if (!startDate) return false;
+              return startDate >= parsed.dateRange.start && startDate <= parsed.dateRange.end;
+            })
+          : undefined;
+
+        parsedReceipts.push({
+          id: receiptId,
+          fileName: file.name,
+          vendor: parsed.merchant,
+          amount: parsed.expenses[0]?.amount,
+          currency: undefined,
+          date: parsed.expenses[0]?.date,
+          dateRange: parsed.dateRange,
+          category: parsed.category,
+          location: undefined,
+          confidence: parsed.confidence,
+          linkedLegId: autoLinkedLeg?.id ?? null,
+          duplicateOf: duplicateMatch ? duplicateMatch.fileName : null,
+          notes: parsed.notes,
+        });
+      }
+
+      setFormData((prev) => ({
+        ...prev,
+        receipts: [...(prev.receipts ?? []), ...parsedReceipts],
+      }));
+      updateUploadStatus('receipts', 'ready');
+    } catch (err) {
+      updateUploadStatus(
+        'receipts',
+        'error',
+        err instanceof Error
+          ? err.message
+          : 'We could not read this document. Try a clearer scan.'
+      );
+    }
+  };
+
+  const formatReceiptCategory = (category?: ReceiptCategory) => {
+    if (!category) return 'Uncategorized';
+    return category
+      .split('_')
+      .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+      .join(' ');
+  };
+
+  const formatReceiptDateRange = (range?: { start: string; end: string }) => {
+    if (!range) return null;
+    const start = new Date(range.start);
+    const end = new Date(range.end);
+    if (Number.isNaN(start.valueOf()) || Number.isNaN(end.valueOf())) {
+      return `${range.start}–${range.end}`;
+    }
+    const startLabel = start.toLocaleDateString('en-US', {
+      month: 'short',
+      day: 'numeric',
+    });
+    const endLabel = end.toLocaleDateString('en-US', {
+      month: 'short',
+      day: 'numeric',
+    });
+    return `${startLabel}–${endLabel}`;
   };
 
   const renderIntakeStep = () => (
@@ -1097,6 +1266,46 @@ export default function TravelClaimGenerator() {
 
         {intakeMode === 'ocr' && (
           <div className="mt-6 space-y-5">
+            <div className="border border-gray-200 rounded-xl p-5 bg-white">
+              <h4 className="text-sm font-semibold text-gray-900">Confirm trip endpoints</h4>
+              <p className="text-xs text-gray-500 mt-1">
+                These two points anchor the trip skeleton. You can edit them later.
+              </p>
+              <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Where did this trip start?
+                  </label>
+                  <Input
+                    id="trip-start"
+                    value={formData.tripStart.details}
+                    onChange={(v) =>
+                      setFormData((prev) => ({
+                        ...prev,
+                        tripStart: { ...prev.tripStart, details: v },
+                      }))
+                    }
+                    placeholder="Home, ship, or port"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Where did this trip end?
+                  </label>
+                  <Input
+                    id="trip-end"
+                    value={formData.tripEnd.details}
+                    onChange={(v) =>
+                      setFormData((prev) => ({
+                        ...prev,
+                        tripEnd: { ...prev.tripEnd, details: v },
+                      }))
+                    }
+                    placeholder="Final destination"
+                  />
+                </div>
+              </div>
+            </div>
             <div className="grid grid-cols-1 gap-4">
               <div className="border border-dashed border-gray-300 rounded-xl p-5 bg-gray-50">
                 <div className="flex items-center justify-between">
@@ -1116,6 +1325,9 @@ export default function TravelClaimGenerator() {
                 </div>
                 {uploadErrors.orders && (
                   <p className="mt-2 text-xs text-red-600">{uploadErrors.orders}</p>
+                )}
+                {uploadFiles.orders && (
+                  <p className="mt-2 text-xs text-gray-600">Uploaded: {uploadFiles.orders}</p>
                 )}
                 <p className="mt-2 text-xs text-gray-500">Status: {uploadStatus.orders}</p>
                 {uploadStatus.orders === 'error' && (
@@ -1147,6 +1359,9 @@ export default function TravelClaimGenerator() {
                 {uploadErrors.itinerary && (
                   <p className="mt-2 text-xs text-red-600">{uploadErrors.itinerary}</p>
                 )}
+                {uploadFiles.itinerary && (
+                  <p className="mt-2 text-xs text-gray-600">Uploaded: {uploadFiles.itinerary}</p>
+                )}
                 <p className="mt-2 text-xs text-gray-500">Status: {uploadStatus.itinerary}</p>
                 {uploadStatus.itinerary === 'error' && (
                   <button
@@ -1177,6 +1392,18 @@ export default function TravelClaimGenerator() {
                 </div>
                 {uploadErrors.receipts && (
                   <p className="mt-2 text-xs text-red-600">{uploadErrors.receipts}</p>
+                )}
+                {uploadFiles.receipts.length > 0 && (
+                  <div className="mt-2 flex flex-wrap gap-2">
+                    {uploadFiles.receipts.map((file) => (
+                      <span
+                        key={file}
+                        className="text-xs bg-white border border-gray-200 rounded-full px-2 py-0.5 text-gray-600"
+                      >
+                        {file}
+                      </span>
+                    ))}
+                  </div>
                 )}
                 <p className="mt-2 text-xs text-gray-500">Status: {uploadStatus.receipts}</p>
                 {uploadStatus.receipts === 'error' && (
@@ -1602,6 +1829,43 @@ export default function TravelClaimGenerator() {
 
   const renderItineraryStep = () => (
     <div className="space-y-6">
+      <SectionCard title="Trip Endpoints" icon={<MapPin className="w-5 h-5 text-violet-600" />}>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Trip start
+            </label>
+            <Input
+              id="trip-start-inline"
+              value={formData.tripStart.details}
+              onChange={(v) =>
+                setFormData((prev) => ({
+                  ...prev,
+                  tripStart: { ...prev.tripStart, details: v },
+                }))
+              }
+              placeholder="Home, ship, or port"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Trip end
+            </label>
+            <Input
+              id="trip-end-inline"
+              value={formData.tripEnd.details}
+              onChange={(v) =>
+                setFormData((prev) => ({
+                  ...prev,
+                  tripEnd: { ...prev.tripEnd, details: v },
+                }))
+              }
+              placeholder="Final destination"
+            />
+          </div>
+        </div>
+      </SectionCard>
+
       <InfoBox type="info">
         <p>
           Build your travel itinerary leg by leg. Start from your Home of Record
@@ -1611,23 +1875,30 @@ export default function TravelClaimGenerator() {
 
       <button
         onClick={addLegToStart}
-        className="w-full py-4 border-2 border-dashed border-gray-300 rounded-xl text-gray-700 hover:bg-gray-50 hover:border-gray-400 transition-all flex items-center justify-center gap-2"
+        className="w-full py-4 border-2 border-dashed border-violet-300 rounded-xl text-violet-600 hover:bg-violet-50 hover:border-violet-400 transition-all flex items-center justify-center gap-2"
       >
         <Plus className="w-5 h-5" />
-        {formData.itinerary.length === 0
-          ? 'Add First Leg (Start from Home)'
-          : `Add Earlier Leg (To ${
-              formData.itinerary[0].from.details ||
-              getLocationLabel(formData.itinerary[0].from.type)
-            })`}
+        Add leg before (from {formData.tripStart.details || 'trip start'})
       </button>
+
+      {formData.itinerary.length > 0 && (
+        <button
+          onClick={addLegToStart}
+          className="w-full py-2 border border-dashed border-gray-200 rounded-lg text-sm text-gray-600 hover:bg-gray-50 hover:border-gray-300 transition-all flex items-center justify-center gap-2"
+        >
+          <Plus className="w-4 h-4" />
+          Add leg before{' '}
+          {formData.itinerary[0].from.details ||
+            getLocationLabel(formData.itinerary[0].from.type)}
+        </button>
+      )}
 
       {/* Existing Legs */}
       {formData.itinerary.map((leg, index) => (
-        <SectionCard
-          key={leg.id}
-          className={editingLegId === leg.id ? 'ring-2 ring-violet-500' : ''}
-        >
+        <div key={leg.id} className="space-y-3">
+          <SectionCard
+            className={editingLegId === leg.id ? 'ring-2 ring-violet-500' : ''}
+          >
           {/* Leg Header */}
           <div
             className="flex items-center justify-between cursor-pointer"
@@ -2059,23 +2330,41 @@ export default function TravelClaimGenerator() {
               </div>
             </div>
           )}
-        </SectionCard>
+          </SectionCard>
+          {index < formData.itinerary.length - 1 && (
+            <button
+              onClick={() => insertLegAfter(index)}
+              className="w-full py-2 border border-dashed border-gray-200 rounded-lg text-sm text-gray-600 hover:bg-gray-50 hover:border-gray-300 transition-all flex items-center justify-center gap-2"
+            >
+              <Plus className="w-4 h-4" />
+              Add leg before{' '}
+              {formData.itinerary[index + 1].from.details ||
+                getLocationLabel(formData.itinerary[index + 1].from.type)}
+            </button>
+          )}
+          {index === formData.itinerary.length - 1 && (
+            <button
+              onClick={addLeg}
+              className="w-full py-2 border border-dashed border-gray-200 rounded-lg text-sm text-gray-600 hover:bg-gray-50 hover:border-gray-300 transition-all flex items-center justify-center gap-2"
+            >
+              <Plus className="w-4 h-4" />
+              Add leg after{' '}
+              {formData.itinerary[formData.itinerary.length - 1].to.details ||
+                getLocationLabel(
+                  formData.itinerary[formData.itinerary.length - 1].to.type
+                )}
+            </button>
+          )}
+        </div>
       ))}
 
-      {/* Add Next Leg Button */}
+      {/* Add leg after endpoint */}
       <button
-        onClick={addLeg}
+        onClick={addLegToEnd}
         className="w-full py-4 border-2 border-dashed border-violet-300 rounded-xl text-violet-600 hover:bg-violet-50 hover:border-violet-400 transition-all flex items-center justify-center gap-2"
       >
         <Plus className="w-5 h-5" />
-        {formData.itinerary.length === 0
-          ? 'Add First Leg (Start from Home)'
-          : `Add Next Leg (From ${
-              formData.itinerary[formData.itinerary.length - 1].to.details ||
-              getLocationLabel(
-                formData.itinerary[formData.itinerary.length - 1].to.type
-              )
-            })`}
+        Add leg after (to {formData.tripEnd.details || 'trip end'})
       </button>
 
       {/* Return from summary edit */}
@@ -2226,6 +2515,147 @@ export default function TravelClaimGenerator() {
             <Plus className="w-4 h-4" />
             Add Expense
           </button>
+        </SectionCard>
+
+        <SectionCard
+          title="Receipts"
+          icon={<FileText className="w-5 h-5 text-violet-600" />}
+        >
+          <div className="flex items-center justify-between">
+            <p className="text-sm text-gray-600">
+              Upload receipts and assign them to the leg they belong to.
+            </p>
+            <label className="inline-flex items-center justify-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium">
+              Add receipts
+              <input
+                type="file"
+                accept="application/pdf,image/*"
+                multiple
+                className="sr-only"
+                onChange={(e) => handleReceiptFilesUpload(e.target.files)}
+              />
+            </label>
+          </div>
+
+        <div className="mt-4 grid grid-cols-1 lg:grid-cols-2 gap-4">
+          <div className="border border-gray-100 rounded-xl p-4">
+            <p className="text-sm font-semibold text-gray-900">Unassigned receipts</p>
+            <div className="mt-3 space-y-3">
+                {(formData.receipts ?? [])
+                  .filter((receipt) => !receipt.linkedLegId)
+                  .map((receipt) => (
+                    <div
+                      key={receipt.id}
+                      className={`rounded-lg border p-3 text-sm ${
+                        receipt.confidence < 0.75
+                          ? 'border-amber-300 bg-amber-50'
+                          : 'border-gray-200 bg-white'
+                      }`}
+                    >
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="font-medium text-gray-900">
+                            {receipt.vendor || receipt.fileName}
+                          </p>
+                          <p className="text-xs text-gray-500">
+                            {receipt.date || 'Date unknown'}
+                            {receipt.amount
+                              ? ` • ${receipt.currency ? `${receipt.currency} ` : '$'}${receipt.amount.toFixed(2)}`
+                              : ''}
+                          </p>
+                          <p className="text-xs text-gray-500 mt-1">
+                            {formatReceiptCategory(receipt.category)}
+                            {receipt.dateRange
+                              ? ` • ${formatReceiptDateRange(receipt.dateRange)}`
+                              : ''}
+                          </p>
+                        </div>
+                        <Select
+                          id={`assign-${receipt.id}`}
+                          value=""
+                          onChange={(v) => assignReceiptToLeg(receipt.id, v || null)}
+                          options={formData.itinerary.map((leg) => ({
+                            value: leg.id,
+                            label: `${leg.from.details || getLocationLabel(leg.from.type)} → ${
+                              leg.to.details || getLocationLabel(leg.to.type)
+                            }`,
+                          }))}
+                          placeholder="Assign"
+                          className="max-w-[180px]"
+                        />
+                      </div>
+                      {receipt.duplicateOf && (
+                        <p className="mt-2 text-xs text-amber-700">
+                          Possible duplicate of {receipt.duplicateOf}
+                        </p>
+                      )}
+                      {receipt.confidence < 0.75 && (
+                        <p className="mt-2 text-xs text-amber-700">
+                          AI wasn't sure — please confirm.
+                        </p>
+                      )}
+                    </div>
+                  ))}
+                {(formData.receipts ?? []).filter((receipt) => !receipt.linkedLegId)
+                  .length === 0 && (
+                  <p className="text-sm text-gray-500">No unassigned receipts.</p>
+                )}
+              </div>
+            </div>
+
+            <div className="border border-gray-100 rounded-xl p-4">
+              <p className="text-sm font-semibold text-gray-900">Receipts by leg</p>
+              <div className="mt-3 space-y-3">
+                {formData.itinerary.map((leg) => {
+                  const linkedReceipts = (formData.receipts ?? []).filter(
+                    (receipt) => receipt.linkedLegId === leg.id
+                  );
+                  return (
+                    <div key={`receipt-leg-${leg.id}`} className="rounded-lg border border-gray-200 p-3">
+                      <p className="text-sm font-medium text-gray-900">
+                        {leg.from.details || getLocationLabel(leg.from.type)} →{' '}
+                        {leg.to.details || getLocationLabel(leg.to.type)}
+                      </p>
+                      <div className="mt-2 space-y-2">
+                        {linkedReceipts.length === 0 ? (
+                          <p className="text-xs text-gray-500">No receipts assigned.</p>
+                        ) : (
+                          linkedReceipts.map((receipt) => (
+                            <div
+                              key={receipt.id}
+                              className="flex flex-wrap items-center justify-between gap-2 text-xs text-gray-600"
+                            >
+                              <div className="flex flex-wrap items-center gap-2">
+                                <span>
+                                  {receipt.vendor || receipt.fileName}
+                                  {receipt.amount
+                                    ? ` • ${receipt.currency ? `${receipt.currency} ` : '$'}${receipt.amount.toFixed(2)}`
+                                    : ''}
+                                </span>
+                                <span className="text-xs text-gray-400">
+                                  {formatReceiptCategory(receipt.category)}
+                                  {receipt.dateRange
+                                    ? ` • ${formatReceiptDateRange(receipt.dateRange)}`
+                                    : ''}
+                                </span>
+                              </div>
+                              <button
+                                type="button"
+                                onClick={() => assignReceiptToLeg(receipt.id, null)}
+                                className="text-blue-600 hover:text-blue-700"
+                              >
+                                Unassign
+                              </button>
+                            </div>
+                          ))
+                        )}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
         </SectionCard>
       </div>
     );
@@ -2595,29 +3025,6 @@ export default function TravelClaimGenerator() {
         </div>
       </div>
 
-      {/* Update Notice Modal */}
-      {showUpdateNotice && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-          <div className="bg-white rounded-2xl shadow-2xl max-w-lg w-full p-8 text-center">
-            <div className="w-16 h-16 bg-amber-100 rounded-full flex items-center justify-center mx-auto mb-5">
-              <AlertCircle className="w-8 h-8 text-amber-600" />
-            </div>
-            <h2 className="text-xl font-bold text-gray-900 mb-3">
-              Updated Travel Claim Form
-            </h2>
-            <p className="text-gray-600 mb-6 leading-relaxed">
-              It has come to our attention that there is an updated travel claim form. The CIVSail team is aware and working to update the calculator to use the new form.
-            </p>
-            <button
-              onClick={() => setShowUpdateNotice(false)}
-              className="bg-violet-600 hover:bg-violet-700 text-white font-semibold px-8 py-3 rounded-lg transition-colors"
-            >
-              Got it
-            </button>
-          </div>
-        </div>
-      )}
-
       {/* Main Content */}
       <div className="max-w-5xl mx-auto px-4 py-8">
         <StepIndicator
@@ -2628,8 +3035,8 @@ export default function TravelClaimGenerator() {
 
         {renderStepContent()}
 
-        {/* Navigation Buttons */}
-        {!editingLegFromSummary && (
+      {/* Navigation Buttons */}
+      {!editingLegFromSummary && (
           <div className="flex justify-between mt-8">
              <button
                onClick={goBack}
@@ -2642,6 +3049,7 @@ export default function TravelClaimGenerator() {
             {currentStep !== 'review' && (
               <button
                 onClick={goNext}
+                disabled={currentStep === 'intake' && isOcrBusy}
                 className="px-6 py-2 bg-violet-600 text-white rounded-lg hover:bg-violet-700 transition-colors flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 Next Step

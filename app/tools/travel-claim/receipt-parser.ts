@@ -3,7 +3,7 @@
  * Parse OCR text from travel receipts into structured suggestions.
  */
 
-import { AdditionalExpense, ItineraryLeg } from './types';
+import { AdditionalExpense, ItineraryLeg, ReceiptCategory, ReceiptDateRange } from './types';
 import { parseItineraryFromOcrText } from './itinerary-parser';
 
 export interface ReceiptParseResult {
@@ -11,6 +11,8 @@ export interface ReceiptParseResult {
   itineraryLegs: ItineraryLeg[];
   flightInfo?: string;
   merchant?: string;
+  category?: ReceiptCategory;
+  dateRange?: ReceiptDateRange;
   notes: string[];
   confidence: number;
 }
@@ -27,6 +29,14 @@ const DATE_PATTERNS: RegExp[] = [
   /\b(\d{1,2})[\/-](\d{1,2})[\/-](\d{2,4})\b/, // MM/DD/YYYY
   /\b(\d{4})[\/-](\d{1,2})[\/-](\d{1,2})\b/, // YYYY-MM-DD
 ];
+
+const CATEGORY_KEYWORDS: Record<ReceiptCategory, string[]> = {
+  lodging: ['folio', 'room', 'night', 'nights', 'check-in', 'check out', 'check-out', 'hotel', 'inn', 'marriott', 'hilton', 'hyatt', 'holiday inn', 'westin', 'sheraton', 'courtyard'],
+  meal: ['restaurant', 'cafe', 'grill', 'bistro', 'bar', 'diner', 'meal', 'tip', 'server', 'food', 'beverage'],
+  ground_transport: ['uber', 'lyft', 'taxi', 'cab', 'rental', 'rental car', 'hertz', 'avis', 'enterprise', 'alamo', 'national', 'ride'],
+  baggage: ['baggage', 'checked bag', 'bag fee', 'luggage', 'bag'],
+  other: [],
+};
 
 function normalizeAmount(value: string): number | null {
   const cleaned = value.replace(/[^0-9.]/g, '');
@@ -64,6 +74,78 @@ function parseDate(text: string): string | null {
     }
   }
   return null;
+}
+
+function formatParsedDate(year: number, month: number, day: number): string {
+  return `${year.toString().padStart(4, '0')}-${month
+    .toString()
+    .padStart(2, '0')}-${day.toString().padStart(2, '0')}`;
+}
+
+function parseFlexibleDate(text: string): string | null {
+  const cleaned = text.trim();
+  for (const pattern of DATE_PATTERNS) {
+    const match = cleaned.match(pattern);
+    if (!match) continue;
+
+    if (pattern === DATE_PATTERNS[0]) {
+      const month = Number.parseInt(match[1], 10);
+      const day = Number.parseInt(match[2], 10);
+      const year = Number.parseInt(match[3].length === 2 ? `20${match[3]}` : match[3], 10);
+      if (month >= 1 && month <= 12 && day >= 1 && day <= 31) {
+        return formatParsedDate(year, month, day);
+      }
+    }
+
+    if (pattern === DATE_PATTERNS[1]) {
+      const year = Number.parseInt(match[1], 10);
+      const month = Number.parseInt(match[2], 10);
+      const day = Number.parseInt(match[3], 10);
+      if (month >= 1 && month <= 12 && day >= 1 && day <= 31) {
+        return formatParsedDate(year, month, day);
+      }
+    }
+  }
+  return null;
+}
+
+function parseDateRange(text: string): ReceiptDateRange | null {
+  const lower = text.toLowerCase();
+  const rangePatterns = [
+    /check[-\s]?in[:\s]*([^\n]+)\s+check[-\s]?out[:\s]*([^\n]+)/i,
+    /arrival[:\s]*([^\n]+)\s+departure[:\s]*([^\n]+)/i,
+    /from[:\s]*([^\n]+)\s+to[:\s]*([^\n]+)/i,
+  ];
+
+  for (const pattern of rangePatterns) {
+    const match = text.match(pattern);
+    if (!match) continue;
+    const start = parseFlexibleDate(match[1]);
+    const end = parseFlexibleDate(match[2]);
+    if (start && end) {
+      return { start, end };
+    }
+  }
+
+  const inlineRange = lower.match(/(\d{1,2}[\/-]\d{1,2}[\/-]\d{2,4})\s*[-–]\s*(\d{1,2}[\/-]\d{1,2}[\/-]\d{2,4})/i);
+  if (inlineRange) {
+    const start = parseFlexibleDate(inlineRange[1]);
+    const end = parseFlexibleDate(inlineRange[2]);
+    if (start && end) return { start, end };
+  }
+
+  return null;
+}
+
+function categorizeReceipt(text: string): ReceiptCategory | undefined {
+  const lower = text.toLowerCase();
+  for (const [category, keywords] of Object.entries(CATEGORY_KEYWORDS)) {
+    if (category === 'other') continue;
+    if (keywords.some((keyword) => lower.includes(keyword))) {
+      return category as ReceiptCategory;
+    }
+  }
+  return undefined;
 }
 
 function guessMerchant(lines: string[]): string | undefined {
@@ -109,12 +191,15 @@ export function parseReceiptText(
 
   const merchant = guessMerchant(lines);
   const date = parseDate(cleanedText);
+  const dateRange = parseDateRange(cleanedText);
+  const category = categorizeReceipt(cleanedText);
   const total = extractTotal(cleanedText);
 
   const notes: string[] = [];
   if (!date) notes.push('Could not find date');
   if (!total) notes.push('Could not find amount');
   if (!merchant) notes.push('Could not find description');
+  if (!dateRange && !date) notes.push('Could not find date range');
 
   const expenses: AdditionalExpense[] = [];
   const hasAnyDetails = Boolean(merchant || date || total !== null);
@@ -139,6 +224,8 @@ export function parseReceiptText(
     itineraryLegs,
     flightInfo,
     merchant,
+    category,
+    dateRange,
     notes,
     confidence,
   };

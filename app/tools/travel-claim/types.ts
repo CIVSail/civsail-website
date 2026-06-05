@@ -202,6 +202,10 @@ export interface TravelerInfo {
 export interface TravelClaimForm {
   /** Traveler personal info */
   traveler: TravelerInfo;
+  /** Confirmed trip start location */
+  tripStart: Location;
+  /** Confirmed trip end location */
+  tripEnd: Location;
   /** Travel order/authorization number */
   authorizationNumber: string;
   /** Were travel orders issued? */
@@ -220,6 +224,8 @@ export interface TravelClaimForm {
   itinerary: ItineraryLeg[];
   /** Additional reimbursable expenses */
   additionalExpenses: AdditionalExpense[];
+  /** Uploaded receipts (assigned per leg) */
+  receipts?: ReceiptItem[];
   /** Comp time calculations (computed) */
   compTimeCalculations?: CompTimeCalculation[];
   /** Total GTCC amount for split disbursement */
