@@ -69,9 +69,10 @@ import {
   isTravelEligibleForCompTime,
 } from './comp-time-utils';
 
-import { generateAndDownloadPDFs } from './pdf-generator';
+import { generateAndDownloadPDFs, generateTravelClaimPackage } from './pdf-generator';
 import { createPayClient } from '@/lib/supabase/pay-client';
 import { createClient } from '@/lib/supabase/client';
+import SaveToAccount from '@/components/tools/SaveToAccount';
 import { parseItineraryFromOcrText } from './itinerary-parser';
 import { extractTextFromPdf } from '@/lib/ocr/pdf-text';
 import { parseReceiptText } from './receipt-parser';
@@ -859,7 +860,7 @@ export default function TravelClaimGenerator() {
   // PDF GENERATION
   // ============================================
 
-  const handleGenerate = async () => {
+  const handleDownload = async () => {
     setIsGenerating(true);
     setError(null);
 
@@ -2968,27 +2969,35 @@ export default function TravelClaimGenerator() {
           </div>
         </SectionCard>
 
-        {/* Generate Button */}
+        {/* Action Buttons */}
         <div className="flex flex-col items-center gap-4 pt-4">
           {error && <InfoBox type="warning">{error}</InfoBox>}
 
-          <button
-            onClick={handleGenerate}
-            disabled={isGenerating}
-            className="px-8 py-4 bg-gradient-to-r from-violet-600 to-purple-600 text-white rounded-xl font-semibold shadow-lg hover:shadow-xl hover:from-violet-700 hover:to-purple-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-3"
-          >
-            {isGenerating ? (
-              <>
-                <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                Generating PDFs...
-              </>
-            ) : (
-              <>
-                <FileText className="w-5 h-5" />
-                Generate DD 1351-2 & Comp Time Forms
-              </>
-            )}
-          </button>
+          <div className="flex gap-3">
+            <button
+              onClick={handleDownload}
+              disabled={isGenerating}
+              className="px-8 py-4 bg-gradient-to-r from-violet-600 to-purple-600 text-white rounded-xl font-semibold shadow-lg hover:shadow-xl hover:from-violet-700 hover:to-purple-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-3"
+            >
+              {isGenerating ? (
+                <>
+                  <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                  Generating PDFs...
+                </>
+              ) : (
+                <>
+                  <FileText className="w-5 h-5" />
+                  Download Forms
+                </>
+              )}
+            </button>
+            <SaveToAccount
+              formData={formData as unknown as Record<string, unknown>}
+              storageFolder="travel_claim"
+              formLabel="Travel Claim"
+              generatePdf={() => generateTravelClaimPackage(formData)}
+            />
+          </div>
 
           <p className="text-sm text-gray-500 text-center">
             Both forms will be downloaded to your device.

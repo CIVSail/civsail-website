@@ -21,20 +21,20 @@ create table if not exists public.course_exam_alternatives (
   primary key (course_id, exam_id)
 );
 
-create index idx_course_exam_alternatives_exam_id
-  on public.course_exam_alternatives (exam_id);
-
-create index idx_course_exam_alternatives_course_id
-  on public.course_exam_alternatives (course_id);
+-- create index idx_course_exam_alternatives_exam_id
+--   on public.course_exam_alternatives (exam_id);
+--
+-- create index idx_course_exam_alternatives_course_id
+--   on public.course_exam_alternatives (course_id);
 
 -- updated_at trigger not needed — junction table has no mutable columns
 
 -- RLS
 alter table public.course_exam_alternatives enable row level security;
 
-create policy "Authenticated users can read course_exam_alternatives"
-  on public.course_exam_alternatives
-  for select using (auth.role() = 'authenticated');
+-- create policy "Authenticated users can read course_exam_alternatives"
+--   on public.course_exam_alternatives
+--   for select using (auth.role() = 'authenticated');
 
 -- ============================================================
 -- What this table means:

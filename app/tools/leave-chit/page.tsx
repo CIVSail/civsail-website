@@ -15,6 +15,7 @@ import {
 } from 'lucide-react';
 import { PDFDocument } from 'pdf-lib';
 import { createClient } from '@/lib/supabase/client';
+import SaveToAccount from '@/components/tools/SaveToAccount';
 
 // ============================================================================
 // TYPES
@@ -313,141 +314,112 @@ function calculateLeaveDates(form: FormState): LeaveResult | null {
 // PDF GENERATION
 // ============================================================================
 
-async function generateLeaveChitPDF(form: FormState): Promise<void> {
+async function generateLeaveChitBlob(form: FormState): Promise<Blob> {
   const calc = calculateLeaveDates(form);
   if (!calc) {
-    alert('Please enter valid start and end dates.');
-    return;
+    throw new Error('Please enter valid start and end dates.');
   }
 
-  try {
-    // Fetch OPM 71 PDF template - you'll need to place this in public/forms/
-    const pdfUrl = '/forms/opm71_fillable.pdf';
-    const existingPdfBytes = await fetch(pdfUrl).then(res => res.arrayBuffer());
-    
-    // Fetch logo - you'll need to place this in public/images/
-    const logoUrl = '/images/CIVSail_Logo_Crop.png';
-    const logoBytes = await fetch(logoUrl).then(res => res.arrayBuffer());
+  const pdfUrl = '/forms/opm71_fillable.pdf';
+  const existingPdfBytes = await fetch(pdfUrl).then(res => res.arrayBuffer());
 
-    const pdfDoc = await PDFDocument.load(existingPdfBytes);
-    const logo = await pdfDoc.embedPng(logoBytes);
-    const logoDims = logo.scale(0.05);
-    const pages = pdfDoc.getPages();
-    const firstPage = pages[0];
-    const pdfForm = pdfDoc.getForm();
+  const logoUrl = '/images/CIVSail_Logo_Crop.png';
+  const logoBytes = await fetch(logoUrl).then(res => res.arrayBuffer());
 
-    // Build remarks
-    let fullRemarks = `Contact: ${form.phoneNumber} / ${form.email}; ${form.remarks}`;
+  const pdfDoc = await PDFDocument.load(existingPdfBytes);
+  const logo = await pdfDoc.embedPng(logoBytes);
+  const logoDims = logo.scale(0.05);
+  const pages = pdfDoc.getPages();
+  const firstPage = pages[0];
+  const pdfForm = pdfDoc.getForm();
 
-    // Fill basic fields
-    pdfForm.getTextField('form1[0].#subform[0].Table1[0].Row2[0].TextField[0]')
-      .setText(`${form.lastName}, ${form.firstName}, ${form.middleName}`);
-    pdfForm.getTextField('form1[0].#subform[0].Table1[0].Row2[0].TextField[1]')
-      .setText(form.employeeId);
-    pdfForm.getTextField('form1[0].#subform[0].Table1[0].Row4[0].TextField[0]')
-      .setText('Military Sealift Command');
-    pdfForm.getTextField('form1[0].#subform[0].Table8[0].Row5[0].DateTimeField25[0]')
-      .setText(new Date().toDateString());
+  let fullRemarks = `Contact: ${form.phoneNumber} / ${form.email}; ${form.remarks}`;
 
-    // Fill Shore Leave
-    if (calc.startDateShore) {
-      pdfForm.getCheckBox('form1[0].#subform[0].CheckBox4[1]').check();
-      pdfForm.getTextField('form1[0].#subform[0].Table7[0].Row2[0].DateTimeField21[0]').setText(calc.startDateShore);
-      pdfForm.getTextField('form1[0].#subform[0].Table7[0].Row2[0].DateTimeField22[0]').setText(calc.endDateShore);
-      pdfForm.getTextField('form1[0].#subform[0].Table7[0].Row2[0].DateTimeField28[0]').setText('8:00:00 AM');
-      pdfForm.getTextField('form1[0].#subform[0].Table7[0].Row2[0].DateTimeField31[0]').setText('5:00:00 PM');
-      pdfForm.getTextField('form1[0].#subform[0].Table7[0].Row2[0].TextField[0]').setText(calc.shoreDays.toString());
-      fullRemarks = `${calc.shoreDays} Shore Days for ${calc.startDateShore} - ${calc.endDateShore}; ${fullRemarks}`;
-    }
+  pdfForm.getTextField('form1[0].#subform[0].Table1[0].Row2[0].TextField[0]')
+    .setText(`${form.lastName}, ${form.firstName}, ${form.middleName}`);
+  pdfForm.getTextField('form1[0].#subform[0].Table1[0].Row2[0].TextField[1]')
+    .setText(form.employeeId);
+  pdfForm.getTextField('form1[0].#subform[0].Table1[0].Row4[0].TextField[0]')
+    .setText('Military Sealift Command');
+  pdfForm.getTextField('form1[0].#subform[0].Table8[0].Row5[0].DateTimeField25[0]')
+    .setText(new Date().toDateString());
 
-    // Fill Annual Leave
-    if (calc.startDateAnnual) {
-      pdfForm.getCheckBox('form1[0].#subform[0].CheckBox1[0]').check();
-      pdfForm.getTextField('form1[0].#subform[0].Table3[0].Row3[0].DateTimeField1[0]').setText(calc.startDateAnnual);
-      pdfForm.getTextField('form1[0].#subform[0].Table3[0].Row3[0].DateTimeField2[0]').setText(calc.endDateAnnual);
-      pdfForm.getTextField('form1[0].#subform[0].Table3[1].Row3[0].DateTimeField1[0]').setText('8:00:00 AM');
-      pdfForm.getTextField('form1[0].#subform[0].Table3[1].Row3[0].DateTimeField2[0]').setText('5:00:00 PM');
-      pdfForm.getTextField('form1[0].#subform[0].Table4[0].Row2[0].TextField[0]').setText((calc.annualDays * 8).toString());
-    }
-
-    // Fill Comp Leave
-    if (calc.startDateComp) {
-      pdfForm.getCheckBox('form1[0].#subform[0].CheckBox4[0]').check();
-      pdfForm.getTextField('form1[0].#subform[0].Table7[0].Row1[0].DateTimeField19[0]').setText(calc.startDateComp);
-      pdfForm.getTextField('form1[0].#subform[0].Table7[0].Row1[0].DateTimeField20[0]').setText(calc.endDateComp);
-      pdfForm.getTextField('form1[0].#subform[0].Table7[0].Row1[0].DateTimeField27[0]').setText('8:00:00 AM');
-      pdfForm.getTextField('form1[0].#subform[0].Table7[0].Row1[0].DateTimeField30[0]').setText('5:00:00 PM');
-      pdfForm.getTextField('form1[0].#subform[0].Table7[0].Row1[0].TextField[0]').setText((calc.compDays * 8).toString());
-    }
-
-    // Fill Sick Leave
-    if (calc.startDateSick) {
-      pdfForm.getCheckBox('form1[0].#subform[0].CheckBox1[3]').check();
-      pdfForm.getTextField('form1[0].#subform[0].Table3[0].Row6[0].DateTimeField7[0]').setText(calc.startDateSick);
-      pdfForm.getTextField('form1[0].#subform[0].Table3[0].Row6[0].DateTimeField8[0]').setText(calc.endDateSick);
-      pdfForm.getTextField('form1[0].#subform[0].Table3[1].Row6[0].DateTimeField15[0]').setText('8:00:00 AM');
-      pdfForm.getTextField('form1[0].#subform[0].Table3[1].Row6[0].DateTimeField16[0]').setText('5:00:00 PM');
-      pdfForm.getTextField('form1[0].#subform[0].Table4[0].Row5[0].TextField[0]').setText((calc.sickDays * 8).toString());
-    }
-
-    // Travel Comp and Time Off AWD go in remarks
-    if (calc.startDateTravel) {
-      fullRemarks = `${calc.travelDays * 8} hours Travel Comp for ${calc.startDateTravel} - ${calc.endDateTravel}; ${fullRemarks}`;
-    }
-    if (calc.startDateAWD) {
-      fullRemarks = `${calc.awdDays * 8} hours Time Off AWD for ${calc.startDateAWD} - ${calc.endDateAWD}; ${fullRemarks}`;
-    }
-
-    // Fill LWOP
-    if (calc.startDateLWOP) {
-      pdfForm.getCheckBox('form1[0].#subform[0].CheckBox4[2]').check();
-      pdfForm.getTextField('form1[0].#subform[0].Table7[0].Row3[0].DateTimeField23[0]').setText(calc.startDateLWOP);
-      pdfForm.getTextField('form1[0].#subform[0].Table7[0].Row3[0].DateTimeField24[0]').setText(calc.endDateLWOP);
-      pdfForm.getTextField('form1[0].#subform[0].Table7[0].Row3[0].DateTimeField29[0]').setText('8:00:00 AM');
-      pdfForm.getTextField('form1[0].#subform[0].Table7[0].Row3[0].DateTimeField32[0]').setText('5:00:00 PM');
-      pdfForm.getTextField('form1[0].#subform[0].Table7[0].Row3[0].TextField[0]').setText((calc.lwopDays * 8).toString());
-    }
-
-    // FMLA checkboxes
-    if (form.fmlaLeave === 'Yes') {
-      pdfForm.getCheckBox('form1[0].#subform[0].CheckBox2[0]').check();
-      if (form.fmlaReason === 'Birth/Adoption/Foster Care') {
-        pdfForm.getCheckBox('form1[0].#subform[0].CheckBox2[1]').check();
-      } else if (form.fmlaReason === 'Serious health condition of spouse, son, daughter, or parent') {
-        pdfForm.getCheckBox('form1[0].#subform[0].CheckBox2[2]').check();
-      } else if (form.fmlaReason === 'Serious health condition of self') {
-        pdfForm.getCheckBox('form1[0].#subform[0].CheckBox2[3]').check();
-      }
-    }
-
-    // Set remarks
-    pdfForm.getTextField('form1[0].#subform[0].Table8[0].Row2[0].TextField[0]').setText(fullRemarks);
-
-    // Draw logos
-    firstPage.drawImage(logo, { x: 5, y: 5, width: logoDims.width, height: logoDims.height });
-    firstPage.drawImage(logo, {
-      x: firstPage.getWidth() - logoDims.width * 0.9 - 5,
-      y: firstPage.getHeight() - logoDims.height * 0.9 - 5,
-      width: logoDims.width * 0.9,
-      height: logoDims.height * 0.9,
-    });
-
-    // Save and download
-    const pdfBytes = await pdfDoc.save();
-    const blob = new Blob([pdfBytes as BlobPart], { type: 'application/pdf' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = `OPM71_${form.lastName}_${form.firstName}.pdf`;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    URL.revokeObjectURL(url);
-
-  } catch (error) {
-    console.error('Error generating PDF:', error);
-    alert('Error generating PDF. Please ensure the OPM 71 template and logo are available.');
+  if (calc.startDateShore) {
+    pdfForm.getCheckBox('form1[0].#subform[0].CheckBox4[1]').check();
+    pdfForm.getTextField('form1[0].#subform[0].Table7[0].Row2[0].DateTimeField21[0]').setText(calc.startDateShore);
+    pdfForm.getTextField('form1[0].#subform[0].Table7[0].Row2[0].DateTimeField22[0]').setText(calc.endDateShore);
+    pdfForm.getTextField('form1[0].#subform[0].Table7[0].Row2[0].DateTimeField28[0]').setText('8:00:00 AM');
+    pdfForm.getTextField('form1[0].#subform[0].Table7[0].Row2[0].DateTimeField31[0]').setText('5:00:00 PM');
+    pdfForm.getTextField('form1[0].#subform[0].Table7[0].Row2[0].TextField[0]').setText(calc.shoreDays.toString());
+    fullRemarks = `${calc.shoreDays} Shore Days for ${calc.startDateShore} - ${calc.endDateShore}; ${fullRemarks}`;
   }
+
+  if (calc.startDateAnnual) {
+    pdfForm.getCheckBox('form1[0].#subform[0].CheckBox1[0]').check();
+    pdfForm.getTextField('form1[0].#subform[0].Table3[0].Row3[0].DateTimeField1[0]').setText(calc.startDateAnnual);
+    pdfForm.getTextField('form1[0].#subform[0].Table3[0].Row3[0].DateTimeField2[0]').setText(calc.endDateAnnual);
+    pdfForm.getTextField('form1[0].#subform[0].Table3[1].Row3[0].DateTimeField1[0]').setText('8:00:00 AM');
+    pdfForm.getTextField('form1[0].#subform[0].Table3[1].Row3[0].DateTimeField2[0]').setText('5:00:00 PM');
+    pdfForm.getTextField('form1[0].#subform[0].Table4[0].Row2[0].TextField[0]').setText((calc.annualDays * 8).toString());
+  }
+
+  if (calc.startDateComp) {
+    pdfForm.getCheckBox('form1[0].#subform[0].CheckBox4[0]').check();
+    pdfForm.getTextField('form1[0].#subform[0].Table7[0].Row1[0].DateTimeField19[0]').setText(calc.startDateComp);
+    pdfForm.getTextField('form1[0].#subform[0].Table7[0].Row1[0].DateTimeField20[0]').setText(calc.endDateComp);
+    pdfForm.getTextField('form1[0].#subform[0].Table7[0].Row1[0].DateTimeField27[0]').setText('8:00:00 AM');
+    pdfForm.getTextField('form1[0].#subform[0].Table7[0].Row1[0].DateTimeField30[0]').setText('5:00:00 PM');
+    pdfForm.getTextField('form1[0].#subform[0].Table7[0].Row1[0].TextField[0]').setText((calc.compDays * 8).toString());
+  }
+
+  if (calc.startDateSick) {
+    pdfForm.getCheckBox('form1[0].#subform[0].CheckBox1[3]').check();
+    pdfForm.getTextField('form1[0].#subform[0].Table3[0].Row6[0].DateTimeField7[0]').setText(calc.startDateSick);
+    pdfForm.getTextField('form1[0].#subform[0].Table3[0].Row6[0].DateTimeField8[0]').setText(calc.endDateSick);
+    pdfForm.getTextField('form1[0].#subform[0].Table3[1].Row6[0].DateTimeField15[0]').setText('8:00:00 AM');
+    pdfForm.getTextField('form1[0].#subform[0].Table3[1].Row6[0].DateTimeField16[0]').setText('5:00:00 PM');
+    pdfForm.getTextField('form1[0].#subform[0].Table4[0].Row5[0].TextField[0]').setText((calc.sickDays * 8).toString());
+  }
+
+  if (calc.startDateTravel) {
+    fullRemarks = `${calc.travelDays * 8} hours Travel Comp for ${calc.startDateTravel} - ${calc.endDateTravel}; ${fullRemarks}`;
+  }
+  if (calc.startDateAWD) {
+    fullRemarks = `${calc.awdDays * 8} hours Time Off AWD for ${calc.startDateAWD} - ${calc.endDateAWD}; ${fullRemarks}`;
+  }
+
+  if (calc.startDateLWOP) {
+    pdfForm.getCheckBox('form1[0].#subform[0].CheckBox4[2]').check();
+    pdfForm.getTextField('form1[0].#subform[0].Table7[0].Row3[0].DateTimeField23[0]').setText(calc.startDateLWOP);
+    pdfForm.getTextField('form1[0].#subform[0].Table7[0].Row3[0].DateTimeField24[0]').setText(calc.endDateLWOP);
+    pdfForm.getTextField('form1[0].#subform[0].Table7[0].Row3[0].DateTimeField28[0]').setText('8:00:00 AM');
+    pdfForm.getTextField('form1[0].#subform[0].Table7[0].Row3[0].DateTimeField31[0]').setText('5:00:00 PM');
+    pdfForm.getTextField('form1[0].#subform[0].Table7[0].Row3[0].TextField[0]').setText((calc.lwopDays * 8).toString());
+  }
+
+  if (form.fmlaLeave === 'Yes') {
+    pdfForm.getCheckBox('form1[0].#subform[0].CheckBox2[0]').check();
+    if (form.fmlaReason === 'Birth/Adoption/Foster Care') {
+      pdfForm.getCheckBox('form1[0].#subform[0].CheckBox2[1]').check();
+    } else if (form.fmlaReason === 'Serious health condition of spouse, son, daughter, or parent') {
+      pdfForm.getCheckBox('form1[0].#subform[0].CheckBox2[2]').check();
+    } else if (form.fmlaReason === 'Serious health condition of self') {
+      pdfForm.getCheckBox('form1[0].#subform[0].CheckBox2[3]').check();
+    }
+  }
+
+  pdfForm.getTextField('form1[0].#subform[0].Table8[0].Row2[0].TextField[0]').setText(fullRemarks);
+
+  firstPage.drawImage(logo, { x: 5, y: 5, width: logoDims.width, height: logoDims.height });
+  firstPage.drawImage(logo, {
+    x: firstPage.getWidth() - logoDims.width * 0.9 - 5,
+    y: firstPage.getHeight() - logoDims.height * 0.9 - 5,
+    width: logoDims.width * 0.9,
+    height: logoDims.height * 0.9,
+  });
+
+  const pdfBytes = await pdfDoc.save();
+  return new Blob([pdfBytes as BlobPart], { type: 'application/pdf' });
 }
 
 // ============================================================================
@@ -551,14 +523,25 @@ export default function LeaveChitPage() {
 
   const enabledPriorityCount = activeLeaveTypes.length;
 
-  const handleGenerate = async () => {
+  const handleDownload = async () => {
     if (!form.dateStart || !form.dateEnd) {
       alert('Please enter start and end dates.');
       return;
     }
     setGenerating(true);
     try {
-      await generateLeaveChitPDF(form);
+      const blob = await generateLeaveChitBlob(form);
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `OPM71_${form.lastName}_${form.firstName}.pdf`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error('Error generating PDF:', error);
+      alert('Error generating PDF.');
     } finally {
       setGenerating(false);
     }
@@ -798,20 +781,28 @@ export default function LeaveChitPage() {
           </div>
         </section>
 
-        {/* Generate Button */}
-        <div className="text-center">
-          <button onClick={handleGenerate} disabled={generating || !form.dateStart || !form.dateEnd}
-            className="inline-flex items-center gap-2 bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700 text-white font-semibold px-8 py-3 rounded-xl shadow-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed">
-            {generating ? (
-              <><div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>Generating...</>
-            ) : (
-              <><Download className="w-5 h-5" />Generate Leave Chit</>
-            )}
-          </button>
+        {/* Action Buttons */}
+        <div className="flex flex-col items-center gap-4">
+          <div className="flex gap-3">
+            <button onClick={handleDownload} disabled={generating || !form.dateStart || !form.dateEnd}
+              className="inline-flex items-center gap-2 bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700 text-white font-semibold px-8 py-3 rounded-xl shadow-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed">
+              {generating ? (
+                <><div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>Generating...</>
+              ) : (
+                <><Download className="w-5 h-5" />Download Form</>
+              )}
+            </button>
+            <SaveToAccount
+              formData={form as unknown as Record<string, unknown>}
+              storageFolder="leave-chits"
+              formLabel="Leave Chit"
+              generatePdf={() => generateLeaveChitBlob(form)}
+            />
+          </div>
+          <p className="text-sm text-gray-500">
+            Tip: Request a screenshot from your detailer for proof of Leave Chit acceptance.
+          </p>
         </div>
-        <p className="text-center text-sm text-gray-500 mt-4">
-          Tip: Request a screenshot from your detailer for proof of Leave Chit acceptance.
-        </p>
       </div>
     </div>
   );

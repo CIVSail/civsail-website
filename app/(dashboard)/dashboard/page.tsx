@@ -72,6 +72,7 @@ export default function DashboardPage() {
   const [mmcFiles, setMmcFiles] = useState<any[]>([]);
   const [seaServiceFiles, setSeaServiceFiles] = useState<any[]>([]);
   const [travelClaimFiles, setTravelClaimFiles] = useState<any[]>([]);
+  const [leaveChitFiles, setLeaveChitFiles] = useState<any[]>([]);
   const [uploadingTo, setUploadingTo] = useState<string | null>(null);
 
   // Sea service data state
@@ -178,6 +179,12 @@ export default function DashboardPage() {
       .from('documents')
       .list(`travel_claim/${user.id}`);
     setTravelClaimFiles(travelList || []);
+
+    // Load saved leave chits
+    const { data: leaveChitList } = await supabase.storage
+      .from('documents')
+      .list(`leave-chits/${user.id}`);
+    setLeaveChitFiles(leaveChitList || []);
   }
 
   // Load sea service periods from database
@@ -225,7 +232,7 @@ export default function DashboardPage() {
 
   // Modified to process sea service files with OCR
   async function handleFileUpload(
-    type: 'mmc' | 'sea_service' | 'travel_claim',
+    type: string,
     files: FileList | null
   ) {
     if (!files || !profile) return;
@@ -357,7 +364,7 @@ export default function DashboardPage() {
   }
 
   async function handleDeleteFile(
-    type: 'mmc' | 'sea_service' | 'travel_claim',
+    type: string,
     fileName: string
   ) {
     if (!profile) return;
@@ -819,6 +826,16 @@ export default function DashboardPage() {
                 uploading={uploadingTo === 'travel_claim'}
                 onUpload={(files) => handleFileUpload('travel_claim', files)}
                 onDelete={(name) => handleDeleteFile('travel_claim', name)}
+                userId={profile.user_id}
+                supabase={supabase}
+              />
+              <DocumentSection
+                title="Leave Chit Forms"
+                files={leaveChitFiles}
+                type="leave-chits"
+                uploading={uploadingTo === 'leave-chits'}
+                onUpload={(files) => handleFileUpload('leave-chits', files)}
+                onDelete={(name) => handleDeleteFile('leave-chits', name)}
                 userId={profile.user_id}
                 supabase={supabase}
               />
@@ -1380,7 +1397,7 @@ function DocumentSection({
 }: {
   title: string;
   files: any[];
-  type: 'mmc' | 'sea_service' | 'travel_claim';
+  type: string;
   uploading: boolean;
   onUpload: (files: FileList | null) => void;
   onDelete: (name: string) => void;

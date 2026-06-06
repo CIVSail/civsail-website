@@ -28,12 +28,12 @@ create table if not exists public.nmc_exams (
   constraint nmc_exams_exam_code_unique unique (exam_code)
 );
 
-create index idx_nmc_exams_department
-  on public.nmc_exams (department);
-
-create index idx_nmc_exams_waterway_type
-  on public.nmc_exams (waterway_type);
-
+-- create index idx_nmc_exams_department
+--   on public.nmc_exams (department);
+--
+-- create index idx_nmc_exams_waterway_type
+--   on public.nmc_exams (waterway_type);
+--
 -- ──────────────────────────────────────────────────────────────
 -- 2. nmc_exam_modules
 --    One row per Q-code module (e.g. Q100, Q101).
@@ -58,8 +58,8 @@ create table if not exists public.nmc_exam_modules (
   constraint nmc_exam_modules_code_unique unique (module_code)
 );
 
-create index idx_nmc_exam_modules_topics
-  on public.nmc_exam_modules using gin(topics);
+-- create index idx_nmc_exam_modules_topics
+--   on public.nmc_exam_modules using gin(topics);
 
 -- ──────────────────────────────────────────────────────────────
 -- 3. nmc_courses
@@ -96,14 +96,14 @@ create table if not exists public.nmc_courses (
   constraint nmc_courses_name_provider_unique unique (name, provider)
 );
 
-create index idx_nmc_courses_satisfies_modules
-  on public.nmc_courses using gin(satisfies_modules);
-
-create index idx_nmc_courses_satisfies_endorsements
-  on public.nmc_courses using gin(satisfies_endorsements);
-
-create index idx_nmc_courses_provider
-  on public.nmc_courses (provider);
+-- create index idx_nmc_courses_satisfies_modules
+--   on public.nmc_courses using gin(satisfies_modules);
+--
+-- create index idx_nmc_courses_satisfies_endorsements
+--   on public.nmc_courses using gin(satisfies_endorsements);
+--
+-- create index idx_nmc_courses_provider
+--   on public.nmc_courses (provider);
 
 -- ──────────────────────────────────────────────────────────────
 -- 4. Junction: checklist_exams
@@ -121,8 +121,8 @@ create table if not exists public.checklist_exams (
   primary key (checklist_id, exam_id)
 );
 
-create index idx_checklist_exams_exam_id
-  on public.checklist_exams (exam_id);
+-- create index idx_checklist_exams_exam_id
+--   on public.checklist_exams (exam_id);
 
 -- ──────────────────────────────────────────────────────────────
 -- 5. Junction: exam_module_assignments
@@ -140,8 +140,8 @@ create table if not exists public.exam_module_assignments (
   primary key (exam_id, module_id)
 );
 
-create index idx_exam_module_assignments_module_id
-  on public.exam_module_assignments (module_id);
+-- create index idx_exam_module_assignments_module_id
+--   on public.exam_module_assignments (module_id);
 
 -- ──────────────────────────────────────────────────────────────
 -- 6. Junction: module_course_alternatives
@@ -159,25 +159,25 @@ create table if not exists public.module_course_alternatives (
   primary key (module_id, course_id)
 );
 
-create index idx_module_course_alternatives_course_id
-  on public.module_course_alternatives (course_id);
+-- create index idx_module_course_alternatives_course_id
+--   on public.module_course_alternatives (course_id);
 
 -- ──────────────────────────────────────────────────────────────
 -- 7. updated_at triggers for new tables
 -- ──────────────────────────────────────────────────────────────
 -- (reuses handle_updated_at() created in the first migration)
 
-create trigger set_nmc_exams_updated_at
-  before update on public.nmc_exams
-  for each row execute function public.handle_updated_at();
+-- create trigger set_nmc_exams_updated_at
+--   before update on public.nmc_exams
+--   for each row execute function public.handle_updated_at();
 
-create trigger set_nmc_exam_modules_updated_at
-  before update on public.nmc_exam_modules
-  for each row execute function public.handle_updated_at();
-
-create trigger set_nmc_courses_updated_at
-  before update on public.nmc_courses
-  for each row execute function public.handle_updated_at();
+-- create trigger set_nmc_exam_modules_updated_at
+--   before update on public.nmc_exam_modules
+--   for each row execute function public.handle_updated_at();
+--
+-- create trigger set_nmc_courses_updated_at
+--   before update on public.nmc_courses
+--   for each row execute function public.handle_updated_at();
 
 -- ──────────────────────────────────────────────────────────────
 -- 8. RLS — authenticated read on all new tables
@@ -189,20 +189,20 @@ alter table public.checklist_exams          enable row level security;
 alter table public.exam_module_assignments  enable row level security;
 alter table public.module_course_alternatives enable row level security;
 
-create policy "Authenticated users can read nmc_exams"
-  on public.nmc_exams for select using (auth.role() = 'authenticated');
-
-create policy "Authenticated users can read nmc_exam_modules"
-  on public.nmc_exam_modules for select using (auth.role() = 'authenticated');
-
-create policy "Authenticated users can read nmc_courses"
-  on public.nmc_courses for select using (auth.role() = 'authenticated');
-
-create policy "Authenticated users can read checklist_exams"
-  on public.checklist_exams for select using (auth.role() = 'authenticated');
-
-create policy "Authenticated users can read exam_module_assignments"
-  on public.exam_module_assignments for select using (auth.role() = 'authenticated');
-
-create policy "Authenticated users can read module_course_alternatives"
-  on public.module_course_alternatives for select using (auth.role() = 'authenticated');
+-- create policy "Authenticated users can read nmc_exams"
+--   on public.nmc_exams for select using (auth.role() = 'authenticated');
+--
+-- create policy "Authenticated users can read nmc_exam_modules"
+--   on public.nmc_exam_modules for select using (auth.role() = 'authenticated');
+--
+-- create policy "Authenticated users can read nmc_courses"
+--   on public.nmc_courses for select using (auth.role() = 'authenticated');
+--
+-- create policy "Authenticated users can read checklist_exams"
+--   on public.checklist_exams for select using (auth.role() = 'authenticated');
+--
+-- create policy "Authenticated users can read exam_module_assignments"
+--   on public.exam_module_assignments for select using (auth.role() = 'authenticated');
+--
+-- create policy "Authenticated users can read module_course_alternatives"
+--   on public.module_course_alternatives for select using (auth.role() = 'authenticated');

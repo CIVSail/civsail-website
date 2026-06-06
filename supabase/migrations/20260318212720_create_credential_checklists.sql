@@ -30,13 +30,13 @@ create table if not exists public.credential_checklists (
 );
 
 -- ── indexes ──────────────────────────────────────────────────
-create index idx_credential_checklists_roles
+create index if not exists idx_credential_checklists_roles
   on public.credential_checklists using gin(roles);
 
-create index idx_credential_checklists_departments
+create index if not exists idx_credential_checklists_departments
   on public.credential_checklists using gin(departments);
 
-create index idx_credential_checklists_credential_types
+create index if not exists idx_credential_checklists_credential_types
   on public.credential_checklists using gin(credential_types);
 
 -- ── updated_at trigger ────────────────────────────────────────
